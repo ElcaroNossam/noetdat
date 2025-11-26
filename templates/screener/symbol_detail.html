@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load formatting %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<div class="symbol-detail-container" data-symbol-detail data-symbol="{{ symbol.symbol }}">
+    <h1>{{ symbol.symbol }}</h1>
+    {% if latest_snapshot %}
+        <div class="symbol-summary">
+            <div class="metric">
+                <span class="label">Price</span>
+                <span class="value" id="symbol-price">{{ latest_snapshot.price|format_price }}</span>
+            </div>
+            <div class="metric">
+                <span class="label">Volatility 15m</span>
+                <span class="value" id="symbol-volatility-15m">{{ latest_snapshot.volatility_15m|floatformat:2 }}</span>
+            </div>
+            <div class="metric">
+                <span class="label">Volume 5m</span>
+                <span class="value" id="symbol-volume-5m">{{ latest_snapshot.volume_5m|floatformat:2 }}</span>
+            </div>
+            <div class="metric">
+                <span class="label">OI Δ 15m</span>
+                <span class="value {% if latest_snapshot.oi_change_15m > 0 %}value-up{% elif latest_snapshot.oi_change_15m < 0 %}value-down{% endif %}"
+                      id="symbol-oi-change-15m">
+                    {{ latest_snapshot.oi_change_15m|floatformat:3 }}
+                </span>
+            </div>
+            <div class="metric">
+                <span class="label">Funding</span>
+                <span class="value {% if latest_snapshot.funding_rate > 0 %}value-up{% elif latest_snapshot.funding_rate < 0 %}value-down{% endif %}"
+                      id="symbol-funding-rate">
+                    {{ latest_snapshot.funding_rate|floatformat:6 }}
+                </span>
+            </div>
+            <div class="metric">
+                <span class="label">OI</span>
+                <span class="value" id="symbol-open-interest">{{ latest_snapshot.open_interest|floatformat:0 }}</span>
+            </div>
+            <div class="metric">
+                <span class="label">Updated</span>
+                <span class="value" id="symbol-updated-at">{{ latest_snapshot.ts }}</span>
+            </div>
+        </div>
+
+        <div class="symbol-chart">
+            <canvas id="priceChart" width="800" height="200"></canvas>
+            <p class="chart-note">Лёгкий stub-график: данные можно будет грузить через `/api/symbol/{{ symbol.symbol }}/`.</p>
+        </div>
+    {% else %}
+        <p>Нет данных по этому символу.</p>
+    {% endif %}
+
+    <h2>Последние snapshot'ы</h2>
+    <div class="screener-table-wrapper">
+        <table class="screener-table">
+            <thead>
+            <tr>
+                <th>TS</th>
+                <th>Price</th>
+                <th>Change 15m %</th>
+                <th>Volume 15m</th>
+                <th>OI</th>
+                <th>OI Δ 15m %</th>
+                <th>Funding</th>
+            </tr>
+            </thead>
+            <tbody id="symbol-history-body">
+            {% for s in snapshots %}
+                <tr>
+                    <td>{{ s.ts }}</td>
+                    <td>{{ s.price|format_price }}</td>
+                    <td class="{% if s.change_15m > 0 %}value-up{% elif s.change_15m < 0 %}value-down{% endif %}">
+                        {{ s.change_15m|floatformat:2 }}
+                    </td>
+                    <td>{{ s.volume_15m|floatformat:2 }}</td>
+                    <td>{{ s.open_interest|floatformat:0 }}</td>
+                    <td class="{% if s.oi_change_15m > 0 %}value-up{% elif s.oi_change_15m < 0 %}value-down{% endif %}">
+                        {{ s.oi_change_15m|floatformat:3 }}
+                    </td>
+                    <td class="{% if s.funding_rate > 0 %}value-up{% elif s.funding_rate < 0 %}value-down{% endif %}">
+                        {{ s.funding_rate|floatformat:6 }}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-row">Нет данных.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if request.user.is_authenticated %}
+        <h2>Создать алерт</h2>
+        <div class="auth-form">
+            <form method="post" action="{% url 'alerts:create' symbol.symbol %}">
+                {% csrf_token %}
+                <div class="form-field">
+                    <label for="metric">Метрика</label>
+                    <select name="metric" id="metric">
+                        <option value="change_15m">Change 15m %</option>
+                        <option value="oi_change_15m">OI change 15m %</option>
+                        <option value="volume_15m">Volume 15m</option>
+                        <option value="funding_rate">Funding rate</option>
+                        <option value="vdelta_15m">Vdelta 15m</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="operator">Оператор</label>
+                    <select name="operator" id="operator">
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&gt;=</option>
+                        <option value="<=">&lt;=</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="threshold">Пороговое значение</label>
+                    <input type="number" step="0.0001" name="threshold" id="threshold">
+                </div>
+                <div class="form-field">
+                    <label for="telegram_chat_id">Telegram chat id</label>
+                    <input type="number" name="telegram_chat_id" id="telegram_chat_id">
+                </div>
+                <p class="chart-note">
+                    Telegram chat id можно узнать, написав вашему боту и посмотрев id в ответе
+                    либо через сервисные боты вроде @userinfobot.
+                </p>
+                <button type="submit" class="btn-primary">Создать алерт</button>
+            </form>
+        </div>
+    {% else %}
+        <p class="chart-note">
+            <a href="{% url 'accounts:login' %}">Войдите</a>, чтобы создавать алерты по этому символу.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}
+
+

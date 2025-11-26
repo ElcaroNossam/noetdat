@@ -1,0 +1,17 @@
+<header class="navbar">
+    <div class="navbar-left">
+        <a href="{% url 'screener:list' %}" class="navbar-logo">Noet-Dat</a>
+    </div>
+    <nav class="navbar-right">
+        <a href="{% url 'screener:list' %}">Скринер</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'accounts:profile' %}">Профиль</a>
+            <a href="{% url 'accounts:logout' %}">Выход</a>
+        {% else %}
+            <a href="{% url 'accounts:login' %}">Логин</a>
+            <a href="{% url 'accounts:register' %}">Регистрация</a>
+        {% endif %}
+    </nav>
+</header>
+
+

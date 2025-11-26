@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load formatting %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<div class="screener-container">
+    <h1>Крипто-скринер</h1>
+    <div class="market-type-toggle">
+        {% with request.GET.urlencode as query_string %}
+            {% if query_string %}
+                {% with query_string|add:"&market_type=futures" as futures_qs %}
+                    {% with query_string|add:"&market_type=spot" as spot_qs %}
+                        <a href="?{{ futures_qs }}" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}">Фьючерсы</a>
+                        <a href="?{{ spot_qs }}" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}">Спот</a>
+                    {% endwith %}
+                {% endwith %}
+            {% else %}
+                <a href="?market_type=futures" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}">Фьючерсы</a>
+                <a href="?market_type=spot" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}">Спот</a>
+            {% endif %}
+        {% endwith %}
+    </div>
+    <form method="get" class="screener-filters">
+        <input type="hidden" name="market_type" value="{{ market_type }}">
+        <input type="text" name="search" placeholder="Поиск по символу" value="{{ search }}">
+        <input type="number" step="0.0001" name="min_volume_15m" placeholder="Min volume 15m"
+               value="{{ min_volume_15m }}">
+        <input type="number" step="0.0001" name="max_volume_15m" placeholder="Max volume 15m"
+               value="{{ max_volume_15m }}">
+        <input type="number" step="0.01" name="min_change_15m" placeholder="Min change 15m %"
+               value="{{ min_change_15m }}">
+        <input type="number" step="0.01" name="max_change_15m" placeholder="Max change 15m %"
+               value="{{ max_change_15m }}">
+        <input type="number" step="0.01" name="min_oi_change_15m" placeholder="Min OI Δ 15m %"
+               value="{{ min_oi_change_15m }}">
+        <input type="number" step="1" name="min_open_interest" placeholder="Min OI"
+               value="{{ min_open_interest }}">
+        <input type="number" step="1" name="max_open_interest" placeholder="Max OI"
+               value="{{ max_open_interest }}">
+        <input type="number" step="0.0001" name="min_funding_rate" placeholder="Min funding"
+               value="{{ min_funding_rate }}">
+        <input type="number" step="0.0001" name="max_funding_rate" placeholder="Max funding"
+               value="{{ max_funding_rate }}">
+        <button type="submit" class="btn-secondary">Фильтровать</button>
+        <button type="button" id="toggle-settings" class="btn-secondary">Screener Settings</button>
+    </form>
+
+    <div class="screener-table-container">
+        <div class="screener-table-scrollbar-top" id="top-scrollbar">
+            <div class="scrollbar-spacer" id="scrollbar-spacer"></div>
+        </div>
+        <div class="screener-table-wrapper" id="table-wrapper">
+            <table class="screener-table" id="screener-main-table">
+            <thead id="screener-table-head">
+            <tr>
+                <th data-column="symbol" class="sortable">Symbol</th>
+                <th data-column="price" class="sortable">Price</th>
+                <th data-column="change_5m" class="sortable">Change 5m</th>
+                <th data-column="change_15m" class="sortable">Change 15m</th>
+                <th data-column="change_1h" class="sortable">Change 1h</th>
+                <th data-column="change_8h" class="sortable">Change 8h</th>
+                <th data-column="change_1d" class="sortable">Change 1d</th>
+                <th data-column="oi_change_5m" class="sortable">OI Δ 5m</th>
+                <th data-column="oi_change_15m" class="sortable">OI Δ 15m</th>
+                <th data-column="oi_change_1h" class="sortable">OI Δ 1h</th>
+                <th data-column="oi_change_8h" class="sortable">OI Δ 8h</th>
+                <th data-column="oi_change_1d" class="sortable">OI Δ 1d</th>
+                <th data-column="volatility_5m" class="sortable">Vol 5m</th>
+                <th data-column="volatility_15m" class="sortable">Vol 15m</th>
+                <th data-column="volatility_1h" class="sortable">Vol 1h</th>
+                <th data-column="ticks_5m" class="sortable">Ticks 5m</th>
+                <th data-column="ticks_15m" class="sortable">Ticks 15m</th>
+                <th data-column="ticks_1h" class="sortable">Ticks 1h</th>
+                <th data-column="vdelta_5m" class="sortable">Vdelta 5m</th>
+                <th data-column="vdelta_15m" class="sortable">Vdelta 15m</th>
+                <th data-column="vdelta_1h" class="sortable">Vdelta 1h</th>
+                <th data-column="vdelta_8h" class="sortable">Vdelta 8h</th>
+                <th data-column="vdelta_1d" class="sortable">Vdelta 1d</th>
+                <th data-column="volume_5m" class="sortable">Volume 5m</th>
+                <th data-column="volume_15m" class="sortable">Volume 15m</th>
+                <th data-column="volume_1h" class="sortable">Volume 1h</th>
+                <th data-column="volume_8h" class="sortable">Volume 8h</th>
+                <th data-column="volume_1d" class="sortable">Volume 1d</th>
+                <th data-column="funding_rate" class="sortable">Funding</th>
+                <th data-column="open_interest" class="sortable">OI</th>
+                <th data-column="ts" class="sortable">Updated</th>
+            </tr>
+            </thead>
+            <tbody id="screener-table-body">
+            {% for snapshot in page_obj %}
+                <tr>
+                    <td data-column="symbol">
+                        <a href="{% url 'screener:symbol_detail' snapshot.symbol.symbol %}">
+                            {{ snapshot.symbol.symbol }}
+                        </a>
+                    </td>
+                    <td data-column="price">{{ snapshot.price|format_price }}</td>
+                    <td data-column="change_5m" class="{% if snapshot.change_5m > 0 %}value-up{% elif snapshot.change_5m < 0 %}value-down{% endif %}">
+                        {{ snapshot.change_5m|floatformat:2 }}
+                    </td>
+                    <td data-column="change_15m" class="{% if snapshot.change_15m > 0 %}value-up{% elif snapshot.change_15m < 0 %}value-down{% endif %}">
+                        {{ snapshot.change_15m|floatformat:2 }}
+                    </td>
+                    <td data-column="change_1h" class="{% if snapshot.change_1h > 0 %}value-up{% elif snapshot.change_1h < 0 %}value-down{% endif %}">
+                        {{ snapshot.change_1h|floatformat:2 }}
+                    </td>
+                    <td data-column="change_8h" class="{% if snapshot.change_8h > 0 %}value-up{% elif snapshot.change_8h < 0 %}value-down{% endif %}">
+                        {{ snapshot.change_8h|floatformat:2 }}
+                    </td>
+                    <td data-column="change_1d" class="{% if snapshot.change_1d > 0 %}value-up{% elif snapshot.change_1d < 0 %}value-down{% endif %}">
+                        {{ snapshot.change_1d|floatformat:2 }}
+                    </td>
+                    <td data-column="oi_change_5m" class="{% if snapshot.oi_change_5m > 0 %}value-up{% elif snapshot.oi_change_5m < 0 %}value-down{% endif %}">
+                        {{ snapshot.oi_change_5m|floatformat:3 }}
+                    </td>
+                    <td data-column="oi_change_15m" class="{% if snapshot.oi_change_15m > 0 %}value-up{% elif snapshot.oi_change_15m < 0 %}value-down{% endif %}">
+                        {{ snapshot.oi_change_15m|floatformat:3 }}
+                    </td>
+                    <td data-column="oi_change_1h" class="{% if snapshot.oi_change_1h > 0 %}value-up{% elif snapshot.oi_change_1h < 0 %}value-down{% endif %}">
+                        {{ snapshot.oi_change_1h|floatformat:3 }}
+                    </td>
+                    <td data-column="oi_change_8h" class="{% if snapshot.oi_change_8h > 0 %}value-up{% elif snapshot.oi_change_8h < 0 %}value-down{% endif %}">
+                        {{ snapshot.oi_change_8h|floatformat:3 }}
+                    </td>
+                    <td data-column="oi_change_1d" class="{% if snapshot.oi_change_1d > 0 %}value-up{% elif snapshot.oi_change_1d < 0 %}value-down{% endif %}">
+                        {{ snapshot.oi_change_1d|floatformat:3 }}
+                    </td>
+                    <td data-column="volatility_5m">{{ snapshot.volatility_5m|floatformat:2 }}</td>
+                    <td data-column="volatility_15m">{{ snapshot.volatility_15m|floatformat:2 }}</td>
+                    <td data-column="volatility_1h">{{ snapshot.volatility_1h|floatformat:2 }}</td>
+                    <td data-column="ticks_5m">{{ snapshot.ticks_5m }}</td>
+                    <td data-column="ticks_15m">{{ snapshot.ticks_15m }}</td>
+                    <td data-column="ticks_1h">{{ snapshot.ticks_1h }}</td>
+                    <td data-column="vdelta_5m">{{ snapshot.vdelta_5m|floatformat:2 }}</td>
+                    <td data-column="vdelta_15m">{{ snapshot.vdelta_15m|floatformat:2 }}</td>
+                    <td data-column="vdelta_1h">{{ snapshot.vdelta_1h|floatformat:2 }}</td>
+                    <td data-column="vdelta_8h">{{ snapshot.vdelta_8h|floatformat:2 }}</td>
+                    <td data-column="vdelta_1d">{{ snapshot.vdelta_1d|floatformat:2 }}</td>
+                    <td data-column="volume_5m">{{ snapshot.volume_5m|format_volume }}</td>
+                    <td data-column="volume_15m">{{ snapshot.volume_15m|format_volume }}</td>
+                    <td data-column="volume_1h">{{ snapshot.volume_1h|format_volume }}</td>
+                    <td data-column="volume_8h">{{ snapshot.volume_8h|format_volume }}</td>
+                    <td data-column="volume_1d">{{ snapshot.volume_1d|format_volume }}</td>
+                    <td data-column="funding_rate" class="{% if snapshot.funding_rate > 0 %}value-up{% elif snapshot.funding_rate < 0 %}value-down{% endif %}">
+                        {{ snapshot.funding_rate|floatformat:6 }}
+                    </td>
+                    <td data-column="open_interest">{{ snapshot.open_interest|format_volume }}</td>
+                    <td data-column="ts">{{ snapshot.ts }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="31" class="empty-row">Нет данных для отображения.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&market_type={{ market_type }}&search={{ search }}&min_volume_15m={{ min_volume_15m }}&max_volume_15m={{ max_volume_15m }}&min_change_15m={{ min_change_15m }}&max_change_15m={{ max_change_15m }}&min_oi_change_15m={{ min_oi_change_15m }}&min_open_interest={{ min_open_interest }}&max_open_interest={{ max_open_interest }}&min_funding_rate={{ min_funding_rate }}&max_funding_rate={{ max_funding_rate }}&sort={{ sort }}&order={{ order }}">&laquo; Назад</a>
+        {% endif %}
+        <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&market_type={{ market_type }}&search={{ search }}&min_volume_15m={{ min_volume_15m }}&max_volume_15m={{ max_volume_15m }}&min_change_15m={{ min_change_15m }}&max_change_15m={{ max_change_15m }}&min_oi_change_15m={{ min_oi_change_15m }}&min_open_interest={{ min_open_interest }}&max_open_interest={{ max_open_interest }}&min_funding_rate={{ min_funding_rate }}&max_funding_rate={{ max_funding_rate }}&sort={{ sort }}&order={{ order }}">Вперёд &raquo;</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    window.SCREENER_AVAILABLE_COLUMNS = [
+        "symbol",
+        "price",
+        "change_5m",
+        "change_15m",
+        "change_1h",
+        "change_8h",
+        "change_1d",
+        "oi_change_5m",
+        "oi_change_15m",
+        "oi_change_1h",
+        "oi_change_8h",
+        "oi_change_1d",
+        "volatility_5m",
+        "volatility_15m",
+        "volatility_1h",
+        "ticks_5m",
+        "ticks_15m",
+        "ticks_1h",
+        "vdelta_5m",
+        "vdelta_15m",
+        "vdelta_1h",
+        "vdelta_8h",
+        "vdelta_1d",
+        "volume_5m",
+        "volume_15m",
+        "volume_1h",
+        "volume_8h",
+        "volume_1d",
+        "funding_rate",
+        "open_interest",
+        "ts",
+    ];
+</script>
+{% endblock %}
