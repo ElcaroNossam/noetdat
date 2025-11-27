@@ -20,7 +20,9 @@ timeout = 120
 keepalive = 5
 max_requests = 1000
 max_requests_jitter = 50
-preload_app = True
+# Отключаем preload_app для диагностики - если есть ошибки при импорте, они будут видны сразу
+# preload_app = True  # Временно отключено для диагностики
+preload_app = False
 
 # Логирование
 loglevel = "info"
