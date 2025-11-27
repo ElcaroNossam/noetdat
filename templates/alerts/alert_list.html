@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Алерты{% endblock %}
+
+{% block content %}
+<div class="alerts-container">
+    <div class="alerts-header">
+        <h1>Управление алертами</h1>
+        <div class="alerts-filters">
+            <form method="get" class="alerts-filter-form">
+                <input type="text" name="search" placeholder="Поиск по символу" value="{{ search }}">
+                <select name="market_type">
+                    <option value="">Все рынки</option>
+                    <option value="futures" {% if market_type == 'futures' %}selected{% endif %}>Фьючерсы</option>
+                    <option value="spot" {% if market_type == 'spot' %}selected{% endif %}>Спот</option>
+                </select>
+                <select name="active">
+                    <option value="">Все</option>
+                    <option value="true" {% if active_filter == 'true' %}selected{% endif %}>Активные</option>
+                    <option value="false" {% if active_filter == 'false' %}selected{% endif %}>Неактивные</option>
+                </select>
+                <button type="submit" class="btn-secondary">Фильтровать</button>
+                <a href="{% url 'alerts:list' %}" class="btn-secondary">Сбросить</a>
+            </form>
+        </div>
+    </div>
+
+    {% if alerts %}
+        <div class="alerts-table-container">
+            <table class="alerts-table">
+                <thead>
+                    <tr>
+                        <th>Символ</th>
+                        <th>Метрика</th>
+                        <th>Условие</th>
+                        <th>Порог</th>
+                        <th>Telegram ID</th>
+                        <th>Статус</th>
+                        <th>Создан</th>
+                        <th>Последний триггер</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alert in alerts %}
+                        <tr class="{% if not alert.active %}alert-inactive{% endif %}">
+                            <td>
+                                <a href="{% url 'screener:symbol_detail' alert.symbol.symbol %}?market_type={{ alert.symbol.market_type }}">
+                                    {{ alert.symbol.symbol }}
+                                </a>
+                            </td>
+                            <td>{{ alert.get_metric_display }}</td>
+                            <td>{{ alert.operator }}</td>
+                            <td>{{ alert.threshold }}</td>
+                            <td>{{ alert.telegram_chat_id|default:"—" }}</td>
+                            <td>
+                                <span class="alert-status {% if alert.active %}alert-active{% else %}alert-inactive-status{% endif %}">
+                                    {% if alert.active %}Активен{% else %}Неактивен{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ alert.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>{{ alert.last_triggered_at|date:"d.m.Y H:i"|default:"—" }}</td>
+                            <td class="alert-actions">
+                                <form method="post" action="{% url 'alerts:toggle' alert.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-small {% if alert.active %}btn-warning{% else %}btn-success{% endif %}">
+                                        {% if alert.active %}Отключить{% else %}Включить{% endif %}
+                                    </button>
+                                </form>
+                                <a href="{% url 'alerts:edit' alert.id %}" class="btn-small btn-secondary">Редактировать</a>
+                                <form method="post" action="{% url 'alerts:delete' alert.id %}" style="display: inline;" onsubmit="return confirm('Удалить этот алерт?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-small btn-danger">Удалить</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>У вас пока нет алертов.</p>
+            <p>Создайте алерт на странице символа, чтобы получать уведомления.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

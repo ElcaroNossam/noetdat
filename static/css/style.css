@@ -100,7 +100,9 @@ body {
 .auth-container,
 .profile-container,
 .screener-container,
-.symbol-detail-container {
+.symbol-detail-container,
+.alerts-container,
+.trading-terminal-container {
     background-color: #0b0c10;
 }
 
@@ -127,17 +129,33 @@ body {
     color: #c5c6c7;
 }
 
-.form-field input {
-    padding: 0.45rem 0.6rem;
-    border-radius: 4px;
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px;
     border: 1px solid #45a29e33;
     background: #0b0c10;
     color: #c5c6c7;
+    font-size: 0.95rem;
+    transition: all 0.2s;
 }
 
-.form-field input:focus {
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
     outline: none;
     border-color: #66fcf1;
+    box-shadow: 0 0 0 2px rgba(102, 252, 241, 0.1);
+}
+
+.form-field select {
+    cursor: pointer;
+}
+
+.form-field select option {
+    background: #0b0c10;
+    color: #c5c6c7;
 }
 
 .field-errors {
@@ -429,6 +447,51 @@ body {
 
 .symbol-chart {
     margin-bottom: 1.5rem;
+}
+
+.alert-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.alert-form {
+    max-width: 100%;
+}
+
+.alert-info-box {
+    background: #1a2332;
+    border: 1px solid #45a29e44;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.alert-info-box .chart-note {
+    margin: 0;
+    color: #c5c6c7;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.alert-info-box .chart-note strong {
+    color: #66fcf1;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions .btn-primary,
+.form-actions .btn-secondary {
+    flex: 1;
+}
+
+.field-help {
+    color: #888;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
 }
 
 .chart-note {
@@ -920,3 +983,472 @@ body {
 }
 
 
+
+.alerts-container {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.alerts-header {
+    margin-bottom: 1.5rem;
+}
+
+.alerts-header h1 {
+    color: #66fcf1;
+    margin-bottom: 1rem;
+}
+
+.alerts-filter-form {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.alerts-filter-form input,
+.alerts-filter-form select {
+    padding: 0.5rem 0.75rem;
+    background: #1f2833;
+    border: 1px solid #45a29e33;
+    border-radius: 4px;
+    color: #c5c6c7;
+    font-size: 0.9rem;
+}
+
+.alerts-filter-form input:focus,
+.alerts-filter-form select:focus {
+    outline: none;
+    border-color: #66fcf1;
+}
+
+.alerts-table-container {
+    overflow-x: auto;
+    background: #1f2833;
+    border-radius: 8px;
+    border: 1px solid #45a29e33;
+}
+
+.alerts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.alerts-table th {
+    background: #0b0c10;
+    color: #66fcf1;
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid #45a29e66;
+    font-weight: 600;
+}
+
+.alerts-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #45a29e33;
+    color: #c5c6c7;
+}
+
+.alerts-table tbody tr:hover {
+    background: #151a20;
+}
+
+.alerts-table tbody tr.alert-inactive {
+    opacity: 0.6;
+}
+
+.alert-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.alert-status.alert-active {
+    background: #2ecc7133;
+    color: #2ecc71;
+}
+
+.alert-status.alert-inactive-status {
+    background: #7f8c8d33;
+    color: #7f8c8d;
+}
+
+.alert-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-small.btn-success {
+    background: #2ecc71;
+    color: #0b0c10;
+}
+
+.btn-small.btn-success:hover {
+    background: #27ae60;
+}
+
+.btn-small.btn-warning {
+    background: #f39c12;
+    color: #0b0c10;
+}
+
+.btn-small.btn-warning:hover {
+    background: #e67e22;
+}
+
+.btn-small.btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn-small.btn-danger:hover {
+    background: #c0392b;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #7f8c8d;
+}
+
+.empty-state p {
+    margin: 0.5rem 0;
+}
+
+.trading-terminal-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.trading-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #1f2833;
+    border-radius: 8px;
+    border: 1px solid #45a29e33;
+}
+
+.trading-symbol-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.trading-symbol-info h1 {
+    margin: 0;
+    color: #66fcf1;
+    font-size: 1.5rem;
+}
+
+.market-type-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.market-type-badge.futures {
+    background: #45a29e33;
+    color: #66fcf1;
+    border: 1px solid #45a29e;
+}
+
+.market-type-badge.spot {
+    background: #2ecc7133;
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
+}
+
+.price-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.current-price {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #c5c6c7;
+}
+
+.price-change {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.price-change.positive {
+    background: #2ecc7133;
+    color: #2ecc71;
+}
+
+.price-change.negative {
+    background: #e74c3c33;
+    color: #e74c3c;
+}
+
+.trading-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.timeframe-selector {
+    display: flex;
+    gap: 0.5rem;
+    background: #0b0c10;
+    padding: 0.25rem;
+    border-radius: 6px;
+    border: 1px solid #45a29e33;
+}
+
+.timeframe-btn {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
+    color: #c5c6c7;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.timeframe-btn:hover {
+    background: #1f2833;
+    color: #66fcf1;
+}
+
+.timeframe-btn.active {
+    background: #45a29e;
+    color: #0b0c10;
+    font-weight: 600;
+}
+
+.indicator-selector {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.indicator-select {
+    padding: 0.5rem 0.75rem;
+    background: #0b0c10;
+    border: 1px solid #45a29e33;
+    border-radius: 4px;
+    color: #c5c6c7;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.indicator-select:focus {
+    outline: none;
+    border-color: #66fcf1;
+}
+
+.trading-chart-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+    background: #1f2833;
+    border-radius: 8px;
+    border: 1px solid #45a29e33;
+    overflow: hidden;
+}
+
+.tradingview-widget-container {
+    width: 100%;
+    height: 600px;
+    position: relative;
+}
+
+.tradingview-widget {
+    width: 100%;
+    height: 100%;
+}
+
+.indicators-list {
+    padding: 1rem;
+    background: #0b0c10;
+    border-top: 1px solid #45a29e33;
+}
+
+.indicators-list h4 {
+    margin: 0 0 0.5rem 0;
+    color: #c5c6c7;
+    font-size: 0.9rem;
+}
+
+.indicator-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: #1f2833;
+    border-radius: 4px;
+    border: 1px solid #45a29e33;
+}
+
+.indicator-item span {
+    color: #c5c6c7;
+    font-size: 0.9rem;
+}
+
+.trading-sidebar {
+    background: #1f2833;
+    border-radius: 8px;
+    border: 1px solid #45a29e33;
+    padding: 1rem;
+}
+
+.trading-stats h3 {
+    margin: 0 0 1rem 0;
+    color: #66fcf1;
+    font-size: 1.1rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #45a29e22;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    color: #c5c6c7;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.stat-value.positive {
+    color: #2ecc71;
+}
+
+.stat-value.negative {
+    color: #e74c3c;
+}
+
+@media (max-width: 768px) {
+    .alerts-table {
+        font-size: 0.8rem;
+    }
+    
+    .alerts-table th,
+    .alerts-table td {
+        padding: 0.5rem;
+    }
+    
+    .alert-actions {
+        flex-direction: column;
+    }
+    
+    .btn-small {
+        width: 100%;
+    }
+    
+    .trading-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .trading-controls {
+        flex-direction: column;
+    }
+    
+    .timeframe-selector {
+        flex-wrap: wrap;
+    }
+    
+    .tradingview-widget-container {
+        height: 400px;
+    }
+}
+
+.profile-status {
+    margin: 1rem 0;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-badge.status-success {
+    background: #2ecc7133;
+    color: #2ecc71;
+}
+
+.status-badge.status-warning {
+    background: #f39c1233;
+    color: #f39c12;
+}
+
+.status-badge.status-pending {
+    background: #3498db33;
+    color: #3498db;
+}
+
+.profile-alert {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 4px solid;
+}
+
+.profile-alert.alert-warning {
+    background: #f39c1233;
+    border-color: #f39c12;
+    color: #f39c12;
+}
+
+.profile-alert.alert-info {
+    background: #3498db33;
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.profile-alert.alert-success {
+    background: #2ecc7133;
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.profile-alert p {
+    margin: 0;
+    font-size: 0.9rem;
+}

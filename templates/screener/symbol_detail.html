@@ -95,8 +95,9 @@
     {% if request.user.is_authenticated %}
         <h2>Создать алерт</h2>
         <div class="auth-form">
-            <form method="post" action="{% url 'alerts:create' symbol.symbol %}">
+            <form method="post" action="{% url 'alerts:create' symbol.symbol %}?market_type={{ market_type }}">
                 {% csrf_token %}
+                <input type="hidden" name="market_type" value="{{ market_type }}">
                 <div class="form-field">
                     <label for="metric">Метрика</label>
                     <select name="metric" id="metric">

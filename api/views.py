@@ -1,9 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from accounts.decorators import access_required
 
 from screener.models import ScreenerSnapshot, Symbol
 
 
+@access_required
 def screener_list_api(request):
     from django.db import connection
     from django.utils import timezone
@@ -157,6 +159,7 @@ def screener_list_api(request):
     return JsonResponse(data, safe=False)
 
 
+@access_required
 def symbol_detail_api(request, symbol):
     market_type = request.GET.get("market_type", "futures").strip()
     if market_type not in ["spot", "futures"]:

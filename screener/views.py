@@ -1,9 +1,11 @@
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
+from accounts.decorators import access_required
 
 from .models import ScreenerSnapshot, Symbol
 
 
+@access_required
 def screener_list(request):
     """Main screener view showing the latest snapshot per symbol with filters and sorting."""
 
@@ -154,6 +156,7 @@ def screener_list(request):
     return render(request, "screener/screener_list.html", context)
 
 
+@access_required
 def symbol_detail(request, symbol):
     market_type = request.GET.get("market_type", "futures").strip()
     if market_type not in ["spot", "futures"]:
@@ -179,5 +182,35 @@ def symbol_detail(request, symbol):
         "market_type": market_type,
     }
     return render(request, "screener/symbol_detail.html", context)
+
+
+@access_required
+def trading_terminal(request, symbol):
+    """Торговый терминал с графиком."""
+    market_type = request.GET.get("market_type", "futures").strip()
+    if market_type not in ["spot", "futures"]:
+        market_type = "futures"
+    
+    symbol_obj = get_object_or_404(
+        Symbol,
+        symbol__iexact=symbol,
+        market_type=market_type
+    )
+    
+    snapshots = (
+        ScreenerSnapshot.objects.filter(symbol=symbol_obj)
+        .order_by("-ts")[:100]
+        .select_related("symbol")
+    )
+    snapshots = list(snapshots)
+    latest_snapshot = snapshots[0] if snapshots else None
+
+    context = {
+        "symbol": symbol_obj,
+        "latest_snapshot": latest_snapshot,
+        "snapshots": snapshots,
+        "market_type": market_type,
+    }
+    return render(request, "screener/trading_terminal.html", context)
 
 

@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Создать алерт — {{ symbol.symbol }}{% endblock %}
+{% block title %}Редактировать алерт — {{ alert.symbol.symbol }}{% endblock %}
 
 {% block content %}
 <div class="auth-container">
     <div class="alert-form-container">
-        <h1>Создать алерт для {{ symbol.symbol }}</h1>
+        <h1>Редактировать алерт для {{ alert.symbol.symbol }}</h1>
         <form method="post" class="auth-form alert-form">
             {% csrf_token %}
-            {% if market_type %}
-                <input type="hidden" name="market_type" value="{{ market_type }}">
-            {% endif %}
             {{ form.non_field_errors }}
             {% for field in form %}
                 <div class="form-field">
@@ -33,12 +30,11 @@
                 </p>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn-primary">Сохранить алерт</button>
-                <a href="{% url 'screener:symbol_detail' symbol.symbol %}?market_type={{ market_type|default:'futures' }}" class="btn-secondary">Отмена</a>
+                <button type="submit" class="btn-primary">Сохранить изменения</button>
+                <a href="{% url 'alerts:list' %}" class="btn-secondary">Отмена</a>
             </div>
         </form>
     </div>
 </div>
 {% endblock %}
-
 

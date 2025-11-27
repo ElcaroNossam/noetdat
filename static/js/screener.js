@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
             symbolTd.dataset.column = "symbol";
             const link = document.createElement("a");
             const marketType = new URLSearchParams(window.location.search).get("market_type") || "futures";
-            link.href = `/symbol/${row.symbol}/?market_type=${marketType}`;
+            link.href = `/trading/${row.symbol}/?market_type=${marketType}`;
             link.textContent = row.symbol;
             symbolTd.appendChild(link);
 

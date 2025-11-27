@@ -5,6 +5,7 @@
     <nav class="navbar-right">
         <a href="{% url 'screener:list' %}">Скринер</a>
         {% if user.is_authenticated %}
+            <a href="{% url 'alerts:list' %}">Алерты</a>
             <a href="{% url 'accounts:profile' %}">Профиль</a>
             <a href="{% url 'accounts:logout' %}">Выход</a>
         {% else %}
