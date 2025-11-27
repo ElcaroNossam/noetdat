@@ -45,13 +45,14 @@ sudo apt install -y build-essential libpq-dev
 sudo -u postgres psql
 
 # В PostgreSQL консоли:
-CREATE DATABASE scan_db;
-CREATE USER scan_user WITH PASSWORD 'your_secure_password';
-ALTER ROLE scan_user SET client_encoding TO 'utf8';
-ALTER ROLE scan_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE scan_user SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE scan_db TO scan_user;
+CREATE DATABASE cryptoscreener;
+CREATE USER cryptouser WITH PASSWORD 'cryptopass';
+ALTER ROLE cryptouser SET client_encoding TO 'utf8';
+ALTER ROLE cryptouser SET default_transaction_isolation TO 'read committed';
+ALTER ROLE cryptouser SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE cryptoscreener TO cryptouser;
 \q
+
 ```
 
 ## Шаг 5: Клонирование репозитория

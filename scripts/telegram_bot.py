@@ -11,6 +11,8 @@ Run from the project root:
 
 import asyncio
 import os
+import signal
+import sys
 
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -38,10 +40,43 @@ async def main() -> None:
     app.add_handler(CommandHandler("start", start))
 
     print("Telegram bot is running. Press Ctrl+C to stop.")
-    await app.run_polling()
+    
+    try:
+        await app.run_polling(
+            drop_pending_updates=True,
+            stop_signals=(signal.SIGINT, signal.SIGTERM),
+        )
+    except KeyboardInterrupt:
+        print("\nBot stopped.")
+    except Exception as e:
+        print(f"Bot error: {e}")
+        raise
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Properly handle event loop for systemd
+    # Ensure we start with a clean event loop
+    try:
+        # Try to close any existing event loop if it exists and is closed
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_closed():
+                # Create new loop if old one is closed
+                asyncio.set_event_loop(asyncio.new_event_loop())
+        except RuntimeError:
+            # No event loop exists, which is fine - asyncio.run() will create one
+            pass
+        
+        # Use asyncio.run() which creates a new event loop
+        # This is the recommended way for Python 3.7+ and works with systemd
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nBot stopped by user.")
+        sys.exit(0)
+    except Exception as e:
+        print(f"Fatal error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
