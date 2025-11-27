@@ -7,8 +7,20 @@ from screener.models import ScreenerSnapshot, Symbol
 
 
 def screener_list_api(request):
+    # Optimized: Limit to recent snapshots first, then use window function
+    from django.utils import timezone
+    from datetime import timedelta
+    from django.db.models import F, Window
+    from django.db.models.functions import RowNumber
+    
+    # Only consider snapshots from the last 24 hours to reduce dataset size
+    recent_cutoff = timezone.now() - timedelta(hours=24)
+    
+    # Latest snapshot per symbol using window function on limited dataset
     qs = (
-        ScreenerSnapshot.objects.annotate(
+        ScreenerSnapshot.objects
+        .filter(ts__gte=recent_cutoff)  # Limit to recent data first
+        .annotate(
             row_number=Window(
                 expression=RowNumber(),
                 partition_by=[F("symbol")],

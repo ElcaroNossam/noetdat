@@ -16,8 +16,9 @@ else:
 
 worker_class = "sync"
 worker_connections = 1000
-timeout = 120
+timeout = 300  # Увеличено до 5 минут для медленных запросов
 keepalive = 5
+graceful_timeout = 120  # Время на graceful shutdown
 max_requests = 1000
 max_requests_jitter = 50
 # Отключаем preload_app для диагностики - если есть ошибки при импорте, они будут видны сразу
