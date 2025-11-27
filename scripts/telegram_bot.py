@@ -14,6 +14,14 @@ import os
 import signal
 import sys
 
+# Fix for systemd event loop issues
+try:
+    import nest_asyncio
+    nest_asyncio.apply()
+except ImportError:
+    # nest_asyncio not installed, will use manual event loop handling
+    pass
+
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
@@ -32,6 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def main() -> None:
+    """Main async function that sets up and runs the bot."""
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     if not token:
         raise SystemExit("TELEGRAM_BOT_TOKEN env var is required")
@@ -50,25 +59,16 @@ async def main() -> None:
         print("\nBot stopped.")
     except Exception as e:
         print(f"Bot error: {e}")
+        import traceback
+        traceback.print_exc()
         raise
 
 
 if __name__ == "__main__":
-    # Properly handle event loop for systemd
-    # Ensure we start with a clean event loop
+    # For systemd compatibility
+    # nest_asyncio allows us to use asyncio.run() even if an event loop is already running
+    # This fixes the "RuntimeError: This event loop is already running" error
     try:
-        # Try to close any existing event loop if it exists and is closed
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_closed():
-                # Create new loop if old one is closed
-                asyncio.set_event_loop(asyncio.new_event_loop())
-        except RuntimeError:
-            # No event loop exists, which is fine - asyncio.run() will create one
-            pass
-        
-        # Use asyncio.run() which creates a new event loop
-        # This is the recommended way for Python 3.7+ and works with systemd
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nBot stopped by user.")

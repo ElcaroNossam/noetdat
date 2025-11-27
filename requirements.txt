@@ -10,6 +10,9 @@ requests>=2.31.0,<3.0
 # Telegram Bot API library (for alerts)
 python-telegram-bot>=21.0.0,<22.0
 
+# Fix for asyncio event loop issues in systemd
+nest-asyncio>=1.5.0,<2.0
+
 # Environment variables management (.env files)
 python-dotenv>=1.0.0,<2.0
 
