@@ -36,6 +36,12 @@ body {
     box-sizing: border-box;
 }
 
+.content:has(.trading-terminal-container) {
+    padding: 0;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -1149,8 +1155,12 @@ body {
 .trading-terminal-container {
     width: 100%;
     max-width: 100%;
-    padding: 1rem;
+    padding: 0;
     box-sizing: border-box;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .trading-header {
@@ -1159,11 +1169,13 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
     padding: 1rem;
     background: #1f2833;
-    border-radius: 8px;
-    border: 1px solid #45a29e33;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid #45a29e33;
+    flex-shrink: 0;
 }
 
 .trading-symbol-info {
@@ -1290,18 +1302,24 @@ body {
 .trading-chart-container {
     position: relative;
     width: 100%;
-    margin-bottom: 1rem;
+    margin: 0;
     background: #1f2833;
-    border-radius: 8px;
-    border: 1px solid #45a29e33;
+    border-radius: 0;
+    border: none;
     overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .tradingview-widget-container {
     width: 100%;
-    height: calc(100vh - 100px);
+    height: 100%;
     min-height: 300px;
     position: relative;
+    flex: 1;
+    min-height: 0;
 }
 
 .tradingview-widget {
