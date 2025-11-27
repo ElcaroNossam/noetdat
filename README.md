@@ -165,5 +165,39 @@ External Python scripts (e.g. Binance collectors) should follow the same pattern
 The web UI and API always show the most recent snapshot per symbol (using PostgreSQL
 `DISTINCT ON` semantics under the hood), so you can simply keep pushing new rows.
 
+## Автоматическая очистка старых данных
+
+Для поддержания размера базы данных на разумном уровне, проект включает management command для автоматического удаления старых snapshots.
+
+### Ручной запуск
+
+```bash
+# Показать что будет удалено (без фактического удаления)
+python manage.py cleanup_old_snapshots --dry-run
+
+# Удалить snapshots старше 24 часов (по умолчанию)
+python manage.py cleanup_old_snapshots
+
+# Удалить snapshots старше 48 часов
+python manage.py cleanup_old_snapshots --hours 48
+```
+
+### Настройка автоматической очистки
+
+```bash
+# Использовать готовый скрипт настройки cron
+chmod +x setup_cleanup_cron.sh
+./setup_cleanup_cron.sh
+```
+
+Или добавить в crontab вручную:
+
+```bash
+crontab -e
+# Добавить: 0 */6 * * * cd /path/to/project && venv/bin/python manage.py cleanup_old_snapshots --hours 24 >> logs/cleanup.log 2>&1
+```
+
+Подробная документация: см. `CLEANUP.md`
+
 
 

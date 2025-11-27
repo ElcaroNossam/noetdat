@@ -1,5 +1,4 @@
-from django.db.models import F, Window
-from django.db.models.functions import RowNumber
+from django.db.models import Max, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
@@ -7,29 +6,23 @@ from screener.models import ScreenerSnapshot, Symbol
 
 
 def screener_list_api(request):
-    # Optimized: Limit to recent snapshots first, then use window function
     from django.utils import timezone
     from datetime import timedelta
-    from django.db.models import F, Window
-    from django.db.models.functions import RowNumber
     
-    # Only consider snapshots from the last 24 hours to reduce dataset size
-    recent_cutoff = timezone.now() - timedelta(hours=24)
+    recent_cutoff = timezone.now() - timedelta(hours=6)
     
-    # Latest snapshot per symbol using window function on limited dataset
-    qs = (
+    latest_per_symbol = (
         ScreenerSnapshot.objects
-        .filter(ts__gte=recent_cutoff)  # Limit to recent data first
-        .annotate(
-            row_number=Window(
-                expression=RowNumber(),
-                partition_by=[F("symbol")],
-                order_by=[F("ts").desc()],
-            )
-        )
-        .filter(row_number=1)
-        .select_related("symbol")
+        .filter(ts__gte=recent_cutoff)
+        .values("symbol_id")
+        .annotate(max_ts=Max("ts"))
     )
+    
+    q_filter = Q()
+    for item in latest_per_symbol:
+        q_filter |= Q(symbol_id=item["symbol_id"], ts=item["max_ts"])
+    
+    qs = ScreenerSnapshot.objects.filter(q_filter).select_related("symbol")
 
     # Market type filter (spot/futures)
     market_type = request.GET.get("market_type", "futures").strip()
@@ -40,7 +33,6 @@ def screener_list_api(request):
     if search:
         qs = qs.filter(symbol__symbol__icontains=search)
 
-    # The same extended filters as in HTML screener.
     def _to_float(val):
         try:
             return float(val)
@@ -177,7 +169,6 @@ def symbol_detail_api(request, symbol):
             "volatility_15m": s.volatility_15m,
             "ticks_15m": s.ticks_15m,
             "ticks_5m": s.ticks_5m,
-            "vdelta_1m": s.vdelta_1m,
             "vdelta_5m": s.vdelta_5m,
             "volume_5m": s.volume_5m,
             "volume_1h": s.volume_1h,

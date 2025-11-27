@@ -1,41 +1,30 @@
 from django.core.paginator import Paginator
-from django.db.models import F, Window
-from django.db.models.functions import RowNumber
+from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404, render
 
 from .models import ScreenerSnapshot, Symbol
 
 
 def screener_list(request):
-    """
-    Main screener view showing the latest snapshot per symbol with filters and sorting.
-    Relies on PostgreSQL's DISTINCT ON via order_by + distinct("symbol__symbol").
-    """
+    """Main screener view showing the latest snapshot per symbol with filters and sorting."""
 
-    # Optimized: Limit to recent snapshots first, then use window function
-    # This reduces the dataset before applying the expensive window function
     from django.utils import timezone
     from datetime import timedelta
-    from django.db.models import F, Window
-    from django.db.models.functions import RowNumber
     
-    # Only consider snapshots from the last 24 hours to reduce dataset size
-    recent_cutoff = timezone.now() - timedelta(hours=24)
+    recent_cutoff = timezone.now() - timedelta(hours=6)
     
-    # Latest snapshot per symbol using window function on limited dataset
-    qs = (
+    latest_per_symbol = (
         ScreenerSnapshot.objects
-        .filter(ts__gte=recent_cutoff)  # Limit to recent data first
-        .annotate(
-            row_number=Window(
-                expression=RowNumber(),
-                partition_by=[F("symbol")],
-                order_by=[F("ts").desc()],
-            )
-        )
-        .filter(row_number=1)
-        .select_related("symbol")
+        .filter(ts__gte=recent_cutoff)
+        .values("symbol_id")
+        .annotate(max_ts=Max("ts"))
     )
+    
+    q_filter = Q()
+    for item in latest_per_symbol:
+        q_filter |= Q(symbol_id=item["symbol_id"], ts=item["max_ts"])
+    
+    qs = ScreenerSnapshot.objects.filter(q_filter).select_related("symbol")
 
     # Market type filter (spot/futures)
     market_type = request.GET.get("market_type", "futures").strip()
