@@ -5,7 +5,12 @@
 
 {% block content %}
 <div class="symbol-detail-container" data-symbol-detail data-symbol="{{ symbol.symbol }}">
-    <h1>{{ symbol.symbol }}</h1>
+    <div class="symbol-detail-header">
+        <h1>{{ symbol.symbol }}</h1>
+        <a href="{% url 'screener:trading_terminal' symbol.symbol %}?market_type={{ market_type }}" class="btn-primary trading-terminal-btn">
+            📈 Торговый терминал
+        </a>
+    </div>
     {% if latest_snapshot %}
         <div class="symbol-summary">
             <div class="metric">

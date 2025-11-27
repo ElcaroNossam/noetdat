@@ -22,56 +22,12 @@
                 </div>
             {% endif %}
         </div>
-        <div class="trading-controls">
-            <div class="timeframe-selector">
-                <button class="timeframe-btn active" data-timeframe="1">1m</button>
-                <button class="timeframe-btn" data-timeframe="5">5m</button>
-                <button class="timeframe-btn" data-timeframe="15">15m</button>
-                <button class="timeframe-btn" data-timeframe="60">1h</button>
-                <button class="timeframe-btn" data-timeframe="240">4h</button>
-                <button class="timeframe-btn" data-timeframe="D">1D</button>
-            </div>
-            <div class="indicator-selector">
-                <select id="indicator-select" class="indicator-select">
-                    <option value="">Добавить индикатор...</option>
-                    <optgroup label="Скользящие средние">
-                        <option value="sma">SMA (Simple Moving Average)</option>
-                        <option value="ema">EMA (Exponential Moving Average)</option>
-                        <option value="wma">WMA (Weighted Moving Average)</option>
-                    </optgroup>
-                    <optgroup label="Осцилляторы">
-                        <option value="rsi">RSI (Relative Strength Index)</option>
-                        <option value="stochastic">Stochastic</option>
-                        <option value="williams">Williams %R</option>
-                        <option value="cci">CCI (Commodity Channel Index)</option>
-                        <option value="adx">ADX (Average Directional Index)</option>
-                    </optgroup>
-                    <optgroup label="Трендовые">
-                        <option value="macd">MACD</option>
-                        <option value="bollinger">Bollinger Bands</option>
-                        <option value="atr">ATR (Average True Range)</option>
-                        <option value="parabolic">Parabolic SAR</option>
-                    </optgroup>
-                    <optgroup label="Объем">
-                        <option value="volume">Volume</option>
-                        <option value="vwap">VWAP</option>
-                    </optgroup>
-                    <optgroup label="Дополнительные">
-                        <option value="ichimoku">Ichimoku Cloud</option>
-                        <option value="pivot">Pivot Points</option>
-                        <option value="fibonacci">Fibonacci Retracement</option>
-                    </optgroup>
-                </select>
-                <button id="add-indicator" class="btn-secondary">Добавить</button>
-            </div>
-        </div>
     </div>
 
     <div class="trading-chart-container">
         <div id="tradingview-widget-container" class="tradingview-widget-container">
             <div id="tradingview-widget" class="tradingview-widget"></div>
         </div>
-        <div id="indicators-list" class="indicators-list"></div>
     </div>
 
     <div class="trading-sidebar">
@@ -108,14 +64,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const exchange = '{{ market_type|upper }}';
     const marketType = '{{ market_type }}';
     
-    let currentTimeframe = '1';
-    const activeIndicators = [];
+    function calculateChartHeight() {
+        const windowHeight = window.innerHeight;
+        const headerHeight = document.querySelector('.trading-header').offsetHeight;
+        const sidebarHeight = document.querySelector('.trading-sidebar')?.offsetHeight || 0;
+        const padding = 100;
+        return Math.max(400, windowHeight - headerHeight - sidebarHeight - padding);
+    }
     
     function initTradingView() {
+        const chartHeight = calculateChartHeight();
         const widgetConfig = {
             "autosize": true,
             "symbol": `BINANCE:${symbol}`,
-            "interval": currentTimeframe,
+            "interval": "1",
             "timezone": "Etc/UTC",
             "theme": "dark",
             "style": "1",
@@ -126,111 +88,25 @@ document.addEventListener('DOMContentLoaded', function() {
             "hide_legend": false,
             "save_image": false,
             "container_id": "tradingview-widget",
-            "height": 600,
+            "height": chartHeight,
             "width": "100%"
         };
-        
-        if (activeIndicators.length > 0) {
-            widgetConfig.studies = activeIndicators;
-            widgetConfig.studies_overrides = {};
-        }
         
         new TradingView.widget(widgetConfig);
     }
     
-    document.querySelectorAll('.timeframe-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            currentTimeframe = this.dataset.timeframe;
-            initTradingView();
-        });
-    });
-    
-    function getIndicatorConfig(code) {
-        const configs = {
-            'sma': 'MASimple@tv-basicstudies',
-            'ema': 'MAExp@tv-basicstudies',
-            'wma': 'MAWeighted@tv-basicstudies',
-            'rsi': 'RSI@tv-basicstudies',
-            'stochastic': 'Stochastic@tv-basicstudies',
-            'williams': 'WilliamsR@tv-basicstudies',
-            'cci': 'CCI@tv-basicstudies',
-            'adx': 'ADX@tv-basicstudies',
-            'macd': 'MACD@tv-basicstudies',
-            'bollinger': 'BB@tv-basicstudies',
-            'atr': 'ATR@tv-basicstudies',
-            'parabolic': 'ParabolicSAR@tv-basicstudies',
-            'volume': 'Volume@tv-basicstudies',
-            'vwap': 'VWAP@tv-basicstudies',
-            'ichimoku': 'IchimokuCloud@tv-basicstudies',
-            'pivot': 'PivotPointsHighLow@tv-basicstudies',
-            'fibonacci': 'FibRetracement@tv-basicstudies'
-        };
-        return configs[code] || code;
-    }
-    
-    function getIndicatorName(config) {
-        const code = config.split('@')[0];
-        const names = {
-            'MASimple': 'SMA',
-            'MAExp': 'EMA',
-            'MAWeighted': 'WMA',
-            'RSI': 'RSI',
-            'Stochastic': 'Stochastic',
-            'WilliamsR': 'Williams %R',
-            'CCI': 'CCI',
-            'ADX': 'ADX',
-            'MACD': 'MACD',
-            'BB': 'Bollinger Bands',
-            'ATR': 'ATR',
-            'ParabolicSAR': 'Parabolic SAR',
-            'Volume': 'Volume',
-            'VWAP': 'VWAP',
-            'IchimokuCloud': 'Ichimoku Cloud',
-            'PivotPointsHighLow': 'Pivot Points',
-            'FibRetracement': 'Fibonacci'
-        };
-        return names[code] || code;
-    }
-    
-    document.getElementById('add-indicator').addEventListener('click', function() {
-        const select = document.getElementById('indicator-select');
-        const indicatorCode = select.value;
-        if (indicatorCode) {
-            const indicatorConfig = getIndicatorConfig(indicatorCode);
-            if (!activeIndicators.includes(indicatorConfig)) {
-                activeIndicators.push(indicatorConfig);
-                updateIndicatorsList();
-                initTradingView();
-                select.value = '';
+    // Обновление высоты графика при изменении размера окна
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            const container = document.getElementById('tradingview-widget-container');
+            if (container) {
+                const chartHeight = calculateChartHeight();
+                container.style.height = chartHeight + 'px';
             }
-        }
+        }, 250);
     });
-    
-    function updateIndicatorsList() {
-        const list = document.getElementById('indicators-list');
-        if (activeIndicators.length === 0) {
-            list.innerHTML = '';
-            return;
-        }
-        list.innerHTML = '<h4>Активные индикаторы:</h4>';
-        activeIndicators.forEach((ind, index) => {
-            const item = document.createElement('div');
-            item.className = 'indicator-item';
-            item.innerHTML = `
-                <span>${getIndicatorName(ind)}</span>
-                <button class="btn-small btn-danger" onclick="removeIndicator(${index})">Удалить</button>
-            `;
-            list.appendChild(item);
-        });
-    }
-    
-    window.removeIndicator = function(index) {
-        activeIndicators.splice(index, 1);
-        updateIndicatorsList();
-        initTradingView();
-    };
     
     initTradingView();
     
