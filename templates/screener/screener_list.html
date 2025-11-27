@@ -91,7 +91,7 @@
             {% for snapshot in page_obj %}
                 <tr>
                     <td data-column="symbol">
-                        <a href="{% url 'screener:symbol_detail' snapshot.symbol.symbol %}">
+                        <a href="{% url 'screener:symbol_detail' snapshot.symbol.symbol %}?market_type={{ market_type }}">
                             {{ snapshot.symbol.symbol }}
                         </a>
                     </td>

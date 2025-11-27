@@ -296,6 +296,10 @@ body {
 .screener-table th:first-child,
 .screener-table td:first-child {
     text-align: left;
+    width: auto;
+    min-width: 100px;
+    max-width: 150px;
+    white-space: nowrap;
 }
 
 .screener-table thead {

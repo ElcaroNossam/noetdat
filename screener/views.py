@@ -1,5 +1,4 @@
 from django.core.paginator import Paginator
-from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404, render
 
 from .models import ScreenerSnapshot, Symbol
@@ -8,28 +7,32 @@ from .models import ScreenerSnapshot, Symbol
 def screener_list(request):
     """Main screener view showing the latest snapshot per symbol with filters and sorting."""
 
+    from django.db import connection
     from django.utils import timezone
     from datetime import timedelta
     
-    recent_cutoff = timezone.now() - timedelta(hours=6)
-    
-    latest_per_symbol = (
-        ScreenerSnapshot.objects
-        .filter(ts__gte=recent_cutoff)
-        .values("symbol_id")
-        .annotate(max_ts=Max("ts"))
-    )
-    
-    q_filter = Q()
-    for item in latest_per_symbol:
-        q_filter |= Q(symbol_id=item["symbol_id"], ts=item["max_ts"])
-    
-    qs = ScreenerSnapshot.objects.filter(q_filter).select_related("symbol")
-
-    # Market type filter (spot/futures)
     market_type = request.GET.get("market_type", "futures").strip()
-    if market_type in ["spot", "futures"]:
-        qs = qs.filter(symbol__market_type=market_type)
+    if market_type not in ["spot", "futures"]:
+        market_type = "futures"
+    
+    recent_cutoff = timezone.now() - timedelta(hours=2)
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT DISTINCT ON (s.symbol_id)
+                s.id
+            FROM screener_screenersnapshot s
+            INNER JOIN screener_symbol sym ON s.symbol_id = sym.id
+            WHERE s.ts >= %s AND sym.market_type = %s
+            ORDER BY s.symbol_id, s.ts DESC
+        """, [recent_cutoff, market_type])
+        
+        snapshot_ids = [row[0] for row in cursor.fetchall()]
+    
+    if not snapshot_ids:
+        snapshot_ids = [0]
+    
+    qs = ScreenerSnapshot.objects.filter(id__in=snapshot_ids).select_related("symbol")
     
     search = request.GET.get("search", "").strip()
     if search:
@@ -152,7 +155,15 @@ def screener_list(request):
 
 
 def symbol_detail(request, symbol):
-    symbol_obj = get_object_or_404(Symbol, symbol__iexact=symbol)
+    market_type = request.GET.get("market_type", "futures").strip()
+    if market_type not in ["spot", "futures"]:
+        market_type = "futures"
+    
+    symbol_obj = get_object_or_404(
+        Symbol, 
+        symbol__iexact=symbol,
+        market_type=market_type
+    )
     snapshots = (
         ScreenerSnapshot.objects.filter(symbol=symbol_obj)
         .order_by("-ts")[:50]
@@ -165,6 +176,7 @@ def symbol_detail(request, symbol):
         "symbol": symbol_obj,
         "latest_snapshot": latest_snapshot,
         "snapshots": snapshots,
+        "market_type": market_type,
     }
     return render(request, "screener/symbol_detail.html", context)
 
