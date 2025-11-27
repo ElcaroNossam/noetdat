@@ -184,7 +184,7 @@ def main() -> None:
             elapsed = time.time() - start_time
             print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Ingested {count} spot symbols in {elapsed:.2f}s")
             
-            sleep_time = max(0, 1.0 - elapsed)
+            sleep_time = max(0, 5.0 - elapsed)
             time.sleep(sleep_time)
     except KeyboardInterrupt:
         print("\nStopped by user.")
