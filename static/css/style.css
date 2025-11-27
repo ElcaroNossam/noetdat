@@ -1299,9 +1299,8 @@ body {
 
 .tradingview-widget-container {
     width: 100%;
-    height: calc(100vh - 250px);
-    min-height: 400px;
-    max-height: 90vh;
+    height: calc(100vh - 100px);
+    min-height: 300px;
     position: relative;
 }
 
@@ -1385,8 +1384,8 @@ body {
     }
     
     .tradingview-widget-container {
-        height: calc(100vh - 200px);
-        min-height: 300px;
+        height: calc(100vh - 80px);
+        min-height: 250px;
     }
     
     .symbol-detail-header {

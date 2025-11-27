@@ -65,26 +65,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const marketType = '{{ market_type }}';
     
     function calculateChartHeight() {
-        // Можно настроить эти параметры для изменения высоты графика:
-        const MIN_HEIGHT = 400;        // Минимальная высота в пикселях
-        const MAX_HEIGHT = null;       // Максимальная высота (null = без ограничений)
-        const HEADER_OFFSET = 150;     // Отступ для хедера (можно уменьшить для большего графика)
-        const SIDEBAR_OFFSET = 200;    // Отступ для сайдбара (можно уменьшить)
-        const EXTRA_PADDING = 50;      // Дополнительный отступ
-        
+        // Настройки для максимального использования экрана (как в TradingView)
         const windowHeight = window.innerHeight;
-        const headerHeight = document.querySelector('.trading-header')?.offsetHeight || HEADER_OFFSET;
-        const sidebarHeight = document.querySelector('.trading-sidebar')?.offsetHeight || SIDEBAR_OFFSET;
+        const headerHeight = document.querySelector('.trading-header')?.offsetHeight || 80;
+        const padding = 20; // Минимальный отступ
         
-        let calculatedHeight = windowHeight - headerHeight - sidebarHeight - EXTRA_PADDING;
+        // Высота = высота окна - хедер - минимальный отступ
+        // Это даст графику максимальное пространство
+        let calculatedHeight = windowHeight - headerHeight - padding;
         
-        // Применяем минимальную высоту
-        calculatedHeight = Math.max(MIN_HEIGHT, calculatedHeight);
-        
-        // Применяем максимальную высоту, если задана
-        if (MAX_HEIGHT !== null) {
-            calculatedHeight = Math.min(MAX_HEIGHT, calculatedHeight);
-        }
+        // Минимальная высота для очень маленьких экранов
+        calculatedHeight = Math.max(300, calculatedHeight);
         
         return calculatedHeight;
     }
@@ -114,18 +105,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Обновление высоты графика при изменении размера окна
     let resizeTimeout;
+    let tradingViewWidget = null;
+    
+    function updateChartHeight() {
+        const container = document.getElementById('tradingview-widget-container');
+        if (container) {
+            const chartHeight = calculateChartHeight();
+            container.style.height = chartHeight + 'px';
+            // Обновляем виджет TradingView, если он уже создан
+            if (tradingViewWidget && tradingViewWidget.ready) {
+                tradingViewWidget.setAttribute('height', chartHeight);
+            }
+        }
+    }
+    
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
-            const container = document.getElementById('tradingview-widget-container');
-            if (container) {
-                const chartHeight = calculateChartHeight();
-                container.style.height = chartHeight + 'px';
-            }
-        }, 250);
+        resizeTimeout = setTimeout(updateChartHeight, 250);
     });
     
     initTradingView();
+    
+    // Сохраняем ссылку на виджет для последующего обновления
+    setTimeout(function() {
+        tradingViewWidget = document.getElementById('tradingview-widget');
+    }, 1000);
     
     setInterval(function() {
         fetch(`/api/symbol/${symbol}/?market_type=${marketType}`)
