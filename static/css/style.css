@@ -1170,12 +1170,45 @@ body {
     flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 0;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     background: #1f2833;
     border-radius: 0;
     border: none;
     border-bottom: 1px solid #45a29e33;
     flex-shrink: 0;
+}
+
+.trading-stats-inline {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.stat-item-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stat-item-inline .stat-label {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.stat-item-inline .stat-value {
+    color: #c5c6c7;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.stat-item-inline .stat-value.positive {
+    color: #2ecc71;
+}
+
+.stat-item-inline .stat-value.negative {
+    color: #e74c3c;
 }
 
 .trading-symbol-info {
@@ -1327,48 +1360,6 @@ body {
     height: 100%;
 }
 
-.trading-sidebar {
-    background: #1f2833;
-    border-radius: 8px;
-    border: 1px solid #45a29e33;
-    padding: 1rem;
-}
-
-.trading-stats h3 {
-    margin: 0 0 1rem 0;
-    color: #66fcf1;
-    font-size: 1.1rem;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #45a29e22;
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-}
-
-.stat-label {
-    color: #888;
-    font-size: 0.9rem;
-}
-
-.stat-value {
-    color: #c5c6c7;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.stat-value.positive {
-    color: #2ecc71;
-}
-
-.stat-value.negative {
-    color: #e74c3c;
-}
 
 @media (max-width: 768px) {
     .alerts-table {

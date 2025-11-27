@@ -22,37 +22,33 @@
                 </div>
             {% endif %}
         </div>
+        {% if latest_snapshot %}
+            <div class="trading-stats-inline">
+                <div class="stat-item-inline">
+                    <span class="stat-label">Vol 15m:</span>
+                    <span class="stat-value">{{ latest_snapshot.volume_15m|format_volume }}</span>
+                </div>
+                <div class="stat-item-inline">
+                    <span class="stat-label">OI Δ 15m:</span>
+                    <span class="stat-value {% if latest_snapshot.oi_change_15m > 0 %}positive{% elif latest_snapshot.oi_change_15m < 0 %}negative{% endif %}">
+                        {{ latest_snapshot.oi_change_15m|floatformat:2 }}%
+                    </span>
+                </div>
+                <div class="stat-item-inline">
+                    <span class="stat-label">Funding:</span>
+                    <span class="stat-value">{{ latest_snapshot.funding_rate|floatformat:4 }}</span>
+                </div>
+                <div class="stat-item-inline">
+                    <span class="stat-label">OI:</span>
+                    <span class="stat-value">{{ latest_snapshot.open_interest|format_volume }}</span>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
     <div class="trading-chart-container">
         <div id="tradingview-widget-container" class="tradingview-widget-container">
             <div id="tradingview-widget" class="tradingview-widget"></div>
-        </div>
-    </div>
-
-    <div class="trading-sidebar">
-        <div class="trading-stats">
-            <h3>Статистика</h3>
-            {% if latest_snapshot %}
-                <div class="stat-item">
-                    <span class="stat-label">Volume 15m:</span>
-                    <span class="stat-value">{{ latest_snapshot.volume_15m|format_volume }}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">OI Change 15m:</span>
-                    <span class="stat-value {% if latest_snapshot.oi_change_15m > 0 %}positive{% elif latest_snapshot.oi_change_15m < 0 %}negative{% endif %}">
-                        {{ latest_snapshot.oi_change_15m|floatformat:2 }}%
-                    </span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Funding Rate:</span>
-                    <span class="stat-value">{{ latest_snapshot.funding_rate|floatformat:4 }}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Open Interest:</span>
-                    <span class="stat-value">{{ latest_snapshot.open_interest|format_volume }}</span>
-                </div>
-            {% endif %}
         </div>
     </div>
 </div>
@@ -65,17 +61,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const marketType = '{{ market_type }}';
     
     function calculateChartHeight() {
-        // Используем flexbox, высота рассчитывается автоматически
-        // Но для TradingView нужна конкретная высота в пикселях
-        const chartContainer = document.querySelector('.trading-chart-container');
-        if (chartContainer) {
-            // Ждем, пока flexbox применится
-            return chartContainer.offsetHeight || window.innerHeight - 100;
-        }
-        // Fallback: расчет на основе окна
+        // Высота = высота окна - высота хедера
         const windowHeight = window.innerHeight;
-        const headerHeight = document.querySelector('.trading-header')?.offsetHeight || 80;
-        return windowHeight - headerHeight;
+        const headerHeight = document.querySelector('.trading-header')?.offsetHeight || 100;
+        const calculatedHeight = windowHeight - headerHeight;
+        
+        // Минимальная высота для маленьких экранов
+        return Math.max(400, calculatedHeight);
     }
     
     function initTradingView() {
