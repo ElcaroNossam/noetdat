@@ -65,11 +65,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const marketType = '{{ market_type }}';
     
     function calculateChartHeight() {
+        // Можно настроить эти параметры для изменения высоты графика:
+        const MIN_HEIGHT = 400;        // Минимальная высота в пикселях
+        const MAX_HEIGHT = null;       // Максимальная высота (null = без ограничений)
+        const HEADER_OFFSET = 150;     // Отступ для хедера (можно уменьшить для большего графика)
+        const SIDEBAR_OFFSET = 200;    // Отступ для сайдбара (можно уменьшить)
+        const EXTRA_PADDING = 50;      // Дополнительный отступ
+        
         const windowHeight = window.innerHeight;
-        const headerHeight = document.querySelector('.trading-header').offsetHeight;
-        const sidebarHeight = document.querySelector('.trading-sidebar')?.offsetHeight || 0;
-        const padding = 100;
-        return Math.max(400, windowHeight - headerHeight - sidebarHeight - padding);
+        const headerHeight = document.querySelector('.trading-header')?.offsetHeight || HEADER_OFFSET;
+        const sidebarHeight = document.querySelector('.trading-sidebar')?.offsetHeight || SIDEBAR_OFFSET;
+        
+        let calculatedHeight = windowHeight - headerHeight - sidebarHeight - EXTRA_PADDING;
+        
+        // Применяем минимальную высоту
+        calculatedHeight = Math.max(MIN_HEIGHT, calculatedHeight);
+        
+        // Применяем максимальную высоту, если задана
+        if (MAX_HEIGHT !== null) {
+            calculatedHeight = Math.min(MAX_HEIGHT, calculatedHeight);
+        }
+        
+        return calculatedHeight;
     }
     
     function initTradingView() {
