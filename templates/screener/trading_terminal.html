@@ -61,19 +61,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const marketType = '{{ market_type }}';
     
     function calculateChartHeight() {
-        // Высота = высота окна - высота хедера
+        // Получаем реальную высоту контейнера графика через getBoundingClientRect
+        const chartContainer = document.querySelector('.trading-chart-container');
+        if (chartContainer) {
+            const rect = chartContainer.getBoundingClientRect();
+            if (rect.height > 100) {
+                return rect.height;
+            }
+        }
+        
+        // Fallback: расчет на основе окна с учетом навбара
         const windowHeight = window.innerHeight;
-        const headerHeight = document.querySelector('.trading-header')?.offsetHeight || 100;
-        const calculatedHeight = windowHeight - headerHeight;
+        const navbar = document.querySelector('.navbar');
+        const navbarHeight = navbar ? navbar.getBoundingClientRect().height : 60;
+        const header = document.querySelector('.trading-header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 100;
+        
+        const calculatedHeight = windowHeight - navbarHeight - headerHeight;
         
         // Минимальная высота для маленьких экранов
-        return Math.max(400, calculatedHeight);
+        return Math.max(500, calculatedHeight);
     }
     
     function initTradingView() {
-        // Небольшая задержка для правильного расчета высоты после применения flexbox
+        // Увеличиваем задержку для правильного расчета высоты после применения flexbox
         setTimeout(function() {
             const chartHeight = calculateChartHeight();
+            console.log('Chart height calculated:', chartHeight);
+            
+            const container = document.getElementById('tradingview-widget-container');
+            if (container) {
+                container.style.height = chartHeight + 'px';
+            }
+            
             const widgetConfig = {
                 "autosize": true,
                 "symbol": `BINANCE:${symbol}`,
@@ -93,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             
             new TradingView.widget(widgetConfig);
-        }, 200);
+        }, 500);
     }
     
     // Обновление высоты графика при изменении размера окна
