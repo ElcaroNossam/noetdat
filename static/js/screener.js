@@ -413,24 +413,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const diff = current - previous;
             if (diff > 0.0001) return "value-up";
             if (diff < -0.0001) return "value-down";
-            // If values are equal or very close, use sign-based color for negative values
-            if (!isPositiveOnly) {
-                if (current > 0.0000001) return "value-up";
-                if (current < -0.0000001) return "value-down";
-            }
+            // If values are equal or very close, no color (white)
             return "";
         }
         
-        // No previous value - use sign-based color
-        if (isPositiveOnly) {
-            // For positive-only values, don't show color if no previous value
-            return "";
-        } else {
-            // For values that can be negative (change, vdelta, funding), use sign
-            if (current > 0.0000001) return "value-up";
-            if (current < -0.0000001) return "value-down";
-            return "";
-        }
+        // No previous value - no color (white) for all values
+        // Changed: Vdelta now works like Volume - only shows color when comparing with previous value
+        return "";
     }
 
     function renderScreenerTable(rows) {

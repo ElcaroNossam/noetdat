@@ -80,15 +80,12 @@ def get_value_color(current_value, previous_value=None, is_positive_only=False):
     Determine color class for a value based on comparison with previous value.
     Returns: "value-up" (green), "value-down" (red), or "" (white/no color)
     
-    For positive-only values (volume, ticks, volatility, OI):
+    For ALL values (volume, vdelta, ticks, volatility, OI):
     - Green if current > previous
     - Red if current < previous
     - White if no previous value or equal
     
-    For values that can be negative (vdelta, change, funding):
-    - Green if current > previous (or positive if no previous)
-    - Red if current < previous (or negative if no previous)
-    - White if zero or equal
+    Changed: Vdelta now works like Volume - only shows color when comparing with previous value.
     """
     if current_value is None:
         return ""
@@ -107,23 +104,12 @@ def get_value_color(current_value, previous_value=None, is_positive_only=False):
                 return "value-up"
             elif diff < -0.0001:
                 return "value-down"
-            # If values are equal or very close
-            if not is_positive_only:
-                # For values that can be negative, use sign
-                if current > 0.0000001:
-                    return "value-up"
-                elif current < -0.0000001:
-                    return "value-down"
+            # If values are equal or very close, no color
             return ""
         except (ValueError, TypeError):
             pass
     
-    # No previous value - use sign-based color for negative values
-    if not is_positive_only:
-        if current > 0.0000001:
-            return "value-up"
-        elif current < -0.0000001:
-            return "value-down"
-    
+    # No previous value - no color (white) for all values
+    # This makes vdelta work like volume - only color when comparing
     return ""
 
