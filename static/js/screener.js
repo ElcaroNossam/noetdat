@@ -395,15 +395,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getComparisonClass(currentValue, previousValue, isPositiveOnly = false) {
-        if (previousValue === null || previousValue === undefined) return "";
+        // If no previous value, return empty class (will be white on first update)
+        if (previousValue === null || previousValue === undefined || previousValue === "") return "";
+        
         const current = Number(currentValue);
         const previous = Number(previousValue);
+        
+        // Check for NaN
         if (isNaN(current) || isNaN(previous)) return "";
         
         if (isPositiveOnly) {
             // For positive-only values (volume, ticks, volatility, OI), compare with previous
-            if (current > previous) return "value-up";
-            if (current < previous) return "value-down";
+            // Use small epsilon to avoid floating point issues
+            const diff = current - previous;
+            if (diff > 0.0001) return "value-up";
+            if (diff < -0.0001) return "value-down";
             return "";
         } else {
             // For values that can be negative (change, vdelta, funding)
@@ -510,8 +516,11 @@ document.addEventListener("DOMContentLoaded", () => {
             // Volume columns - compare with previous values
             ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
+                const numValue = Number(v);
                 const formatted = formatVolume(v);
-                const cls = getComparisonClass(v, prev[col], true);
+                // Get previous value - ensure it's a number
+                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
+                const cls = getComparisonClass(numValue, prevValue, true);
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
@@ -542,6 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return (!isNaN(num) && num !== null && num !== undefined) ? num : 0;
             };
             
+            // Store ALL values including vdelta for proper comparison
             previousValues.set(symbol, {
                 volatility_5m: storeValue(row.volatility_5m),
                 volatility_15m: storeValue(row.volatility_15m),
@@ -549,6 +559,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 ticks_5m: storeValue(row.ticks_5m),
                 ticks_15m: storeValue(row.ticks_15m),
                 ticks_1h: storeValue(row.ticks_1h),
+                vdelta_5m: storeValue(row.vdelta_5m),
+                vdelta_15m: storeValue(row.vdelta_15m),
+                vdelta_1h: storeValue(row.vdelta_1h),
+                vdelta_8h: storeValue(row.vdelta_8h),
+                vdelta_1d: storeValue(row.vdelta_1d),
                 volume_5m: storeValue(row.volume_5m),
                 volume_15m: storeValue(row.volume_15m),
                 volume_1h: storeValue(row.volume_1h),
@@ -619,6 +634,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 return isNaN(parsed) ? 0 : parsed;
             };
             
+            // Also need to parse vdelta for comparison
+            const getVdeltaValue = (col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                if (!cell) return 0;
+                let text = cell.textContent.trim();
+                
+                // Parse K/M/B suffixes for vdelta
+                if (text.endsWith('K')) {
+                    return parseFloat(text.replace('K', '')) * 1000;
+                }
+                if (text.endsWith('M')) {
+                    return parseFloat(text.replace('M', '')) * 1000000;
+                }
+                
+                const parsed = parseFloat(text);
+                return isNaN(parsed) ? 0 : parsed;
+            };
+            
             previousValues.set(symbol, {
                 volatility_5m: getValue("volatility_5m"),
                 volatility_15m: getValue("volatility_15m"),
@@ -626,6 +659,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 ticks_5m: getValue("ticks_5m"),
                 ticks_15m: getValue("ticks_15m"),
                 ticks_1h: getValue("ticks_1h"),
+                vdelta_5m: getVdeltaValue("vdelta_5m"),
+                vdelta_15m: getVdeltaValue("vdelta_15m"),
+                vdelta_1h: getVdeltaValue("vdelta_1h"),
+                vdelta_8h: getVdeltaValue("vdelta_8h"),
+                vdelta_1d: getVdeltaValue("vdelta_1d"),
                 volume_5m: getValue("volume_5m"),
                 volume_15m: getValue("volume_15m"),
                 volume_1h: getValue("volume_1h"),
@@ -638,7 +676,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initialize main screener auto-refresh if we are on the list page.
     if (screenerTableBody) {
-        // Initialize previous values from server-rendered table
+        // Initialize previous values from server-rendered table FIRST
+        // This must happen before any updates to ensure colors work on first refresh
         initializePreviousValues();
         
         // Apply column visibility IMMEDIATELY on page load (for server-rendered HTML)
@@ -655,11 +694,14 @@ document.addEventListener("DOMContentLoaded", () => {
         setupTableSorting();
         // Sync scrollbars
         syncScrollbars();
-        // Start auto-refresh - delay first refresh to ensure previousValues is initialized
+        // Start auto-refresh - delay first refresh to ensure previousValues is fully initialized
+        // Use longer delay to ensure DOM is ready and values are parsed
         setTimeout(() => {
+            // Re-initialize to be sure (in case DOM wasn't ready)
+            initializePreviousValues();
             refreshScreener();
             setInterval(refreshScreener, autoRefreshIntervalMs);
-        }, 100);
+        }, 200);
         
         // Update scrollbar spacer after table updates
         const observer = new MutationObserver(() => {
