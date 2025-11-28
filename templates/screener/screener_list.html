@@ -95,37 +95,17 @@
                             {{ snapshot.symbol.symbol }}
                         </a>
                     </td>
-                    <td data-column="price">{{ snapshot.price|format_price }}</td>
-                    <td data-column="change_5m" class="{% if snapshot.change_5m and snapshot.change_5m > 0 %}value-up{% elif snapshot.change_5m and snapshot.change_5m < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_5m|format_percentage:2 }}%
-                    </td>
-                    <td data-column="change_15m" class="{% if snapshot.change_15m and snapshot.change_15m > 0 %}value-up{% elif snapshot.change_15m and snapshot.change_15m < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_15m|format_percentage:2 }}%
-                    </td>
-                    <td data-column="change_1h" class="{% if snapshot.change_1h and snapshot.change_1h > 0 %}value-up{% elif snapshot.change_1h and snapshot.change_1h < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_1h|format_percentage:2 }}%
-                    </td>
-                    <td data-column="change_8h" class="{% if snapshot.change_8h and snapshot.change_8h > 0 %}value-up{% elif snapshot.change_8h and snapshot.change_8h < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_8h|format_percentage:2 }}%
-                    </td>
-                    <td data-column="change_1d" class="{% if snapshot.change_1d and snapshot.change_1d > 0 %}value-up{% elif snapshot.change_1d and snapshot.change_1d < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_1d|format_percentage:2 }}%
-                    </td>
-                    <td data-column="oi_change_5m" class="{% if snapshot.oi_change_5m and snapshot.oi_change_5m > 0 %}value-up{% elif snapshot.oi_change_5m and snapshot.oi_change_5m < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_5m|format_oi_change }}%
-                    </td>
-                    <td data-column="oi_change_15m" class="{% if snapshot.oi_change_15m and snapshot.oi_change_15m > 0 %}value-up{% elif snapshot.oi_change_15m and snapshot.oi_change_15m < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_15m|format_oi_change }}%
-                    </td>
-                    <td data-column="oi_change_1h" class="{% if snapshot.oi_change_1h and snapshot.oi_change_1h > 0 %}value-up{% elif snapshot.oi_change_1h and snapshot.oi_change_1h < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_1h|format_oi_change }}%
-                    </td>
-                    <td data-column="oi_change_8h" class="{% if snapshot.oi_change_8h and snapshot.oi_change_8h > 0 %}value-up{% elif snapshot.oi_change_8h and snapshot.oi_change_8h < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_8h|format_oi_change }}%
-                    </td>
-                    <td data-column="oi_change_1d" class="{% if snapshot.oi_change_1d and snapshot.oi_change_1d > 0 %}value-up{% elif snapshot.oi_change_1d and snapshot.oi_change_1d < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_1d|format_oi_change }}%
-                    </td>
+                    <td data-column="price" class="price-cell">{{ snapshot.price|format_price }}</td>
+                    <td data-column="change_5m" class="change-cell">{{ snapshot.change_5m|format_percentage:2 }}%</td>
+                    <td data-column="change_15m" class="change-cell">{{ snapshot.change_15m|format_percentage:2 }}%</td>
+                    <td data-column="change_1h" class="change-cell">{{ snapshot.change_1h|format_percentage:2 }}%</td>
+                    <td data-column="change_8h" class="change-cell">{{ snapshot.change_8h|format_percentage:2 }}%</td>
+                    <td data-column="change_1d" class="change-cell">{{ snapshot.change_1d|format_percentage:2 }}%</td>
+                    <td data-column="oi_change_5m" class="oi-change-cell">{{ snapshot.oi_change_5m|format_oi_change }}%</td>
+                    <td data-column="oi_change_15m" class="oi-change-cell">{{ snapshot.oi_change_15m|format_oi_change }}%</td>
+                    <td data-column="oi_change_1h" class="oi-change-cell">{{ snapshot.oi_change_1h|format_oi_change }}%</td>
+                    <td data-column="oi_change_8h" class="oi-change-cell">{{ snapshot.oi_change_8h|format_oi_change }}%</td>
+                    <td data-column="oi_change_1d" class="oi-change-cell">{{ snapshot.oi_change_1d|format_oi_change }}%</td>
                     <td data-column="volatility_5m" class="volatility-cell">{{ snapshot.volatility_5m|format_volatility }}</td>
                     <td data-column="volatility_15m" class="volatility-cell">{{ snapshot.volatility_15m|format_volatility }}</td>
                     <td data-column="volatility_1h" class="volatility-cell">{{ snapshot.volatility_1h|format_volatility }}</td>
@@ -142,9 +122,7 @@
                     <td data-column="volume_1h" class="volume-cell">{{ snapshot.volume_1h|format_volume }}</td>
                     <td data-column="volume_8h" class="volume-cell">{{ snapshot.volume_8h|format_volume }}</td>
                     <td data-column="volume_1d" class="volume-cell">{{ snapshot.volume_1d|format_volume }}</td>
-                    <td data-column="funding_rate" class="{% if snapshot.funding_rate and snapshot.funding_rate > 0 %}value-up{% elif snapshot.funding_rate and snapshot.funding_rate < 0 %}value-down{% endif %}">
-                        {{ snapshot.funding_rate|format_percentage:4 }}
-                    </td>
+                    <td data-column="funding_rate" class="funding-cell">{{ snapshot.funding_rate|format_percentage:4 }}</td>
                     <td data-column="open_interest" class="oi-cell">{{ snapshot.open_interest|format_volume }}</td>
                     <td data-column="ts">{{ snapshot.ts }}</td>
                 </tr>

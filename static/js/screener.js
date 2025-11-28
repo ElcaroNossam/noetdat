@@ -466,29 +466,31 @@ document.addEventListener("DOMContentLoaded", () => {
             symbolTd.appendChild(link);
 
             tr.appendChild(symbolTd);
-            tr.appendChild(makeTd("price", formatPrice(row.price)));
+            
+            // Price - compare with previous value
+            const priceValue = Number(row.price ?? 0);
+            const priceFormatted = formatPrice(row.price);
+            const prevPrice = prev.price !== undefined && prev.price !== null && prev.price !== "" ? Number(prev.price) : undefined;
+            const priceCls = getComparisonClass(priceValue, prevPrice, true);
+            tr.appendChild(makeTd("price", priceFormatted, priceCls));
 
-            // Change columns
+            // Change columns - compare with previous values (same logic as Volume)
             ["change_5m", "change_15m", "change_1h", "change_8h", "change_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
                 const numValue = Number(v);
-                let cls = "";
-                // Use strict comparison with epsilon for floating point precision
-                if (!isNaN(numValue) && numValue > 0.0000001) cls = "value-up";
-                else if (!isNaN(numValue) && numValue < -0.0000001) cls = "value-down";
                 const formatted = !isNaN(numValue) ? numValue.toFixed(2) : String(v);
+                const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
+                const cls = getComparisonClass(numValue, prevValue, false);
                 tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
-            // OI Change columns
+            // OI Change columns - compare with previous values (same logic as Volume)
             ["oi_change_5m", "oi_change_15m", "oi_change_1h", "oi_change_8h", "oi_change_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
                 const numValue = Number(v);
-                let cls = "";
-                // Use strict comparison with epsilon for floating point precision
-                if (!isNaN(numValue) && numValue > 0.0000001) cls = "value-up";
-                else if (!isNaN(numValue) && numValue < -0.0000001) cls = "value-down";
                 const formatted = formatOIChange(v);
+                const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
+                const cls = getComparisonClass(numValue, prevValue, false);
                 tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
@@ -550,14 +552,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Funding
+            // Funding Rate - compare with previous value (same logic as Volume)
             const funding = row.funding_rate ?? 0;
             const fundNumValue = Number(funding);
-            let fundClass = "";
-            // Use strict comparison with epsilon for floating point precision
-            if (!isNaN(fundNumValue) && fundNumValue > 0.0000001) fundClass = "value-up";
-            else if (!isNaN(fundNumValue) && fundNumValue < -0.0000001) fundClass = "value-down";
             const fundingFormatted = !isNaN(fundNumValue) ? fundNumValue.toFixed(4) : String(funding);
+            const prevFunding = prev.funding_rate !== undefined && prev.funding_rate !== null && prev.funding_rate !== "" ? Number(prev.funding_rate) : undefined;
+            const fundClass = getComparisonClass(fundNumValue, prevFunding, false);
             tr.appendChild(makeTd("funding_rate", fundingFormatted, fundClass));
 
             // Open Interest - use formatted value and color from backend (reference implementation)
@@ -589,7 +589,9 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Store ALL values for proper comparison
             previousValues.set(symbol, {
-                // Change values (for potential future comparison)
+                // Price
+                price: storeValue(row.price),
+                // Change values
                 change_5m: storeValue(row.change_5m),
                 change_15m: storeValue(row.change_15m),
                 change_1h: storeValue(row.change_1h),
@@ -688,7 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Get previous row for comparison
             const prevRow = index > 0 ? rows[index - 1] : null;
             
-            // Apply colors to Vol, Ticks, Volume, OI based on comparison with previous row
+            // Apply colors to all cells based on comparison with previous row (same logic as Volume)
             const applyColorToCell = (col, cell, isPositiveOnly = true) => {
                 if (!cell) return;
                 const currentText = cell.textContent.trim();
@@ -700,72 +702,67 @@ document.addEventListener("DOMContentLoaded", () => {
                         const prevText = prevCell.textContent.trim();
                         const prevValue = parseFormattedValue(prevText);
                         
-                        if (isPositiveOnly && prevValue > 0) {
-                            if (currentValue > prevValue + 0.0001) {
-                                cell.classList.add("value-up");
-                            } else if (currentValue < prevValue - 0.0001) {
-                                cell.classList.add("value-down");
-                            }
-                        }
-                    }
-                }
-            };
-            
-            // Apply colors to cells that need comparison
-            ["volatility_5m", "volatility_15m", "volatility_1h"].forEach((col) => {
-                const cell = tr.querySelector(`td[data-column="${col}"]`);
-                applyColorToCell(col, cell, true);
-            });
-            
-            ["ticks_5m", "ticks_15m", "ticks_1h"].forEach((col) => {
-                const cell = tr.querySelector(`td[data-column="${col}"]`);
-                applyColorToCell(col, cell, true);
-            });
-            
-            ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
-                const cell = tr.querySelector(`td[data-column="${col}"]`);
-                applyColorToCell(col, cell, true);
-            });
-            
-            const oiCell = tr.querySelector(`td[data-column="open_interest"]`);
-            applyColorToCell("open_interest", oiCell, true);
-            
-            // Apply colors to vdelta - compare with previous row OR use sign
-            ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
-                const cell = tr.querySelector(`td[data-column="${col}"]`);
-                if (!cell) return;
-                const currentText = cell.textContent.trim();
-                const currentValue = parseFormattedValue(currentText);
-                
-                if (prevRow) {
-                    const prevCell = prevRow.querySelector(`td[data-column="${col}"]`);
-                    if (prevCell) {
-                        const prevText = prevCell.textContent.trim();
-                        const prevValue = parseFormattedValue(prevText);
-                        
+                        // Compare with previous value (same logic for all columns)
                         const diff = currentValue - prevValue;
                         if (diff > 0.0001) {
                             cell.classList.add("value-up");
                         } else if (diff < -0.0001) {
                             cell.classList.add("value-down");
-                        } else {
-                            // If values are equal, use sign-based color
-                            if (currentValue > 0.0000001) {
-                                cell.classList.add("value-up");
-                            } else if (currentValue < -0.0000001) {
-                                cell.classList.add("value-down");
-                            }
                         }
-                    }
-                } else {
-                    // No previous row, use sign-based color
-                    if (currentValue > 0.0000001) {
-                        cell.classList.add("value-up");
-                    } else if (currentValue < -0.0000001) {
-                        cell.classList.add("value-down");
+                        // If values are equal or very close, no color (white)
                     }
                 }
+                // If no previous row, no color (white) - same for all columns
+            };
+            
+            // Apply colors to all cells based on comparison with previous row (same logic as Volume)
+            // Price
+            const priceCell = tr.querySelector(`td[data-column="price"]`);
+            applyColorToCell("price", priceCell, true);
+            
+            // Change columns
+            ["change_5m", "change_15m", "change_1h", "change_8h", "change_1d"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, false);
             });
+            
+            // OI Change columns
+            ["oi_change_5m", "oi_change_15m", "oi_change_1h", "oi_change_8h", "oi_change_1d"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, false);
+            });
+            
+            // Volatility columns
+            ["volatility_5m", "volatility_15m", "volatility_1h"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, true);
+            });
+            
+            // Ticks columns
+            ["ticks_5m", "ticks_15m", "ticks_1h"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, true);
+            });
+            
+            // Volume columns
+            ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, true);
+            });
+            
+            // Vdelta columns
+            ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, false);
+            });
+            
+            // Funding Rate
+            const fundingCell = tr.querySelector(`td[data-column="funding_rate"]`);
+            applyColorToCell("funding_rate", fundingCell, false);
+            
+            // Open Interest
+            const oiCell = tr.querySelector(`td[data-column="open_interest"]`);
+            applyColorToCell("open_interest", oiCell, true);
             
             // Store values for next update
             const getValue = (col) => {
@@ -791,22 +788,43 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             
             previousValues.set(symbol, {
+                // Price
+                price: getValue("price"),
+                // Change values
+                change_5m: getValue("change_5m"),
+                change_15m: getValue("change_15m"),
+                change_1h: getValue("change_1h"),
+                change_8h: getValue("change_8h"),
+                change_1d: getValue("change_1d"),
+                // OI Change values
+                oi_change_5m: getValue("oi_change_5m"),
+                oi_change_15m: getValue("oi_change_15m"),
+                oi_change_1h: getValue("oi_change_1h"),
+                oi_change_8h: getValue("oi_change_8h"),
+                oi_change_1d: getValue("oi_change_1d"),
+                // Volatility values
                 volatility_5m: getValue("volatility_5m"),
                 volatility_15m: getValue("volatility_15m"),
                 volatility_1h: getValue("volatility_1h"),
+                // Ticks values
                 ticks_5m: getValue("ticks_5m"),
                 ticks_15m: getValue("ticks_15m"),
                 ticks_1h: getValue("ticks_1h"),
+                // Vdelta values
                 vdelta_5m: getVdeltaValue("vdelta_5m"),
                 vdelta_15m: getVdeltaValue("vdelta_15m"),
                 vdelta_1h: getVdeltaValue("vdelta_1h"),
                 vdelta_8h: getVdeltaValue("vdelta_8h"),
                 vdelta_1d: getVdeltaValue("vdelta_1d"),
+                // Volume values
                 volume_5m: getValue("volume_5m"),
                 volume_15m: getValue("volume_15m"),
                 volume_1h: getValue("volume_1h"),
                 volume_8h: getValue("volume_8h"),
                 volume_1d: getValue("volume_1d"),
+                // Funding rate
+                funding_rate: getValue("funding_rate"),
+                // Open Interest
                 open_interest: getValue("open_interest"),
             });
         });
