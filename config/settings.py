@@ -39,6 +39,22 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# Content Security Policy settings for TradingView widget
+# TradingView requires 'unsafe-eval' for its JavaScript
+SECURE_CONTENT_SECURITY_POLICY = {
+    "default-src": "'self'",
+    "script-src": "'self' 'unsafe-inline' 'unsafe-eval' https://s3.tradingview.com https://*.tradingview.com",
+    "style-src": "'self' 'unsafe-inline' https://*.tradingview.com",
+    "img-src": "'self' data: https: blob:",
+    "font-src": "'self' data: https:",
+    "connect-src": "'self' https://*.tradingview.com https://*.binance.com",
+    "frame-src": "'self' https://*.tradingview.com",
+    "object-src": "'none'",
+    "base-uri": "'self'",
+    "form-action": "'self'",
+    "frame-ancestors": "'self'",
+}
+
 ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [

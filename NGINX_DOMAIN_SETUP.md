@@ -5,14 +5,10 @@
 Отредактируйте файл конфигурации Nginx:
 
 ```bash
-sudo nano /etc/nginx/sites-available/scan
+sudo nano /etc/nginx/sites-available/noetdat
 ```
 
-Или если файл называется по-другому, найдите его:
-
-```bash
-sudo ls -la /etc/nginx/sites-available/
-```
+**Примечание:** На вашем сервере конфигурация называется `noetdat`, а не `scan`.
 
 ## Шаг 2: Обновите server_name
 
@@ -26,8 +22,7 @@ server {
     client_max_body_size 10M;
 
     location /static/ {
-        alias /var/www/scan/staticfiles/;
-        # или /home/illiateslenko/project/scan/staticfiles/ если проект там
+        alias /home/ubuntu/project/noetdat/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
@@ -86,10 +81,25 @@ ALLOWED_HOSTS=elcaro.online,www.elcaro.online,localhost,127.0.0.1,18.196.22.113
 ## Шаг 6: Перезапустите Django сервис
 
 ```bash
-sudo systemctl restart scan
-# или как называется ваш сервис
-sudo systemctl status scan
+sudo systemctl restart noetdat
+sudo systemctl status noetdat
 ```
+
+**ВАЖНО:** Если видите ошибки "connect() failed" в логах Nginx, проверьте:
+
+1. На каком порту слушает Gunicorn:
+```bash
+sudo netstat -tlnp | grep gunicorn
+# или
+sudo ss -tlnp | grep gunicorn
+```
+
+2. Проверьте конфигурацию Gunicorn:
+```bash
+cat /home/ubuntu/project/noetdat/gunicorn_config.py
+```
+
+3. Убедитесь, что порт в Nginx совпадает с портом в Gunicorn (обычно 8000)
 
 ## Шаг 7: Настройка DNS
 
@@ -128,7 +138,7 @@ Certbot автоматически обновит конфигурацию Nginx
 
 3. Проверьте логи Django:
    ```bash
-   sudo journalctl -u scan -f
+   sudo journalctl -u noetdat -f
    ```
 
 ## Быстрая команда для всего процесса
@@ -162,6 +172,47 @@ sudo systemctl restart scan
 3. Проверьте логи:
    ```bash
    sudo tail -50 /var/log/nginx/error.log
-   sudo journalctl -u scan -n 50
+   sudo journalctl -u noetdat -n 50
    ```
+
+## Решение ошибки "connect() failed (111)"
+
+Если в логах Nginx видите ошибку "connect() failed (111: Unknown error) while connecting to upstream", это означает, что Gunicorn не слушает на порту 8000 или не запущен.
+
+**Решение:**
+
+1. Проверьте, запущен ли Gunicorn:
+```bash
+sudo systemctl status noetdat
+```
+
+2. Проверьте, на каком порту он слушает:
+```bash
+sudo netstat -tlnp | grep python
+# или
+sudo ss -tlnp | grep python
+```
+
+3. Проверьте конфигурацию Gunicorn:
+```bash
+cat /home/ubuntu/project/noetdat/gunicorn_config.py
+```
+
+Убедитесь, что там указан правильный порт (обычно `bind = "127.0.0.1:8000"`).
+
+4. Если порт другой, либо:
+   - Обновите `gunicorn_config.py` чтобы использовать порт 8000
+   - Или обновите Nginx конфигурацию чтобы использовать правильный порт
+
+5. Перезапустите сервис:
+```bash
+sudo systemctl restart noetdat
+sudo systemctl restart nginx
+```
+
+6. Проверьте логи:
+```bash
+sudo journalctl -u noetdat -n 20
+sudo tail -20 /var/log/nginx/error.log
+```
 
