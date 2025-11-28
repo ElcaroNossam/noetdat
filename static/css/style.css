@@ -42,10 +42,12 @@ body {
     height: calc(100vh - 60px) !important;
     max-height: calc(100vh - 60px) !important;
     min-height: calc(100vh - 60px) !important;
-    overflow: hidden;
+    overflow: visible !important;
     display: flex;
     flex-direction: column;
     flex: 1;
+    background: #000000 !important;
+    z-index: 1;
 }
 
 .navbar {
@@ -357,7 +359,7 @@ body {
 
 .screener-table thead th {
     background: #000000;
-    border-bottom: 2px solid #45a29e66;
+    border-bottom: 2px solid #45a29e33;
     font-weight: 600;
     color: #c5c6c7;
 }
@@ -407,7 +409,7 @@ body {
 }
 
 .screener-table tbody tr:nth-child(odd) {
-    background: #0f1419;
+    background: #000000;
 }
 
 .screener-table tbody tr:nth-child(even) {
@@ -415,7 +417,7 @@ body {
 }
 
 .screener-table tbody tr:hover {
-    background: #151a20;
+    background: #0a0a0a;
 }
 
 .empty-row {
@@ -1537,12 +1539,13 @@ body {
     background: #0a0a0a;
     border-radius: 0;
     border: none;
-    overflow: hidden;
+    overflow: visible !important;
     flex: 1 1 auto !important;
     display: flex;
     flex-direction: column;
     min-height: calc(100vh - 150px) !important;
     height: calc(100vh - 150px) !important;
+    z-index: 1 !important;
 }
 
 .tradingview-widget-container {
@@ -1550,14 +1553,18 @@ body {
     height: 100% !important;
     min-height: 100% !important;
     max-height: 100% !important;
-    position: relative;
+    position: relative !important;
     flex: 1 1 auto !important;
-    overflow: hidden;
+    overflow: visible !important;
+    z-index: 10 !important;
+    background: transparent !important;
 }
 
 .tradingview-widget {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    z-index: 10 !important;
 }
 
 
