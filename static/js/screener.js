@@ -333,6 +333,40 @@ document.addEventListener("DOMContentLoaded", () => {
         return value.toFixed(2);
     }
 
+    function formatVdelta(v) {
+        if (v === null || v === undefined || v === "") return "0.00";
+        const value = Number(v);
+        if (isNaN(value) || value === 0) return "0.00";
+        const absV = Math.abs(value);
+        if (absV >= 1_000_000) return (value / 1_000_000).toFixed(2) + "M";
+        if (absV >= 1_000) return (value / 1_000).toFixed(2) + "K";
+        if (absV >= 1) {
+            if (absV === Math.floor(absV)) return String(Math.floor(value));
+            return value.toFixed(1);
+        }
+        return value.toFixed(2);
+    }
+
+    function formatOIChange(v) {
+        if (v === null || v === undefined || v === "") return "0.0000";
+        const value = Number(v);
+        if (isNaN(value) || value === 0) return "0.0000";
+        const absV = Math.abs(value);
+        if (absV >= 1) return value.toFixed(2);
+        if (absV >= 0.1) return value.toFixed(3);
+        if (absV >= 0.001) return value.toFixed(4);
+        return value.toFixed(6);
+    }
+
+    function formatVolatility(v) {
+        if (v === null || v === undefined || v === "") return "0.000";
+        const value = Number(v);
+        if (isNaN(value) || value === 0) return "0.000";
+        const absV = Math.abs(value);
+        if (absV >= 1) return value.toFixed(2);
+        return value.toFixed(3);
+    }
+
     async function refreshScreener() {
         if (!screenerTableBody) return;
         try {
@@ -392,7 +426,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 let cls = "";
                 if (v > 0) cls = "value-up";
                 else if (v < 0) cls = "value-down";
-                tr.appendChild(makeTd(col, v?.toFixed ? v.toFixed(2) : v, cls));
+                const formatted = v?.toFixed ? v.toFixed(2) : v;
+                tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
             // OI Change columns
@@ -401,29 +436,38 @@ document.addEventListener("DOMContentLoaded", () => {
                 let cls = "";
                 if (v > 0) cls = "value-up";
                 else if (v < 0) cls = "value-down";
-                tr.appendChild(makeTd(col, v?.toFixed ? v.toFixed(3) : v, cls));
+                const formatted = formatOIChange(v);
+                tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
             // Volatility columns
             ["volatility_5m", "volatility_15m", "volatility_1h"].forEach((col) => {
                 const v = row[col] ?? 0;
-                tr.appendChild(makeTd(col, v?.toFixed ? v.toFixed(2) : v));
+                const formatted = formatVolatility(v);
+                tr.appendChild(makeTd(col, formatted));
             });
 
             // Ticks columns
             ["ticks_5m", "ticks_15m", "ticks_1h"].forEach((col) => {
-                tr.appendChild(makeTd(col, row[col] ?? 0));
+                const v = row[col] ?? 0;
+                tr.appendChild(makeTd(col, String(v)));
             });
 
             // Vdelta columns
             ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
-                tr.appendChild(makeTd(col, v?.toFixed ? v.toFixed(2) : v));
+                let cls = "";
+                if (v > 0) cls = "value-up";
+                else if (v < 0) cls = "value-down";
+                const formatted = formatVdelta(v);
+                tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Volume columns
+            // Volume columns - always positive, but format correctly
             ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
-                tr.appendChild(makeTd(col, formatVolume(row[col])));
+                const v = row[col] ?? 0;
+                const formatted = formatVolume(v);
+                tr.appendChild(makeTd(col, formatted));
             });
 
             // Funding
@@ -431,7 +475,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let fundClass = "";
             if (funding > 0) fundClass = "value-up";
             else if (funding < 0) fundClass = "value-down";
-            tr.appendChild(makeTd("funding_rate", funding?.toFixed ? funding.toFixed(6) : funding, fundClass));
+            const fundingFormatted = funding?.toFixed ? funding.toFixed(4) : funding;
+            tr.appendChild(makeTd("funding_rate", fundingFormatted, fundClass));
 
             // Open Interest - ensure it's a number
             const oiValue = row.open_interest != null ? Number(row.open_interest) : 0;
@@ -535,20 +580,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 const updatedEl = document.getElementById("symbol-updated-at");
 
                 if (priceEl) priceEl.textContent = formatPrice(latest.price);
-                if (vol15El) vol15El.textContent = latest.volatility_15m?.toFixed
-                    ? latest.volatility_15m.toFixed(2)
-                    : latest.volatility_15m;
+                if (vol15El) {
+                    const v = latest.volatility_15m ?? 0;
+                    vol15El.textContent = formatVolatility(v);
+                }
                 if (vol5mEl) vol5mEl.textContent = formatVolume(latest.volume_5m);
                 if (fundingEl) {
-                    fundingEl.textContent = latest.funding_rate?.toFixed
-                        ? latest.funding_rate.toFixed(6)
-                        : latest.funding_rate;
+                    const f = latest.funding_rate ?? 0;
+                    fundingEl.textContent = f?.toFixed ? f.toFixed(4) : f;
+                    fundingEl.classList.remove("value-up", "value-down");
+                    if (f > 0) fundingEl.classList.add("value-up");
+                    else if (f < 0) fundingEl.classList.add("value-down");
                 }
                 if (oiEl) oiEl.textContent = formatVolume(latest.open_interest);
                 if (updatedEl) updatedEl.textContent = latest.ts || "";
                 if (oi15El) {
                     const v = latest.oi_change_15m ?? 0;
-                    oi15El.textContent = v?.toFixed ? v.toFixed(3) : v;
+                    oi15El.textContent = formatOIChange(v) + "%";
                     oi15El.classList.remove("value-up", "value-down");
                     if (v > 0) oi15El.classList.add("value-up");
                     else if (v < 0) oi15El.classList.add("value-down");
@@ -581,7 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const change15Td = document.createElement("td");
                 const c15 = s.change_15m ?? 0;
-                change15Td.textContent = c15?.toFixed ? c15.toFixed(2) : c15;
+                change15Td.textContent = (c15?.toFixed ? c15.toFixed(2) : c15) + "%";
                 if (c15 > 0) change15Td.classList.add("value-up");
                 else if (c15 < 0) change15Td.classList.add("value-down");
 
@@ -593,13 +641,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const oi15Td = document.createElement("td");
                 const oi15 = s.oi_change_15m ?? 0;
-                oi15Td.textContent = oi15?.toFixed ? oi15.toFixed(3) : oi15;
+                oi15Td.textContent = formatOIChange(oi15) + "%";
                 if (oi15 > 0) oi15Td.classList.add("value-up");
                 else if (oi15 < 0) oi15Td.classList.add("value-down");
 
                 const fundingTd = document.createElement("td");
                 const f = s.funding_rate ?? 0;
-                fundingTd.textContent = f?.toFixed ? f.toFixed(6) : f;
+                fundingTd.textContent = f?.toFixed ? f.toFixed(4) : f;
                 if (f > 0) fundingTd.classList.add("value-up");
                 else if (f < 0) fundingTd.classList.add("value-down");
 

@@ -155,7 +155,8 @@ def format_oi_change(value):
     Format OI change percentage with smart rounding:
     - >= 1: 2 decimals
     - >= 0.1: 3 decimals
-    - < 0.1: 4 decimals
+    - >= 0.001: 4 decimals
+    - < 0.001: 6 decimals (to show very small negative values)
     """
     if value is None:
         return ""
@@ -174,6 +175,9 @@ def format_oi_change(value):
         return f"{v:.2f}"
     elif abs_v >= 0.1:
         return f"{v:.3f}"
-    else:
+    elif abs_v >= 0.001:
         return f"{v:.4f}"
+    else:
+        # For very small values, show more decimals to distinguish from zero
+        return f"{v:.6f}"
 
