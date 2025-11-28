@@ -13,7 +13,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key-change-me")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 
 # Parse ALLOWED_HOSTS from environment variable (comma-separated)
-allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,[::1],.lhr.life")
+allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,[::1],elcaro.online,www.elcaro.online")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",") if host.strip()]
 
 INSTALLED_APPS = [
