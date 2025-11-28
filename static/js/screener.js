@@ -460,7 +460,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const makeTd = (col, text, className) => {
                 const td = document.createElement("td");
                 td.dataset.column = col;
-                if (className) td.className = className;
+                // Set className - empty string means no class, which is fine
+                if (className && className.trim() !== "") {
+                    td.className = className;
+                }
                 td.textContent = text;
                 return td;
             };
@@ -520,12 +523,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Vdelta columns - use formatted values and colors from backend
+            // Vdelta columns - use formatted values and colors from backend (same logic as OI)
             ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
                 // Use formatted value from backend if available, otherwise format on client
-                const formatted = row[col + "_formatted"] || formatVdelta(row[col] ?? 0);
+                const formatted = (row[col + "_formatted"] !== undefined && row[col + "_formatted"] !== null && row[col + "_formatted"] !== "") 
+                    ? row[col + "_formatted"] 
+                    : formatVdelta(row[col] ?? 0);
                 // Use color from backend if available, otherwise calculate based on previousValues
-                let cls = row[col + "_color"] || "";
+                let cls = (row[col + "_color"] !== undefined && row[col + "_color"] !== null && row[col + "_color"] !== "") 
+                    ? row[col + "_color"] 
+                    : "";
                 if (!cls) {
                     // If no color from backend, calculate based on previous value from previousValues
                     const numValue = Number(row[col] ?? 0);
@@ -535,12 +542,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Volume columns - use formatted values and colors from backend
+            // Volume columns - use formatted values and colors from backend (same logic as OI)
             ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
                 // Use formatted value from backend if available, otherwise format on client
-                const formatted = row[col + "_formatted"] || formatVolume(row[col] ?? 0);
+                const formatted = (row[col + "_formatted"] !== undefined && row[col + "_formatted"] !== null && row[col + "_formatted"] !== "") 
+                    ? row[col + "_formatted"] 
+                    : formatVolume(row[col] ?? 0);
                 // Use color from backend if available, otherwise calculate based on previousValues
-                let cls = row[col + "_color"] || "";
+                let cls = (row[col + "_color"] !== undefined && row[col + "_color"] !== null && row[col + "_color"] !== "") 
+                    ? row[col + "_color"] 
+                    : "";
                 if (!cls) {
                     // If no color from backend, calculate based on previous value from previousValues
                     const numValue = Number(row[col] ?? 0);
@@ -560,9 +571,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const fundingFormatted = !isNaN(fundNumValue) ? fundNumValue.toFixed(4) : String(funding);
             tr.appendChild(makeTd("funding_rate", fundingFormatted, fundClass));
 
-            // Open Interest - use formatted value and color from backend
-            const oiFormatted = row.open_interest_formatted || formatVolume(row.open_interest ?? 0);
-            let oiCls = row.open_interest_color || "";
+            // Open Interest - use formatted value and color from backend (reference implementation)
+            const oiFormatted = (row.open_interest_formatted !== undefined && row.open_interest_formatted !== null && row.open_interest_formatted !== "") 
+                ? row.open_interest_formatted 
+                : formatVolume(row.open_interest ?? 0);
+            let oiCls = (row.open_interest_color !== undefined && row.open_interest_color !== null && row.open_interest_color !== "") 
+                ? row.open_interest_color 
+                : "";
             if (!oiCls) {
                 // If no color from backend, calculate based on previous value from previousValues
                 const oiValue = row.open_interest != null ? Number(row.open_interest) : 0;
