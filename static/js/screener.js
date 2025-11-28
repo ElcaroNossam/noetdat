@@ -604,43 +604,89 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize previous values from server-rendered table on first load
     function initializePreviousValues() {
         if (!screenerTableBody) return;
-        const rows = screenerTableBody.querySelectorAll("tbody tr");
-        rows.forEach((tr) => {
+        const rows = Array.from(screenerTableBody.querySelectorAll("tbody tr"));
+        
+        // Helper to parse formatted values
+        const parseFormattedValue = (text) => {
+            if (!text) return 0;
+            text = text.trim().replace('%', '');
+            
+            if (text.endsWith('K')) {
+                return parseFloat(text.replace('K', '')) * 1000;
+            }
+            if (text.endsWith('M')) {
+                return parseFloat(text.replace('M', '')) * 1000000;
+            }
+            if (text.endsWith('B')) {
+                return parseFloat(text.replace('B', '')) * 1000000000;
+            }
+            
+            const parsed = parseFloat(text);
+            return isNaN(parsed) ? 0 : parsed;
+        };
+        
+        rows.forEach((tr, index) => {
             const symbolCell = tr.querySelector('td[data-column="symbol"] a');
             if (!symbolCell) return;
             const symbol = symbolCell.textContent.trim();
             
-            // Extract values from table cells - parse formatted values
+            // Get previous row for comparison
+            const prevRow = index > 0 ? rows[index - 1] : null;
+            
+            // Apply colors to Vol, Ticks, Volume, OI based on comparison with previous row
+            const applyColorToCell = (col, cell, isPositiveOnly = true) => {
+                if (!cell) return;
+                const currentText = cell.textContent.trim();
+                const currentValue = parseFormattedValue(currentText);
+                
+                if (prevRow) {
+                    const prevCell = prevRow.querySelector(`td[data-column="${col}"]`);
+                    if (prevCell) {
+                        const prevText = prevCell.textContent.trim();
+                        const prevValue = parseFormattedValue(prevText);
+                        
+                        if (isPositiveOnly && prevValue > 0) {
+                            if (currentValue > prevValue + 0.0001) {
+                                cell.classList.add("value-up");
+                            } else if (currentValue < prevValue - 0.0001) {
+                                cell.classList.add("value-down");
+                            }
+                        }
+                    }
+                }
+            };
+            
+            // Apply colors to cells that need comparison
+            ["volatility_5m", "volatility_15m", "volatility_1h"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, true);
+            });
+            
+            ["ticks_5m", "ticks_15m", "ticks_1h"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, true);
+            });
+            
+            ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                applyColorToCell(col, cell, true);
+            });
+            
+            const oiCell = tr.querySelector(`td[data-column="open_interest"]`);
+            applyColorToCell("open_interest", oiCell, true);
+            
+            // Store values for next update
             const getValue = (col) => {
                 const cell = tr.querySelector(`td[data-column="${col}"]`);
                 if (!cell) return 0;
-                let text = cell.textContent.trim();
-                
-                // Remove % sign if present
-                text = text.replace('%', '');
-                
-                // Parse K/M/B suffixes
-                if (text.endsWith('K')) {
-                    return parseFloat(text.replace('K', '')) * 1000;
-                }
-                if (text.endsWith('M')) {
-                    return parseFloat(text.replace('M', '')) * 1000000;
-                }
-                if (text.endsWith('B')) {
-                    return parseFloat(text.replace('B', '')) * 1000000000;
-                }
-                
-                const parsed = parseFloat(text);
-                return isNaN(parsed) ? 0 : parsed;
+                return parseFormattedValue(cell.textContent);
             };
             
-            // Also need to parse vdelta for comparison
             const getVdeltaValue = (col) => {
                 const cell = tr.querySelector(`td[data-column="${col}"]`);
                 if (!cell) return 0;
                 let text = cell.textContent.trim();
                 
-                // Parse K/M/B suffixes for vdelta
                 if (text.endsWith('K')) {
                     return parseFloat(text.replace('K', '')) * 1000;
                 }
