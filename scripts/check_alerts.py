@@ -25,10 +25,14 @@ def setup_django() -> None:
     django.setup()
 
 
-def send_telegram_message(token: str, chat_id: int, text: str) -> None:
+def send_telegram_message(token: str, chat_id: int, text: str, parse_mode: str = "HTML") -> None:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     try:
-        resp = requests.post(url, json={"chat_id": chat_id, "text": text}, timeout=10)
+        resp = requests.post(
+            url,
+            json={"chat_id": chat_id, "text": text, "parse_mode": parse_mode},
+            timeout=10
+        )
         resp.raise_for_status()
     except Exception as exc:
         print(f"Failed to send telegram message to {chat_id}: {exc}")
@@ -81,10 +85,51 @@ def main() -> None:
         if not op_func(float(value), float(alert.threshold)):
             continue
 
+        # Format value based on metric type
+        def format_metric_value(metric_name: str, val: float) -> str:
+            """Format metric value for display."""
+            if "change" in metric_name or "oi_change" in metric_name:
+                return f"{val:.2f}%"
+            elif "volume" in metric_name:
+                abs_v = abs(val)
+                if abs_v >= 1_000_000_000:
+                    return f"{val / 1_000_000_000:.2f}B"
+                elif abs_v >= 1_000_000:
+                    return f"{val / 1_000_000:.2f}M"
+                elif abs_v >= 1_000:
+                    return f"{val / 1_000:.2f}K"
+                else:
+                    return f"{val:.2f}"
+            elif "funding" in metric_name:
+                return f"{val:.4f}"
+            else:
+                return f"{val:.2f}"
+        
+        # Get metric display name
+        metric_display = dict(alert.METRIC_CHOICES).get(alert.metric, alert.metric)
+        
+        # Format values
+        threshold_formatted = format_metric_value(alert.metric, float(alert.threshold))
+        value_formatted = format_metric_value(alert.metric, float(value))
+        
+        # Determine emoji based on operator and value
+        if alert.operator in [">", ">="]:
+            emoji = "📈" if float(value) > float(alert.threshold) else "📉"
+        else:
+            emoji = "📉" if float(value) < float(alert.threshold) else "📈"
+        
+        # Create beautiful HTML message
         text = (
-            f"Alert for {alert.symbol.symbol}: {alert.metric} "
-            f"{alert.operator} {alert.threshold} (actual: {value})"
+            f"{emoji} <b>Алерт сработал!</b>\n\n"
+            f"<b>Символ:</b> {alert.symbol.symbol}\n"
+            f"<b>Тип рынка:</b> {alert.symbol.market_type.upper()}\n"
+            f"<b>Показатель:</b> {metric_display}\n"
+            f"<b>Условие:</b> {alert.metric} {alert.operator} {threshold_formatted}\n"
+            f"<b>Текущее значение:</b> <code>{value_formatted}</code>\n"
+            f"<b>Порог:</b> <code>{threshold_formatted}</code>\n\n"
+            f"⏰ {now.strftime('%Y-%m-%d %H:%M:%S UTC')}"
         )
+        
         send_telegram_message(token, alert.telegram_chat_id, text)
         alert.last_triggered_at = now
         alert.save(update_fields=["last_triggered_at"])

@@ -22,6 +22,11 @@
                 </div>
             {% endif %}
         </div>
+        <div class="trading-header-actions">
+            <a href="{% url 'alerts:create' symbol.symbol %}?market_type={{ market_type }}" class="btn-primary">
+                🔔 Создать алерт
+            </a>
+        </div>
         {% if latest_snapshot %}
             <div class="trading-stats-inline">
                 <div class="stat-item-inline">
@@ -79,8 +84,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const calculatedHeight = windowHeight - navbarHeight - headerHeight;
         
-        // Минимальная высота для маленьких экранов
-        return Math.max(500, calculatedHeight);
+        // Увеличиваем высоту в 5 раз (как просил пользователь)
+        const finalHeight = calculatedHeight * 5;
+        
+        // Минимальная высота для маленьких экранов (также увеличенная)
+        return Math.max(2500, finalHeight);
     }
     
     function initTradingView() {
