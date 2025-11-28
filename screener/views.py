@@ -13,9 +13,9 @@ def screener_list(request):
     from django.utils import timezone
     from datetime import timedelta
     
-    market_type = request.GET.get("market_type", "futures").strip()
+    market_type = request.GET.get("market_type", "spot").strip()
     if market_type not in ["spot", "futures"]:
-        market_type = "futures"
+        market_type = "spot"
     
     recent_cutoff = timezone.now() - timedelta(hours=2)
     
@@ -158,9 +158,9 @@ def screener_list(request):
 
 @access_required
 def symbol_detail(request, symbol):
-    market_type = request.GET.get("market_type", "futures").strip()
+    market_type = request.GET.get("market_type", "spot").strip()
     if market_type not in ["spot", "futures"]:
-        market_type = "futures"
+        market_type = "spot"
     
     symbol_obj = get_object_or_404(
         Symbol, 
@@ -187,9 +187,9 @@ def symbol_detail(request, symbol):
 @access_required
 def trading_terminal(request, symbol):
     """Торговый терминал с графиком."""
-    market_type = request.GET.get("market_type", "futures").strip()
+    market_type = request.GET.get("market_type", "spot").strip()
     if market_type not in ["spot", "futures"]:
-        market_type = "futures"
+        market_type = "spot"
     
     symbol_obj = get_object_or_404(
         Symbol,

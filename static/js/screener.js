@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const url = new URL(window.location);
         // Ensure market_type is preserved
         if (!url.searchParams.has("market_type")) {
-            url.searchParams.set("market_type", "futures");
+            url.searchParams.set("market_type", "spot");
         }
         return url.search || "?";
     }
@@ -346,7 +346,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (absV >= 1_000_000) return (value / 1_000_000).toFixed(2) + "M";
         if (absV >= 1_000) return (value / 1_000).toFixed(2) + "K";
         if (absV >= 1) {
-            if (Math.abs(absV - Math.floor(absV)) < 0.0001) return String(Math.floor(value));
+            // Check if value is whole number (same logic as Django: abs_v == int(abs_v))
+            // For whole numbers, return as integer (preserve sign like int(v) in Python)
+            const intAbs = Math.floor(absV);
+            if (Math.abs(absV - intAbs) < 0.0001) {
+                // Value is whole number, return as integer with correct sign
+                // int(v) in Python preserves sign: int(5.0) = 5, int(-5.0) = -5
+                return String(value >= 0 ? intAbs : -intAbs);
+            }
             return value.toFixed(1);
         }
         return value.toFixed(2);
@@ -395,24 +402,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getComparisonClass(currentValue, previousValue, isPositiveOnly = false) {
-        // If no previous value, return empty class (will be white on first update)
-        if (previousValue === null || previousValue === undefined || previousValue === "") return "";
-        
         const current = Number(currentValue);
-        const previous = Number(previousValue);
+        const previous = previousValue !== null && previousValue !== undefined && previousValue !== "" ? Number(previousValue) : null;
         
         // Check for NaN
-        if (isNaN(current) || isNaN(previous)) return "";
+        if (isNaN(current)) return "";
         
-        if (isPositiveOnly) {
-            // For positive-only values (volume, ticks, volatility, OI), compare with previous
-            // Use small epsilon to avoid floating point issues
+        // If we have previous value, always compare (for both positive-only and negative values)
+        if (previous !== null && !isNaN(previous)) {
             const diff = current - previous;
             if (diff > 0.0001) return "value-up";
             if (diff < -0.0001) return "value-down";
+            // If values are equal or very close, use sign-based color for negative values
+            if (!isPositiveOnly) {
+                if (current > 0.0000001) return "value-up";
+                if (current < -0.0000001) return "value-down";
+            }
+            return "";
+        }
+        
+        // No previous value - use sign-based color
+        if (isPositiveOnly) {
+            // For positive-only values, don't show color if no previous value
             return "";
         } else {
-            // For values that can be negative (change, vdelta, funding)
+            // For values that can be negative (change, vdelta, funding), use sign
             if (current > 0.0000001) return "value-up";
             if (current < -0.0000001) return "value-down";
             return "";
@@ -454,7 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const symbolTd = document.createElement("td");
             symbolTd.dataset.column = "symbol";
             const link = document.createElement("a");
-            const marketType = new URLSearchParams(window.location.search).get("market_type") || "futures";
+            const marketType = new URLSearchParams(window.location.search).get("market_type") || "spot";
             link.href = `/trading/${row.symbol}/?market_type=${marketType}`;
             link.textContent = row.symbol;
             symbolTd.appendChild(link);
@@ -489,27 +503,32 @@ document.addEventListener("DOMContentLoaded", () => {
             // Volatility columns - compare with previous values
             ["volatility_5m", "volatility_15m", "volatility_1h"].forEach((col) => {
                 const v = row[col] ?? 0;
+                const numValue = Number(v);
                 const formatted = formatVolatility(v);
-                const cls = getComparisonClass(v, prev[col], true);
+                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
+                const cls = getComparisonClass(numValue, prevValue, true);
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Ticks columns - compare with previous values
+            // Ticks columns - compare with previous values, round to integer
             ["ticks_5m", "ticks_15m", "ticks_1h"].forEach((col) => {
                 const v = row[col] ?? 0;
-                const cls = getComparisonClass(v, prev[col], true);
-                tr.appendChild(makeTd(col, String(v), cls));
+                const numValue = Number(v);
+                const formatted = !isNaN(numValue) ? String(Math.round(numValue)) : String(v);
+                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
+                const cls = getComparisonClass(numValue, prevValue, true);
+                tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Vdelta columns
+            // Vdelta columns - use same logic as OI (compare with previous)
             ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
                 const numValue = Number(v);
-                let cls = "";
-                // Use strict comparison with epsilon for floating point precision
-                if (!isNaN(numValue) && numValue > 0.0000001) cls = "value-up";
-                else if (!isNaN(numValue) && numValue < -0.0000001) cls = "value-down";
                 const formatted = formatVdelta(v);
+                // Get previous value - ensure it's a number
+                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
+                // Use getComparisonClass with isPositiveOnly=false (vdelta can be negative)
+                const cls = getComparisonClass(numValue, prevValue, false);
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
@@ -551,24 +570,43 @@ document.addEventListener("DOMContentLoaded", () => {
                 return (!isNaN(num) && num !== null && num !== undefined) ? num : 0;
             };
             
-            // Store ALL values including vdelta for proper comparison
+            // Store ALL values for proper comparison
             previousValues.set(symbol, {
+                // Change values (for potential future comparison)
+                change_5m: storeValue(row.change_5m),
+                change_15m: storeValue(row.change_15m),
+                change_1h: storeValue(row.change_1h),
+                change_8h: storeValue(row.change_8h),
+                change_1d: storeValue(row.change_1d),
+                // OI Change values
+                oi_change_5m: storeValue(row.oi_change_5m),
+                oi_change_15m: storeValue(row.oi_change_15m),
+                oi_change_1h: storeValue(row.oi_change_1h),
+                oi_change_8h: storeValue(row.oi_change_8h),
+                oi_change_1d: storeValue(row.oi_change_1d),
+                // Volatility values
                 volatility_5m: storeValue(row.volatility_5m),
                 volatility_15m: storeValue(row.volatility_15m),
                 volatility_1h: storeValue(row.volatility_1h),
+                // Ticks values
                 ticks_5m: storeValue(row.ticks_5m),
                 ticks_15m: storeValue(row.ticks_15m),
                 ticks_1h: storeValue(row.ticks_1h),
+                // Vdelta values
                 vdelta_5m: storeValue(row.vdelta_5m),
                 vdelta_15m: storeValue(row.vdelta_15m),
                 vdelta_1h: storeValue(row.vdelta_1h),
                 vdelta_8h: storeValue(row.vdelta_8h),
                 vdelta_1d: storeValue(row.vdelta_1d),
+                // Volume values
                 volume_5m: storeValue(row.volume_5m),
                 volume_15m: storeValue(row.volume_15m),
                 volume_1h: storeValue(row.volume_1h),
                 volume_8h: storeValue(row.volume_8h),
                 volume_1d: storeValue(row.volume_1d),
+                // Funding rate
+                funding_rate: storeValue(row.funding_rate),
+                // Open Interest
                 open_interest: storeValue(row.open_interest),
             });
         }
@@ -674,6 +712,43 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const oiCell = tr.querySelector(`td[data-column="open_interest"]`);
             applyColorToCell("open_interest", oiCell, true);
+            
+            // Apply colors to vdelta - compare with previous row OR use sign
+            ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                if (!cell) return;
+                const currentText = cell.textContent.trim();
+                const currentValue = parseFormattedValue(currentText);
+                
+                if (prevRow) {
+                    const prevCell = prevRow.querySelector(`td[data-column="${col}"]`);
+                    if (prevCell) {
+                        const prevText = prevCell.textContent.trim();
+                        const prevValue = parseFormattedValue(prevText);
+                        
+                        const diff = currentValue - prevValue;
+                        if (diff > 0.0001) {
+                            cell.classList.add("value-up");
+                        } else if (diff < -0.0001) {
+                            cell.classList.add("value-down");
+                        } else {
+                            // If values are equal, use sign-based color
+                            if (currentValue > 0.0000001) {
+                                cell.classList.add("value-up");
+                            } else if (currentValue < -0.0000001) {
+                                cell.classList.add("value-down");
+                            }
+                        }
+                    }
+                } else {
+                    // No previous row, use sign-based color
+                    if (currentValue > 0.0000001) {
+                        cell.classList.add("value-up");
+                    } else if (currentValue < -0.0000001) {
+                        cell.classList.add("value-down");
+                    }
+                }
+            });
             
             // Store values for next update
             const getValue = (col) => {

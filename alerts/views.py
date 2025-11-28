@@ -11,9 +11,9 @@ from .models import AlertRule
 
 @login_required
 def create_alert(request, symbol):
-    market_type = request.GET.get("market_type", "futures").strip()
+    market_type = request.GET.get("market_type", "spot").strip()
     if market_type not in ["spot", "futures"]:
-        market_type = "futures"
+        market_type = "spot"
     
     symbol_obj = get_object_or_404(
         Symbol,
