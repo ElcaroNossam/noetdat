@@ -415,7 +415,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderScreenerTable(rows) {
         if (!screenerTableBody) return;
+        
+        // Don't clear previousValues - keep them for comparison
+        // Only clear the HTML
         screenerTableBody.innerHTML = "";
+        
         if (!rows.length) {
             const tr = document.createElement("tr");
             const td = document.createElement("td");
@@ -430,6 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
         for (const row of rows) {
             const tr = document.createElement("tr");
             const symbol = row.symbol;
+            // Get previous values for this symbol, or use empty object if not found
             const prev = previousValues.get(symbol) || {};
 
             const makeTd = (col, text, className) => {
@@ -530,20 +535,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
             screenerTableBody.appendChild(tr);
             
-            // Store current values as previous for next update
+            // Store current values as previous for next update - ensure they are numbers
+            // Only update if we have valid numeric values
+            const storeValue = (val) => {
+                const num = Number(val);
+                return (!isNaN(num) && num !== null && num !== undefined) ? num : 0;
+            };
+            
             previousValues.set(symbol, {
-                volatility_5m: row.volatility_5m ?? 0,
-                volatility_15m: row.volatility_15m ?? 0,
-                volatility_1h: row.volatility_1h ?? 0,
-                ticks_5m: row.ticks_5m ?? 0,
-                ticks_15m: row.ticks_15m ?? 0,
-                ticks_1h: row.ticks_1h ?? 0,
-                volume_5m: row.volume_5m ?? 0,
-                volume_15m: row.volume_15m ?? 0,
-                volume_1h: row.volume_1h ?? 0,
-                volume_8h: row.volume_8h ?? 0,
-                volume_1d: row.volume_1d ?? 0,
-                open_interest: row.open_interest ?? 0,
+                volatility_5m: storeValue(row.volatility_5m),
+                volatility_15m: storeValue(row.volatility_15m),
+                volatility_1h: storeValue(row.volatility_1h),
+                ticks_5m: storeValue(row.ticks_5m),
+                ticks_15m: storeValue(row.ticks_15m),
+                ticks_1h: storeValue(row.ticks_1h),
+                volume_5m: storeValue(row.volume_5m),
+                volume_15m: storeValue(row.volume_15m),
+                volume_1h: storeValue(row.volume_1h),
+                volume_8h: storeValue(row.volume_8h),
+                volume_1d: storeValue(row.volume_1d),
+                open_interest: storeValue(row.open_interest),
             });
         }
         // Apply visibility immediately after rendering all rows
@@ -575,8 +586,61 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Initialize previous values from server-rendered table on first load
+    function initializePreviousValues() {
+        if (!screenerTableBody) return;
+        const rows = screenerTableBody.querySelectorAll("tbody tr");
+        rows.forEach((tr) => {
+            const symbolCell = tr.querySelector('td[data-column="symbol"] a');
+            if (!symbolCell) return;
+            const symbol = symbolCell.textContent.trim();
+            
+            // Extract values from table cells - parse formatted values
+            const getValue = (col) => {
+                const cell = tr.querySelector(`td[data-column="${col}"]`);
+                if (!cell) return 0;
+                let text = cell.textContent.trim();
+                
+                // Remove % sign if present
+                text = text.replace('%', '');
+                
+                // Parse K/M/B suffixes
+                if (text.endsWith('K')) {
+                    return parseFloat(text.replace('K', '')) * 1000;
+                }
+                if (text.endsWith('M')) {
+                    return parseFloat(text.replace('M', '')) * 1000000;
+                }
+                if (text.endsWith('B')) {
+                    return parseFloat(text.replace('B', '')) * 1000000000;
+                }
+                
+                const parsed = parseFloat(text);
+                return isNaN(parsed) ? 0 : parsed;
+            };
+            
+            previousValues.set(symbol, {
+                volatility_5m: getValue("volatility_5m"),
+                volatility_15m: getValue("volatility_15m"),
+                volatility_1h: getValue("volatility_1h"),
+                ticks_5m: getValue("ticks_5m"),
+                ticks_15m: getValue("ticks_15m"),
+                ticks_1h: getValue("ticks_1h"),
+                volume_5m: getValue("volume_5m"),
+                volume_15m: getValue("volume_15m"),
+                volume_1h: getValue("volume_1h"),
+                volume_8h: getValue("volume_8h"),
+                volume_1d: getValue("volume_1d"),
+                open_interest: getValue("open_interest"),
+            });
+        });
+    }
+
     // Initialize main screener auto-refresh if we are on the list page.
     if (screenerTableBody) {
+        // Initialize previous values from server-rendered table
+        initializePreviousValues();
+        
         // Apply column visibility IMMEDIATELY on page load (for server-rendered HTML)
         // Use multiple attempts to ensure it applies
         applyColumnVisibility();
@@ -591,9 +655,11 @@ document.addEventListener("DOMContentLoaded", () => {
         setupTableSorting();
         // Sync scrollbars
         syncScrollbars();
-        // Start auto-refresh
-        refreshScreener();
-        setInterval(refreshScreener, autoRefreshIntervalMs);
+        // Start auto-refresh - delay first refresh to ensure previousValues is initialized
+        setTimeout(() => {
+            refreshScreener();
+            setInterval(refreshScreener, autoRefreshIntervalMs);
+        }, 100);
         
         // Update scrollbar spacer after table updates
         const observer = new MutationObserver(() => {
