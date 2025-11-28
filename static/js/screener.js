@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const availableColumns = window.SCREENER_AVAILABLE_COLUMNS || [];
     const storageKey = "screener_visible_columns";
+    
+    // Store previous values for comparison (for volume, ticks, volatility, OI)
+    let previousValues = new Map(); // key: symbol, value: object with previous values
 
     // Default visible columns (matching initial display)
     const defaultVisible = new Set([
@@ -354,11 +357,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const value = Number(v);
         if (isNaN(value)) return "0.0000";
         const absV = Math.abs(value);
-        // Handle zero case
+        // Handle zero case - only return 0.0000 if truly zero
+        // For very small values (< 0.001), always show 6 decimals to distinguish from zero
         if (absV < 0.0000001) return "0.0000";
         if (absV >= 1) return value.toFixed(2);
         if (absV >= 0.1) return value.toFixed(3);
         if (absV >= 0.001) return value.toFixed(4);
+        // For very small values (< 0.001), always show 6 decimals
+        // This includes negative values like -0.000001 which should show as -0.000001
         return value.toFixed(6);
     }
 
@@ -388,6 +394,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function getComparisonClass(currentValue, previousValue, isPositiveOnly = false) {
+        if (previousValue === null || previousValue === undefined) return "";
+        const current = Number(currentValue);
+        const previous = Number(previousValue);
+        if (isNaN(current) || isNaN(previous)) return "";
+        
+        if (isPositiveOnly) {
+            // For positive-only values (volume, ticks, volatility, OI), compare with previous
+            if (current > previous) return "value-up";
+            if (current < previous) return "value-down";
+            return "";
+        } else {
+            // For values that can be negative (change, vdelta, funding)
+            if (current > 0.0000001) return "value-up";
+            if (current < -0.0000001) return "value-down";
+            return "";
+        }
+    }
+
     function renderScreenerTable(rows) {
         if (!screenerTableBody) return;
         screenerTableBody.innerHTML = "";
@@ -404,6 +429,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         for (const row of rows) {
             const tr = document.createElement("tr");
+            const symbol = row.symbol;
+            const prev = previousValues.get(symbol) || {};
 
             const makeTd = (col, text, className) => {
                 const td = document.createElement("td");
@@ -448,17 +475,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
-            // Volatility columns
+            // Volatility columns - compare with previous values
             ["volatility_5m", "volatility_15m", "volatility_1h"].forEach((col) => {
                 const v = row[col] ?? 0;
                 const formatted = formatVolatility(v);
-                tr.appendChild(makeTd(col, formatted));
+                const cls = getComparisonClass(v, prev[col], true);
+                tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Ticks columns
+            // Ticks columns - compare with previous values
             ["ticks_5m", "ticks_15m", "ticks_1h"].forEach((col) => {
                 const v = row[col] ?? 0;
-                tr.appendChild(makeTd(col, String(v)));
+                const cls = getComparisonClass(v, prev[col], true);
+                tr.appendChild(makeTd(col, String(v), cls));
             });
 
             // Vdelta columns
@@ -473,11 +502,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Volume columns - always positive, but format correctly
+            // Volume columns - compare with previous values
             ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
                 const formatted = formatVolume(v);
-                tr.appendChild(makeTd(col, formatted));
+                const cls = getComparisonClass(v, prev[col], true);
+                tr.appendChild(makeTd(col, formatted, cls));
             });
 
             // Funding
@@ -490,14 +520,31 @@ document.addEventListener("DOMContentLoaded", () => {
             const fundingFormatted = !isNaN(fundNumValue) ? fundNumValue.toFixed(4) : String(funding);
             tr.appendChild(makeTd("funding_rate", fundingFormatted, fundClass));
 
-            // Open Interest - ensure it's a number
+            // Open Interest - compare with previous value
             const oiValue = row.open_interest != null ? Number(row.open_interest) : 0;
-            tr.appendChild(makeTd("open_interest", formatVolume(oiValue)));
+            const oiCls = getComparisonClass(oiValue, prev.open_interest, true);
+            tr.appendChild(makeTd("open_interest", formatVolume(oiValue), oiCls));
 
             // Timestamp
             tr.appendChild(makeTd("ts", row.ts));
 
             screenerTableBody.appendChild(tr);
+            
+            // Store current values as previous for next update
+            previousValues.set(symbol, {
+                volatility_5m: row.volatility_5m ?? 0,
+                volatility_15m: row.volatility_15m ?? 0,
+                volatility_1h: row.volatility_1h ?? 0,
+                ticks_5m: row.ticks_5m ?? 0,
+                ticks_15m: row.ticks_15m ?? 0,
+                ticks_1h: row.ticks_1h ?? 0,
+                volume_5m: row.volume_5m ?? 0,
+                volume_15m: row.volume_15m ?? 0,
+                volume_1h: row.volume_1h ?? 0,
+                volume_8h: row.volume_8h ?? 0,
+                volume_1d: row.volume_1d ?? 0,
+                open_interest: row.open_interest ?? 0,
+            });
         }
         // Apply visibility immediately after rendering all rows
         applyColumnVisibility();
@@ -650,9 +697,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const vol15Td = document.createElement("td");
                 vol15Td.textContent = formatVolume(s.volume_15m);
+                // Volume comparison - compare with previous snapshot in the list
+                if (snapshots.indexOf(s) > 0) {
+                    const prevSnapshot = snapshots[snapshots.indexOf(s) - 1];
+                    const volCls = getComparisonClass(s.volume_15m, prevSnapshot.volume_15m, true);
+                    if (volCls) vol15Td.classList.add(volCls);
+                }
 
                 const oiTd = document.createElement("td");
                 oiTd.textContent = formatVolume(s.open_interest);
+                // OI comparison - compare with previous snapshot in the list
+                if (snapshots.indexOf(s) > 0) {
+                    const prevSnapshot = snapshots[snapshots.indexOf(s) - 1];
+                    const oiCls = getComparisonClass(s.open_interest, prevSnapshot.open_interest, true);
+                    if (oiCls) oiTd.classList.add(oiCls);
+                }
 
                 const oi15Td = document.createElement("td");
                 const oi15 = s.oi_change_15m ?? 0;

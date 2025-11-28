@@ -36,7 +36,7 @@
                 <span class="label">Funding</span>
                 <span class="value {% if latest_snapshot.funding_rate > 0 %}value-up{% elif latest_snapshot.funding_rate < 0 %}value-down{% endif %}"
                       id="symbol-funding-rate">
-                    {{ latest_snapshot.funding_rate|floatformat:6 }}
+                    {{ latest_snapshot.funding_rate|format_percentage:4 }}
                 </span>
             </div>
             <div class="metric">
@@ -85,7 +85,7 @@
                         {{ s.oi_change_15m|floatformat:3 }}
                     </td>
                     <td class="{% if s.funding_rate > 0 %}value-up{% elif s.funding_rate < 0 %}value-down{% endif %}">
-                        {{ s.funding_rate|floatformat:6 }}
+                        {{ s.funding_rate|format_percentage:4 }}
                     </td>
                 </tr>
             {% empty %}
