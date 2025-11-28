@@ -336,12 +336,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatVdelta(v) {
         if (v === null || v === undefined || v === "") return "0.00";
         const value = Number(v);
-        if (isNaN(value) || value === 0) return "0.00";
+        if (isNaN(value)) return "0.00";
         const absV = Math.abs(value);
+        // Handle zero case
+        if (absV < 0.0001) return "0.00";
         if (absV >= 1_000_000) return (value / 1_000_000).toFixed(2) + "M";
         if (absV >= 1_000) return (value / 1_000).toFixed(2) + "K";
         if (absV >= 1) {
-            if (absV === Math.floor(absV)) return String(Math.floor(value));
+            if (Math.abs(absV - Math.floor(absV)) < 0.0001) return String(Math.floor(value));
             return value.toFixed(1);
         }
         return value.toFixed(2);
@@ -350,8 +352,10 @@ document.addEventListener("DOMContentLoaded", () => {
     function formatOIChange(v) {
         if (v === null || v === undefined || v === "") return "0.0000";
         const value = Number(v);
-        if (isNaN(value) || value === 0) return "0.0000";
+        if (isNaN(value)) return "0.0000";
         const absV = Math.abs(value);
+        // Handle zero case
+        if (absV < 0.0000001) return "0.0000";
         if (absV >= 1) return value.toFixed(2);
         if (absV >= 0.1) return value.toFixed(3);
         if (absV >= 0.001) return value.toFixed(4);
@@ -423,19 +427,23 @@ document.addEventListener("DOMContentLoaded", () => {
             // Change columns
             ["change_5m", "change_15m", "change_1h", "change_8h", "change_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
+                const numValue = Number(v);
                 let cls = "";
-                if (v > 0) cls = "value-up";
-                else if (v < 0) cls = "value-down";
-                const formatted = v?.toFixed ? v.toFixed(2) : v;
+                // Use strict comparison with epsilon for floating point precision
+                if (!isNaN(numValue) && numValue > 0.0000001) cls = "value-up";
+                else if (!isNaN(numValue) && numValue < -0.0000001) cls = "value-down";
+                const formatted = !isNaN(numValue) ? numValue.toFixed(2) : String(v);
                 tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
             // OI Change columns
             ["oi_change_5m", "oi_change_15m", "oi_change_1h", "oi_change_8h", "oi_change_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
+                const numValue = Number(v);
                 let cls = "";
-                if (v > 0) cls = "value-up";
-                else if (v < 0) cls = "value-down";
+                // Use strict comparison with epsilon for floating point precision
+                if (!isNaN(numValue) && numValue > 0.0000001) cls = "value-up";
+                else if (!isNaN(numValue) && numValue < -0.0000001) cls = "value-down";
                 const formatted = formatOIChange(v);
                 tr.appendChild(makeTd(col, formatted + "%", cls));
             });
@@ -456,9 +464,11 @@ document.addEventListener("DOMContentLoaded", () => {
             // Vdelta columns
             ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
                 const v = row[col] ?? 0;
+                const numValue = Number(v);
                 let cls = "";
-                if (v > 0) cls = "value-up";
-                else if (v < 0) cls = "value-down";
+                // Use strict comparison with epsilon for floating point precision
+                if (!isNaN(numValue) && numValue > 0.0000001) cls = "value-up";
+                else if (!isNaN(numValue) && numValue < -0.0000001) cls = "value-down";
                 const formatted = formatVdelta(v);
                 tr.appendChild(makeTd(col, formatted, cls));
             });
@@ -472,10 +482,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Funding
             const funding = row.funding_rate ?? 0;
+            const fundNumValue = Number(funding);
             let fundClass = "";
-            if (funding > 0) fundClass = "value-up";
-            else if (funding < 0) fundClass = "value-down";
-            const fundingFormatted = funding?.toFixed ? funding.toFixed(4) : funding;
+            // Use strict comparison with epsilon for floating point precision
+            if (!isNaN(fundNumValue) && fundNumValue > 0.0000001) fundClass = "value-up";
+            else if (!isNaN(fundNumValue) && fundNumValue < -0.0000001) fundClass = "value-down";
+            const fundingFormatted = !isNaN(fundNumValue) ? fundNumValue.toFixed(4) : String(funding);
             tr.appendChild(makeTd("funding_rate", fundingFormatted, fundClass));
 
             // Open Interest - ensure it's a number
@@ -587,19 +599,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (vol5mEl) vol5mEl.textContent = formatVolume(latest.volume_5m);
                 if (fundingEl) {
                     const f = latest.funding_rate ?? 0;
-                    fundingEl.textContent = f?.toFixed ? f.toFixed(4) : f;
+                    const fNumValue = Number(f);
+                    fundingEl.textContent = !isNaN(fNumValue) ? fNumValue.toFixed(4) : String(f);
                     fundingEl.classList.remove("value-up", "value-down");
-                    if (f > 0) fundingEl.classList.add("value-up");
-                    else if (f < 0) fundingEl.classList.add("value-down");
+                    if (!isNaN(fNumValue) && fNumValue > 0.0000001) fundingEl.classList.add("value-up");
+                    else if (!isNaN(fNumValue) && fNumValue < -0.0000001) fundingEl.classList.add("value-down");
                 }
                 if (oiEl) oiEl.textContent = formatVolume(latest.open_interest);
                 if (updatedEl) updatedEl.textContent = latest.ts || "";
                 if (oi15El) {
                     const v = latest.oi_change_15m ?? 0;
+                    const numValue = Number(v);
                     oi15El.textContent = formatOIChange(v) + "%";
                     oi15El.classList.remove("value-up", "value-down");
-                    if (v > 0) oi15El.classList.add("value-up");
-                    else if (v < 0) oi15El.classList.add("value-down");
+                    if (!isNaN(numValue) && numValue > 0.0000001) oi15El.classList.add("value-up");
+                    else if (!isNaN(numValue) && numValue < -0.0000001) oi15El.classList.add("value-down");
                 }
             }
 
@@ -629,9 +643,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const change15Td = document.createElement("td");
                 const c15 = s.change_15m ?? 0;
-                change15Td.textContent = (c15?.toFixed ? c15.toFixed(2) : c15) + "%";
-                if (c15 > 0) change15Td.classList.add("value-up");
-                else if (c15 < 0) change15Td.classList.add("value-down");
+                const c15NumValue = Number(c15);
+                change15Td.textContent = (!isNaN(c15NumValue) ? c15NumValue.toFixed(2) : String(c15)) + "%";
+                if (!isNaN(c15NumValue) && c15NumValue > 0.0000001) change15Td.classList.add("value-up");
+                else if (!isNaN(c15NumValue) && c15NumValue < -0.0000001) change15Td.classList.add("value-down");
 
                 const vol15Td = document.createElement("td");
                 vol15Td.textContent = formatVolume(s.volume_15m);
@@ -641,15 +656,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const oi15Td = document.createElement("td");
                 const oi15 = s.oi_change_15m ?? 0;
+                const oi15NumValue = Number(oi15);
                 oi15Td.textContent = formatOIChange(oi15) + "%";
-                if (oi15 > 0) oi15Td.classList.add("value-up");
-                else if (oi15 < 0) oi15Td.classList.add("value-down");
+                if (!isNaN(oi15NumValue) && oi15NumValue > 0.0000001) oi15Td.classList.add("value-up");
+                else if (!isNaN(oi15NumValue) && oi15NumValue < -0.0000001) oi15Td.classList.add("value-down");
 
                 const fundingTd = document.createElement("td");
                 const f = s.funding_rate ?? 0;
-                fundingTd.textContent = f?.toFixed ? f.toFixed(4) : f;
-                if (f > 0) fundingTd.classList.add("value-up");
-                else if (f < 0) fundingTd.classList.add("value-down");
+                const fNumValue = Number(f);
+                fundingTd.textContent = !isNaN(fNumValue) ? fNumValue.toFixed(4) : String(f);
+                if (!isNaN(fNumValue) && fNumValue > 0.0000001) fundingTd.classList.add("value-up");
+                else if (!isNaN(fNumValue) && fNumValue < -0.0000001) fundingTd.classList.add("value-down");
 
                 tr.appendChild(tsTd);
                 tr.appendChild(priceTd);
