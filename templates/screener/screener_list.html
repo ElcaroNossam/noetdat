@@ -97,53 +97,63 @@
                     </td>
                     <td data-column="price">{{ snapshot.price|format_price }}</td>
                     <td data-column="change_5m" class="{% if snapshot.change_5m > 0 %}value-up{% elif snapshot.change_5m < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_5m|floatformat:2 }}
+                        {{ snapshot.change_5m|format_percentage:2 }}%
                     </td>
                     <td data-column="change_15m" class="{% if snapshot.change_15m > 0 %}value-up{% elif snapshot.change_15m < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_15m|floatformat:2 }}
+                        {{ snapshot.change_15m|format_percentage:2 }}%
                     </td>
                     <td data-column="change_1h" class="{% if snapshot.change_1h > 0 %}value-up{% elif snapshot.change_1h < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_1h|floatformat:2 }}
+                        {{ snapshot.change_1h|format_percentage:2 }}%
                     </td>
                     <td data-column="change_8h" class="{% if snapshot.change_8h > 0 %}value-up{% elif snapshot.change_8h < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_8h|floatformat:2 }}
+                        {{ snapshot.change_8h|format_percentage:2 }}%
                     </td>
                     <td data-column="change_1d" class="{% if snapshot.change_1d > 0 %}value-up{% elif snapshot.change_1d < 0 %}value-down{% endif %}">
-                        {{ snapshot.change_1d|floatformat:2 }}
+                        {{ snapshot.change_1d|format_percentage:2 }}%
                     </td>
                     <td data-column="oi_change_5m" class="{% if snapshot.oi_change_5m > 0 %}value-up{% elif snapshot.oi_change_5m < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_5m|floatformat:3 }}
+                        {{ snapshot.oi_change_5m|format_oi_change }}%
                     </td>
                     <td data-column="oi_change_15m" class="{% if snapshot.oi_change_15m > 0 %}value-up{% elif snapshot.oi_change_15m < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_15m|floatformat:3 }}
+                        {{ snapshot.oi_change_15m|format_oi_change }}%
                     </td>
                     <td data-column="oi_change_1h" class="{% if snapshot.oi_change_1h > 0 %}value-up{% elif snapshot.oi_change_1h < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_1h|floatformat:3 }}
+                        {{ snapshot.oi_change_1h|format_oi_change }}%
                     </td>
                     <td data-column="oi_change_8h" class="{% if snapshot.oi_change_8h > 0 %}value-up{% elif snapshot.oi_change_8h < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_8h|floatformat:3 }}
+                        {{ snapshot.oi_change_8h|format_oi_change }}%
                     </td>
                     <td data-column="oi_change_1d" class="{% if snapshot.oi_change_1d > 0 %}value-up{% elif snapshot.oi_change_1d < 0 %}value-down{% endif %}">
-                        {{ snapshot.oi_change_1d|floatformat:3 }}
+                        {{ snapshot.oi_change_1d|format_oi_change }}%
                     </td>
-                    <td data-column="volatility_5m">{{ snapshot.volatility_5m|floatformat:2 }}</td>
-                    <td data-column="volatility_15m">{{ snapshot.volatility_15m|floatformat:2 }}</td>
-                    <td data-column="volatility_1h">{{ snapshot.volatility_1h|floatformat:2 }}</td>
+                    <td data-column="volatility_5m">{{ snapshot.volatility_5m|format_volatility }}</td>
+                    <td data-column="volatility_15m">{{ snapshot.volatility_15m|format_volatility }}</td>
+                    <td data-column="volatility_1h">{{ snapshot.volatility_1h|format_volatility }}</td>
                     <td data-column="ticks_5m">{{ snapshot.ticks_5m }}</td>
                     <td data-column="ticks_15m">{{ snapshot.ticks_15m }}</td>
                     <td data-column="ticks_1h">{{ snapshot.ticks_1h }}</td>
-                    <td data-column="vdelta_5m">{{ snapshot.vdelta_5m|floatformat:2 }}</td>
-                    <td data-column="vdelta_15m">{{ snapshot.vdelta_15m|floatformat:2 }}</td>
-                    <td data-column="vdelta_1h">{{ snapshot.vdelta_1h|floatformat:2 }}</td>
-                    <td data-column="vdelta_8h">{{ snapshot.vdelta_8h|floatformat:2 }}</td>
-                    <td data-column="vdelta_1d">{{ snapshot.vdelta_1d|floatformat:2 }}</td>
+                    <td data-column="vdelta_5m" class="{% if snapshot.vdelta_5m > 0 %}value-up{% elif snapshot.vdelta_5m < 0 %}value-down{% endif %}">
+                        {{ snapshot.vdelta_5m|format_vdelta }}
+                    </td>
+                    <td data-column="vdelta_15m" class="{% if snapshot.vdelta_15m > 0 %}value-up{% elif snapshot.vdelta_15m < 0 %}value-down{% endif %}">
+                        {{ snapshot.vdelta_15m|format_vdelta }}
+                    </td>
+                    <td data-column="vdelta_1h" class="{% if snapshot.vdelta_1h > 0 %}value-up{% elif snapshot.vdelta_1h < 0 %}value-down{% endif %}">
+                        {{ snapshot.vdelta_1h|format_vdelta }}
+                    </td>
+                    <td data-column="vdelta_8h" class="{% if snapshot.vdelta_8h > 0 %}value-up{% elif snapshot.vdelta_8h < 0 %}value-down{% endif %}">
+                        {{ snapshot.vdelta_8h|format_vdelta }}
+                    </td>
+                    <td data-column="vdelta_1d" class="{% if snapshot.vdelta_1d > 0 %}value-up{% elif snapshot.vdelta_1d < 0 %}value-down{% endif %}">
+                        {{ snapshot.vdelta_1d|format_vdelta }}
+                    </td>
                     <td data-column="volume_5m">{{ snapshot.volume_5m|format_volume }}</td>
                     <td data-column="volume_15m">{{ snapshot.volume_15m|format_volume }}</td>
                     <td data-column="volume_1h">{{ snapshot.volume_1h|format_volume }}</td>
                     <td data-column="volume_8h">{{ snapshot.volume_8h|format_volume }}</td>
                     <td data-column="volume_1d">{{ snapshot.volume_1d|format_volume }}</td>
                     <td data-column="funding_rate" class="{% if snapshot.funding_rate > 0 %}value-up{% elif snapshot.funding_rate < 0 %}value-down{% endif %}">
-                        {{ snapshot.funding_rate|floatformat:6 }}
+                        {{ snapshot.funding_rate|format_percentage:4 }}
                     </td>
                     <td data-column="open_interest">{{ snapshot.open_interest|format_volume }}</td>
                     <td data-column="ts">{{ snapshot.ts }}</td>

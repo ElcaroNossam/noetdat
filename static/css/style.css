@@ -425,10 +425,12 @@ body {
 
 .value-up {
     color: #2ecc71;
+    font-weight: 500;
 }
 
 .value-down {
     color: #e74c3c;
+    font-weight: 500;
 }
 
 .pagination {
