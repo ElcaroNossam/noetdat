@@ -263,15 +263,33 @@ def symbol_detail_api(request, symbol):
             "ts": s.ts.isoformat(),
             "price": float(s.price),
             "volatility_15m": s.volatility_15m,
+            "volatility_5m": s.volatility_5m,
+            "volatility_1h": s.volatility_1h,
             "ticks_15m": s.ticks_15m,
             "ticks_5m": s.ticks_5m,
+            "ticks_1h": s.ticks_1h,
             "vdelta_5m": s.vdelta_5m,
+            "vdelta_15m": s.vdelta_15m,
+            "vdelta_1h": s.vdelta_1h,
+            "vdelta_8h": s.vdelta_8h,
+            "vdelta_1d": s.vdelta_1d,
             "volume_5m": s.volume_5m,
+            "volume_15m": s.volume_15m,
             "volume_1h": s.volume_1h,
+            "volume_8h": s.volume_8h,
+            "volume_1d": s.volume_1d,
             "oi_change_5m": s.oi_change_5m,
             "oi_change_15m": s.oi_change_15m,
             "oi_change_1h": s.oi_change_1h,
+            "oi_change_8h": s.oi_change_8h,
+            "oi_change_1d": s.oi_change_1d,
+            "change_5m": s.change_5m,
+            "change_15m": s.change_15m,
+            "change_1h": s.change_1h,
+            "change_8h": s.change_8h,
+            "change_1d": s.change_1d,
             "funding_rate": s.funding_rate,
+            "open_interest": float(s.open_interest) if s.open_interest else 0.0,
         }
         for s in snapshots_qs
     ]
@@ -285,5 +303,42 @@ def symbol_detail_api(request, symbol):
         "snapshots": snapshots,
     }
     return JsonResponse(data)
+
+
+@access_required
+def symbols_list_api(request):
+    """API для получения списка доступных символов."""
+    from django.db import connection
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    market_type = request.GET.get("market_type", "spot").strip()
+    if market_type not in ["spot", "futures"]:
+        market_type = "spot"
+    
+    search = request.GET.get("search", "").strip()
+    
+    # Получаем только символы, у которых есть свежие данные (за последние 2 часа)
+    recent_cutoff = timezone.now() - timedelta(hours=2)
+    
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT DISTINCT sym.symbol, sym.name
+            FROM screener_symbol sym
+            INNER JOIN screener_screenersnapshot s ON s.symbol_id = sym.id
+            WHERE s.ts >= %s AND sym.market_type = %s
+        """, [recent_cutoff, market_type])
+        
+        symbols = [{"symbol": row[0], "name": row[1] or ""} for row in cursor.fetchall()]
+    
+    # Фильтрация по поисковому запросу
+    if search:
+        search_upper = search.upper()
+        symbols = [s for s in symbols if search_upper in s["symbol"].upper() or (s["name"] and search_upper in s["name"].upper())]
+    
+    # Сортировка по символу
+    symbols.sort(key=lambda x: x["symbol"])
+    
+    return JsonResponse({"symbols": symbols})
 
 
