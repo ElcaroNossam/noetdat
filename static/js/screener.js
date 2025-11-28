@@ -505,7 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const v = row[col] ?? 0;
                 const numValue = Number(v);
                 const formatted = formatVolatility(v);
-                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
+                const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
                 const cls = getComparisonClass(numValue, prevValue, true);
                 tr.appendChild(makeTd(col, formatted, cls));
             });
@@ -515,31 +515,38 @@ document.addEventListener("DOMContentLoaded", () => {
                 const v = row[col] ?? 0;
                 const numValue = Number(v);
                 const formatted = !isNaN(numValue) ? String(Math.round(numValue)) : String(v);
-                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
+                const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
                 const cls = getComparisonClass(numValue, prevValue, true);
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Vdelta columns - use same logic as OI (compare with previous)
+            // Vdelta columns - use formatted values and colors from backend
             ["vdelta_5m", "vdelta_15m", "vdelta_1h", "vdelta_8h", "vdelta_1d"].forEach((col) => {
-                const v = row[col] ?? 0;
-                const numValue = Number(v);
-                const formatted = formatVdelta(v);
-                // Get previous value - ensure it's a number
-                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
-                // Use getComparisonClass with isPositiveOnly=false (vdelta can be negative)
-                const cls = getComparisonClass(numValue, prevValue, false);
+                // Use formatted value from backend if available, otherwise format on client
+                const formatted = row[col + "_formatted"] || formatVdelta(row[col] ?? 0);
+                // Use color from backend if available, otherwise calculate based on previousValues
+                let cls = row[col + "_color"] || "";
+                if (!cls) {
+                    // If no color from backend, calculate based on previous value from previousValues
+                    const numValue = Number(row[col] ?? 0);
+                    const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
+                    cls = getComparisonClass(numValue, prevValue, false);
+                }
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Volume columns - compare with previous values
+            // Volume columns - use formatted values and colors from backend
             ["volume_5m", "volume_15m", "volume_1h", "volume_8h", "volume_1d"].forEach((col) => {
-                const v = row[col] ?? 0;
-                const numValue = Number(v);
-                const formatted = formatVolume(v);
-                // Get previous value - ensure it's a number
-                const prevValue = prev[col] !== undefined && prev[col] !== null ? Number(prev[col]) : undefined;
-                const cls = getComparisonClass(numValue, prevValue, true);
+                // Use formatted value from backend if available, otherwise format on client
+                const formatted = row[col + "_formatted"] || formatVolume(row[col] ?? 0);
+                // Use color from backend if available, otherwise calculate based on previousValues
+                let cls = row[col + "_color"] || "";
+                if (!cls) {
+                    // If no color from backend, calculate based on previous value from previousValues
+                    const numValue = Number(row[col] ?? 0);
+                    const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
+                    cls = getComparisonClass(numValue, prevValue, true);
+                }
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
@@ -553,10 +560,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const fundingFormatted = !isNaN(fundNumValue) ? fundNumValue.toFixed(4) : String(funding);
             tr.appendChild(makeTd("funding_rate", fundingFormatted, fundClass));
 
-            // Open Interest - compare with previous value
-            const oiValue = row.open_interest != null ? Number(row.open_interest) : 0;
-            const oiCls = getComparisonClass(oiValue, prev.open_interest, true);
-            tr.appendChild(makeTd("open_interest", formatVolume(oiValue), oiCls));
+            // Open Interest - use formatted value and color from backend
+            const oiFormatted = row.open_interest_formatted || formatVolume(row.open_interest ?? 0);
+            let oiCls = row.open_interest_color || "";
+            if (!oiCls) {
+                // If no color from backend, calculate based on previous value from previousValues
+                const oiValue = row.open_interest != null ? Number(row.open_interest) : 0;
+                const prevOI = prev.open_interest !== undefined && prev.open_interest !== null && prev.open_interest !== "" ? Number(prev.open_interest) : undefined;
+                oiCls = getComparisonClass(oiValue, prevOI, true);
+            }
+            tr.appendChild(makeTd("open_interest", oiFormatted, oiCls));
 
             // Timestamp
             tr.appendChild(makeTd("ts", row.ts));

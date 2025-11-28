@@ -46,7 +46,8 @@ server {
 ## Что уже сделано
 
 1. ✅ Добавлен мета-тег CSP в `templates/base.html`
-2. ✅ Добавлены настройки CSP в `config/settings.py`
+2. ✅ Создан `CSPMiddleware` в `config/middleware.py` для установки CSP заголовка
+3. ✅ Middleware добавлен в `MIDDLEWARE` в `config/settings.py`
 
 ## Проверка
 
@@ -55,12 +56,24 @@ server {
 sudo systemctl restart noetdat
 ```
 
-2. Если используете Nginx для CSP, перезапустите Nginx:
+2. Проверьте, что middleware работает:
+```bash
+curl -I http://localhost:8000/ | grep -i content-security-policy
+```
+
+Должен быть заголовок `Content-Security-Policy` с политикой, включающей `unsafe-eval`.
+
+3. Если используете Nginx для CSP (альтернативный вариант), перезапустите Nginx:
 ```bash
 sudo systemctl restart nginx
 ```
 
-3. Откройте страницу с TradingView и проверьте консоль браузера - ошибка должна исчезнуть.
+4. Откройте страницу с TradingView и проверьте консоль браузера - ошибка должна исчезнуть.
+
+**Примечание:** Если предупреждение все еще появляется, это может быть из-за того, что браузер кэширует старую политику. Попробуйте:
+- Очистить кэш браузера (Ctrl+Shift+Delete)
+- Открыть страницу в режиме инкогнито
+- Проверить заголовки ответа в DevTools (Network tab)
 
 ## Безопасность
 

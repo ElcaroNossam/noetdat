@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from accounts.decorators import access_required
 
 from screener.models import ScreenerSnapshot, Symbol
+from screener.utils import format_volume, format_vdelta, get_value_color
 
 
 @access_required
@@ -119,8 +120,51 @@ def screener_list_api(request):
     else:
         qs = qs.order_by(f"-{sort_field}")
 
-    data = [
-        {
+    # Convert queryset to list
+    snapshots = list(qs)
+    
+    # Store previous values per symbol for comparison
+    # This will be populated as we iterate
+    symbol_previous_values = {}
+    
+    data = []
+    for s in snapshots:
+        symbol = s.symbol.symbol
+        prev_vals = symbol_previous_values.get(symbol, {})
+        
+        # Format vdelta values
+        vdelta_5m_formatted = format_vdelta(s.vdelta_5m)
+        vdelta_15m_formatted = format_vdelta(s.vdelta_15m)
+        vdelta_1h_formatted = format_vdelta(s.vdelta_1h)
+        vdelta_8h_formatted = format_vdelta(s.vdelta_8h)
+        vdelta_1d_formatted = format_vdelta(s.vdelta_1d)
+        
+        # Get colors for vdelta (compare with previous value for same symbol)
+        vdelta_5m_color = get_value_color(s.vdelta_5m, prev_vals.get("vdelta_5m"), False)
+        vdelta_15m_color = get_value_color(s.vdelta_15m, prev_vals.get("vdelta_15m"), False)
+        vdelta_1h_color = get_value_color(s.vdelta_1h, prev_vals.get("vdelta_1h"), False)
+        vdelta_8h_color = get_value_color(s.vdelta_8h, prev_vals.get("vdelta_8h"), False)
+        vdelta_1d_color = get_value_color(s.vdelta_1d, prev_vals.get("vdelta_1d"), False)
+        
+        # Format volume values
+        volume_5m_formatted = format_volume(s.volume_5m)
+        volume_15m_formatted = format_volume(s.volume_15m)
+        volume_1h_formatted = format_volume(s.volume_1h)
+        volume_8h_formatted = format_volume(s.volume_8h)
+        volume_1d_formatted = format_volume(s.volume_1d)
+        
+        # Get colors for volume (compare with previous value for same symbol)
+        volume_5m_color = get_value_color(s.volume_5m, prev_vals.get("volume_5m"), True)
+        volume_15m_color = get_value_color(s.volume_15m, prev_vals.get("volume_15m"), True)
+        volume_1h_color = get_value_color(s.volume_1h, prev_vals.get("volume_1h"), True)
+        volume_8h_color = get_value_color(s.volume_8h, prev_vals.get("volume_8h"), True)
+        volume_1d_color = get_value_color(s.volume_1d, prev_vals.get("volume_1d"), True)
+        
+        # Format OI and get color
+        oi_formatted = format_volume(s.open_interest)
+        oi_color = get_value_color(s.open_interest, prev_vals.get("open_interest"), True)
+        
+        data.append({
             "symbol": s.symbol.symbol,
             "name": s.symbol.name,
             "price": float(s.price),
@@ -140,22 +184,60 @@ def screener_list_api(request):
             "ticks_5m": s.ticks_5m,
             "ticks_15m": s.ticks_15m,
             "ticks_1h": s.ticks_1h,
+            # Vdelta - raw values and formatted
             "vdelta_5m": s.vdelta_5m,
+            "vdelta_5m_formatted": vdelta_5m_formatted,
+            "vdelta_5m_color": vdelta_5m_color,
             "vdelta_15m": s.vdelta_15m,
+            "vdelta_15m_formatted": vdelta_15m_formatted,
+            "vdelta_15m_color": vdelta_15m_color,
             "vdelta_1h": s.vdelta_1h,
+            "vdelta_1h_formatted": vdelta_1h_formatted,
+            "vdelta_1h_color": vdelta_1h_color,
             "vdelta_8h": s.vdelta_8h,
+            "vdelta_8h_formatted": vdelta_8h_formatted,
+            "vdelta_8h_color": vdelta_8h_color,
             "vdelta_1d": s.vdelta_1d,
+            "vdelta_1d_formatted": vdelta_1d_formatted,
+            "vdelta_1d_color": vdelta_1d_color,
+            # Volume - raw values and formatted
             "volume_5m": s.volume_5m,
+            "volume_5m_formatted": volume_5m_formatted,
+            "volume_5m_color": volume_5m_color,
             "volume_15m": s.volume_15m,
+            "volume_15m_formatted": volume_15m_formatted,
+            "volume_15m_color": volume_15m_color,
             "volume_1h": s.volume_1h,
+            "volume_1h_formatted": volume_1h_formatted,
+            "volume_1h_color": volume_1h_color,
             "volume_8h": s.volume_8h,
+            "volume_8h_formatted": volume_8h_formatted,
+            "volume_8h_color": volume_8h_color,
             "volume_1d": s.volume_1d,
+            "volume_1d_formatted": volume_1d_formatted,
+            "volume_1d_color": volume_1d_color,
             "funding_rate": float(s.funding_rate) if s.funding_rate else 0.0,
             "open_interest": float(s.open_interest) if s.open_interest else 0.0,
+            "open_interest_formatted": oi_formatted,
+            "open_interest_color": oi_color,
             "ts": s.ts.isoformat(),
+        })
+        
+        # Store current values as previous for next update (for same symbol)
+        symbol_previous_values[symbol] = {
+            "vdelta_5m": float(s.vdelta_5m) if s.vdelta_5m is not None else None,
+            "vdelta_15m": float(s.vdelta_15m) if s.vdelta_15m is not None else None,
+            "vdelta_1h": float(s.vdelta_1h) if s.vdelta_1h is not None else None,
+            "vdelta_8h": float(s.vdelta_8h) if s.vdelta_8h is not None else None,
+            "vdelta_1d": float(s.vdelta_1d) if s.vdelta_1d is not None else None,
+            "volume_5m": float(s.volume_5m) if s.volume_5m is not None else None,
+            "volume_15m": float(s.volume_15m) if s.volume_15m is not None else None,
+            "volume_1h": float(s.volume_1h) if s.volume_1h is not None else None,
+            "volume_8h": float(s.volume_8h) if s.volume_8h is not None else None,
+            "volume_1d": float(s.volume_1d) if s.volume_1d is not None else None,
+            "open_interest": float(s.open_interest) if s.open_interest is not None else None,
         }
-        for s in qs
-    ]
+    
     return JsonResponse(data, safe=False)
 
 
