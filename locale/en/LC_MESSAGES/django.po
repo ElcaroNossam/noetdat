@@ -362,9 +362,6 @@ msgstr "Create an alert on the symbol page to receive notifications."
 msgid "Volatility 15m"
 msgstr "Volatility 15m"
 
-msgid "Volume 5m"
-msgstr "Volume 5m"
-
 msgid "Light stub chart: data can be loaded via"
 msgstr "Light stub chart: data can be loaded via"
 
@@ -379,9 +376,6 @@ msgstr "TS"
 
 msgid "Change 15m %"
 msgstr "Change 15m %"
-
-msgid "Volume 15m"
-msgstr "Volume 15m"
 
 msgid "OI Δ 15m %"
 msgstr "OI Δ 15m %"
@@ -406,9 +400,6 @@ msgstr "OI change 15m %"
 
 msgid "Funding rate"
 msgstr "Funding rate"
-
-msgid "Vdelta 15m"
-msgstr "Vdelta 15m"
 
 msgid "Customize the table display by selecting the columns you want to see."
 msgstr "Customize the table display by selecting the columns you want to see."

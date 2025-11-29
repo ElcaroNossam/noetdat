@@ -372,9 +372,6 @@ msgstr "Создайте алерт на странице символа, что
 msgid "Volatility 15m"
 msgstr "Волатильность 15м"
 
-msgid "Volume 5m"
-msgstr "Объем 5м"
-
 msgid "Light stub chart: data can be loaded via"
 msgstr "Лёгкий stub-график: данные можно будет грузить через"
 
@@ -389,9 +386,6 @@ msgstr "TS"
 
 msgid "Change 15m %"
 msgstr "Change 15m %"
-
-msgid "Volume 15m"
-msgstr "Volume 15m"
 
 msgid "OI Δ 15m %"
 msgstr "OI Δ 15m %"
@@ -416,9 +410,6 @@ msgstr "OI change 15m %"
 
 msgid "Funding rate"
 msgstr "Funding rate"
-
-msgid "Vdelta 15m"
-msgstr "Vdelta 15m"
 
 msgid "Customize the table display by selecting the columns you want to see."
 msgstr "Настройте отображение таблицы, выбрав столбцы, которые вы хотите видеть."

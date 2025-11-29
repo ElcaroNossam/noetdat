@@ -362,9 +362,6 @@ msgstr "Cree una alerta en la página del símbolo para recibir notificaciones."
 msgid "Volatility 15m"
 msgstr "Volatilidad 15m"
 
-msgid "Volume 5m"
-msgstr "Volumen 5m"
-
 msgid "Light stub chart: data can be loaded via"
 msgstr "Gráfico stub ligero: los datos se pueden cargar a través de"
 
@@ -379,9 +376,6 @@ msgstr "TS"
 
 msgid "Change 15m %"
 msgstr "Cambio 15m %"
-
-msgid "Volume 15m"
-msgstr "Volumen 15m"
 
 msgid "OI Δ 15m %"
 msgstr "OI Δ 15m %"
@@ -406,9 +400,6 @@ msgstr "Cambio OI 15m %"
 
 msgid "Funding rate"
 msgstr "Tasa de financiación"
-
-msgid "Vdelta 15m"
-msgstr "Vdelta 15m"
 
 msgid "Customize the table display by selecting the columns you want to see."
 msgstr "Personaliza la visualización de la tabla seleccionando las columnas que deseas ver."
