@@ -102,11 +102,11 @@
                     <td data-column="ticks_5m" class="ticks-cell">{{ snapshot.ticks_5m }}</td>
                     <td data-column="ticks_15m" class="ticks-cell">{{ snapshot.ticks_15m }}</td>
                     <td data-column="ticks_1h" class="ticks-cell">{{ snapshot.ticks_1h }}</td>
-                    <td data-column="vdelta_5m" class="vdelta-cell">{{ snapshot.vdelta_5m|format_vdelta:market_type }}</td>
-                    <td data-column="vdelta_15m" class="vdelta-cell">{{ snapshot.vdelta_15m|format_vdelta:market_type }}</td>
-                    <td data-column="vdelta_1h" class="vdelta-cell">{{ snapshot.vdelta_1h|format_vdelta:market_type }}</td>
-                    <td data-column="vdelta_8h" class="vdelta-cell">{{ snapshot.vdelta_8h|format_vdelta:market_type }}</td>
-                    <td data-column="vdelta_1d" class="vdelta-cell">{{ snapshot.vdelta_1d|format_vdelta:market_type }}</td>
+                    <td data-column="vdelta_5m" class="vdelta-cell">{{ snapshot.vdelta_5m|format_volume:market_type }}</td>
+                    <td data-column="vdelta_15m" class="vdelta-cell">{{ snapshot.vdelta_15m|format_volume:market_type }}</td>
+                    <td data-column="vdelta_1h" class="vdelta-cell">{{ snapshot.vdelta_1h|format_volume:market_type }}</td>
+                    <td data-column="vdelta_8h" class="vdelta-cell">{{ snapshot.vdelta_8h|format_volume:market_type }}</td>
+                    <td data-column="vdelta_1d" class="vdelta-cell">{{ snapshot.vdelta_1d|format_volume:market_type }}</td>
                     <td data-column="volume_5m" class="volume-cell">{{ snapshot.volume_5m|format_volume:market_type }}</td>
                     <td data-column="volume_15m" class="volume-cell">{{ snapshot.volume_15m|format_volume:market_type }}</td>
                     <td data-column="volume_1h" class="volume-cell">{{ snapshot.volume_1h|format_volume:market_type }}</td>

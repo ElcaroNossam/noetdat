@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from accounts.decorators import access_required
 
 from screener.models import ScreenerSnapshot, Symbol
-from screener.utils import format_volume, format_vdelta, get_value_color
+from screener.utils import format_volume, get_value_color
 from screener.templatetags.formatting import format_price, format_ticks
 
 
@@ -133,13 +133,13 @@ def screener_list_api(request):
         symbol = s.symbol.symbol
         prev_vals = symbol_previous_values.get(symbol, {})
         
-        # Format vdelta values (use different thresholds for spot / futures)
+        # Format vdelta values (use same formatter as volume for consistency - both in USDT)
         market_type = s.symbol.market_type
-        vdelta_5m_formatted = format_vdelta(s.vdelta_5m, market_type)
-        vdelta_15m_formatted = format_vdelta(s.vdelta_15m, market_type)
-        vdelta_1h_formatted = format_vdelta(s.vdelta_1h, market_type)
-        vdelta_8h_formatted = format_vdelta(s.vdelta_8h, market_type)
-        vdelta_1d_formatted = format_vdelta(s.vdelta_1d, market_type)
+        vdelta_5m_formatted = format_volume(s.vdelta_5m, market_type)
+        vdelta_15m_formatted = format_volume(s.vdelta_15m, market_type)
+        vdelta_1h_formatted = format_volume(s.vdelta_1h, market_type)
+        vdelta_8h_formatted = format_volume(s.vdelta_8h, market_type)
+        vdelta_1d_formatted = format_volume(s.vdelta_1d, market_type)
         
         # Get colors for vdelta (compare with previous value for same symbol)
         vdelta_5m_color = get_value_color(s.vdelta_5m, prev_vals.get("vdelta_5m"), False)

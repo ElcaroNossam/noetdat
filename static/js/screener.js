@@ -403,39 +403,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function formatVdelta(v, marketType) {
-        if (v === null || v === undefined || v === "") return "0.00";
-        const value = Number(v);
-        if (isNaN(value)) return "0.00";
-        const absV = Math.abs(value);
-        // Handle zero case
-        if (absV < 0.0001) return "0.00";
-        
-        // Different thresholds for spot vs futures
-        let kThreshold, mThreshold;
-        if (marketType === "spot") {
-            // Spot: lower thresholds because volumes are smaller
-            kThreshold = 100;      // K from 100 (e.g., 150 -> 0.15K)
-            mThreshold = 100_000;  // M from 100K (e.g., 150K -> 0.15M)
-        } else {
-            // Futures / default: higher thresholds
-            kThreshold = 1_000;
-            mThreshold = 1_000_000;
-        }
-        
-        if (absV >= mThreshold) return (value / 1_000_000).toFixed(2) + "M";
-        if (absV >= kThreshold) return (value / 1_000).toFixed(2) + "K";
-        if (absV >= 1) {
-            // Check if value is whole number (same logic as Django: abs_v == int(abs_v))
-            // For whole numbers, return as integer (preserve sign like int(v) in Python)
-            const intAbs = Math.floor(absV);
-            if (Math.abs(absV - intAbs) < 0.0001) {
-                // Value is whole number, return as integer with correct sign
-                // int(v) in Python preserves sign: int(5.0) = 5, int(-5.0) = -5
-                return String(value >= 0 ? intAbs : -intAbs);
-            }
-            return value.toFixed(1);
-        }
-        return value.toFixed(2);
+        // Use same formatter as volume for consistency - both are in USDT
+        return formatVolume(v, marketType);
     }
 
     function formatOIChange(v) {
