@@ -588,37 +588,24 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => console.error('Failed to update stats:', err));
     }
     
-    // Первоначальная загрузка
-    const initialSnapshot = {% if latest_snapshot %}{
-        volume_15m: {{ latest_snapshot.volume_15m }},
-        oi_change_15m: {{ latest_snapshot.oi_change_15m }},
-        funding_rate: {{ latest_snapshot.funding_rate }},
-        open_interest: {{ latest_snapshot.open_interest }},
-        change_15m: {{ latest_snapshot.change_15m }},
-        vdelta_15m: {{ latest_snapshot.vdelta_15m|default:0 }},
-        volatility_15m: {{ latest_snapshot.volatility_15m|default:0 }},
-        ticks_15m: {{ latest_snapshot.ticks_15m|default:0 }},
-        volume_5m: {{ latest_snapshot.volume_5m|default:0 }},
-        volume_1h: {{ latest_snapshot.volume_1h|default:0 }},
-        volume_8h: {{ latest_snapshot.volume_8h|default:0 }},
-        volume_1d: {{ latest_snapshot.volume_1d|default:0 }},
-        oi_change_5m: {{ latest_snapshot.oi_change_5m|default:0 }},
-        oi_change_1h: {{ latest_snapshot.oi_change_1h|default:0 }},
-        oi_change_8h: {{ latest_snapshot.oi_change_8h|default:0 }},
-        oi_change_1d: {{ latest_snapshot.oi_change_1d|default:0 }},
-        change_5m: {{ latest_snapshot.change_5m|default:0 }},
-        change_1h: {{ latest_snapshot.change_1h|default:0 }},
-        change_8h: {{ latest_snapshot.change_8h|default:0 }},
-        change_1d: {{ latest_snapshot.change_1d|default:0 }},
-        vdelta_5m: {{ latest_snapshot.vdelta_5m|default:0 }},
-        vdelta_1h: {{ latest_snapshot.vdelta_1h|default:0 }},
-        vdelta_8h: {{ latest_snapshot.vdelta_8h|default:0 }},
-        vdelta_1d: {{ latest_snapshot.vdelta_1d|default:0 }},
-        volatility_5m: {{ latest_snapshot.volatility_5m|default:0 }},
-        volatility_1h: {{ latest_snapshot.volatility_1h|default:0 }},
-        ticks_5m: {{ latest_snapshot.ticks_5m|default:0 }},
-        ticks_1h: {{ latest_snapshot.ticks_1h|default:0 }},
-    }{% else %}null{% endif %};
+    // Первоначальная загрузка - use JSON script to avoid locale formatting issues
+    {% if snapshot_data %}
+    {{ snapshot_data|json_script:"initial-snapshot-data" }}
+    {% endif %}
+    
+    // Parse JSON data if it exists
+    let initialSnapshot = null;
+    {% if snapshot_data %}
+    const initialSnapshotScript = document.getElementById('initial-snapshot-data');
+    if (initialSnapshotScript) {
+        try {
+            initialSnapshot = JSON.parse(initialSnapshotScript.textContent);
+        } catch (e) {
+            console.error('Failed to parse initial snapshot:', e);
+            initialSnapshot = null;
+        }
+    }
+    {% endif %}
     
     window.currentSnapshot = initialSnapshot;
     

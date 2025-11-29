@@ -278,6 +278,8 @@ body {
     background: #0a0a0a;
     border-radius: 6px;
     border: 1px solid #45a29e33;
+    position: relative;
+    z-index: 10;
 }
 
 .market-type-btn {
@@ -293,6 +295,9 @@ body {
     border-radius: 4px;
     transition: all 0.2s;
     font-size: 0.9rem;
+    position: relative;
+    z-index: 11;
+    pointer-events: auto;
 }
 
 .market-type-btn:hover {

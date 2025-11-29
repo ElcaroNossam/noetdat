@@ -204,12 +204,47 @@ def trading_terminal(request, symbol):
     )
     snapshots = list(snapshots)
     latest_snapshot = snapshots[0] if snapshots else None
+    
+    # Prepare snapshot data for JavaScript (avoid locale formatting issues)
+    snapshot_data = None
+    if latest_snapshot:
+        snapshot_data = {
+            "volume_15m": float(latest_snapshot.volume_15m) if latest_snapshot.volume_15m is not None else 0,
+            "oi_change_15m": float(latest_snapshot.oi_change_15m) if latest_snapshot.oi_change_15m is not None else 0,
+            "funding_rate": float(latest_snapshot.funding_rate) if latest_snapshot.funding_rate is not None else 0,
+            "open_interest": float(latest_snapshot.open_interest) if latest_snapshot.open_interest is not None else 0,
+            "change_15m": float(latest_snapshot.change_15m) if latest_snapshot.change_15m is not None else 0,
+            "vdelta_15m": float(latest_snapshot.vdelta_15m) if latest_snapshot.vdelta_15m is not None else 0,
+            "volatility_15m": float(latest_snapshot.volatility_15m) if latest_snapshot.volatility_15m is not None else 0,
+            "ticks_15m": float(latest_snapshot.ticks_15m) if latest_snapshot.ticks_15m is not None else 0,
+            "volume_5m": float(latest_snapshot.volume_5m) if latest_snapshot.volume_5m is not None else 0,
+            "volume_1h": float(latest_snapshot.volume_1h) if latest_snapshot.volume_1h is not None else 0,
+            "volume_8h": float(latest_snapshot.volume_8h) if latest_snapshot.volume_8h is not None else 0,
+            "volume_1d": float(latest_snapshot.volume_1d) if latest_snapshot.volume_1d is not None else 0,
+            "oi_change_5m": float(latest_snapshot.oi_change_5m) if latest_snapshot.oi_change_5m is not None else 0,
+            "oi_change_1h": float(latest_snapshot.oi_change_1h) if latest_snapshot.oi_change_1h is not None else 0,
+            "oi_change_8h": float(latest_snapshot.oi_change_8h) if latest_snapshot.oi_change_8h is not None else 0,
+            "oi_change_1d": float(latest_snapshot.oi_change_1d) if latest_snapshot.oi_change_1d is not None else 0,
+            "change_5m": float(latest_snapshot.change_5m) if latest_snapshot.change_5m is not None else 0,
+            "change_1h": float(latest_snapshot.change_1h) if latest_snapshot.change_1h is not None else 0,
+            "change_8h": float(latest_snapshot.change_8h) if latest_snapshot.change_8h is not None else 0,
+            "change_1d": float(latest_snapshot.change_1d) if latest_snapshot.change_1d is not None else 0,
+            "vdelta_5m": float(latest_snapshot.vdelta_5m) if latest_snapshot.vdelta_5m is not None else 0,
+            "vdelta_1h": float(latest_snapshot.vdelta_1h) if latest_snapshot.vdelta_1h is not None else 0,
+            "vdelta_8h": float(latest_snapshot.vdelta_8h) if latest_snapshot.vdelta_8h is not None else 0,
+            "vdelta_1d": float(latest_snapshot.vdelta_1d) if latest_snapshot.vdelta_1d is not None else 0,
+            "volatility_5m": float(latest_snapshot.volatility_5m) if latest_snapshot.volatility_5m is not None else 0,
+            "volatility_1h": float(latest_snapshot.volatility_1h) if latest_snapshot.volatility_1h is not None else 0,
+            "ticks_5m": float(latest_snapshot.ticks_5m) if latest_snapshot.ticks_5m is not None else 0,
+            "ticks_1h": float(latest_snapshot.ticks_1h) if latest_snapshot.ticks_1h is not None else 0,
+        }
 
     context = {
         "symbol": symbol_obj,
         "latest_snapshot": latest_snapshot,
         "snapshots": snapshots,
         "market_type": market_type,
+        "snapshot_data": snapshot_data,
     }
     return render(request, "screener/trading_terminal.html", context)
 
