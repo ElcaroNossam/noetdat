@@ -179,26 +179,36 @@
         const btnFutures = document.getElementById('btn-futures');
         const btnSpot = document.getElementById('btn-spot');
         
+        console.log('Market type buttons initialization:', { btnFutures: !!btnFutures, btnSpot: !!btnSpot });
+        
         if (btnFutures) {
             btnFutures.addEventListener('click', function(e) {
+                console.log('Futures button clicked', e);
                 e.preventDefault();
                 e.stopPropagation();
                 const url = new URL(window.location);
                 url.searchParams.delete('market_type');
                 url.searchParams.set('market_type', 'futures');
+                console.log('Navigating to:', url.toString());
                 window.location.href = url.toString();
             });
+        } else {
+            console.warn('btn-futures not found!');
         }
         
         if (btnSpot) {
             btnSpot.addEventListener('click', function(e) {
+                console.log('Spot button clicked', e);
                 e.preventDefault();
                 e.stopPropagation();
                 const url = new URL(window.location);
                 url.searchParams.delete('market_type');
                 url.searchParams.set('market_type', 'spot');
+                console.log('Navigating to:', url.toString());
                 window.location.href = url.toString();
             });
+        } else {
+            console.warn('btn-spot not found!');
         }
     });
 </script>
