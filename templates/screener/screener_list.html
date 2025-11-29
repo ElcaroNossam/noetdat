@@ -8,19 +8,8 @@
 <div class="screener-container">
     <h1>{% trans "Crypto Screener" %}</h1>
     <div class="market-type-toggle">
-        {% with request.GET.urlencode as query_string %}
-            {% if query_string %}
-                {% with query_string|add:"&market_type=futures" as futures_qs %}
-                    {% with query_string|add:"&market_type=spot" as spot_qs %}
-                        <a href="?{{ futures_qs }}" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}">{% trans "Futures" %}</a>
-                        <a href="?{{ spot_qs }}" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}">{% trans "Spot" %}</a>
-                    {% endwith %}
-                {% endwith %}
-            {% else %}
-                <a href="?market_type=futures" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}">{% trans "Futures" %}</a>
-                <a href="?market_type=spot" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}">{% trans "Spot" %}</a>
-            {% endif %}
-        {% endwith %}
+        <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures">{% trans "Futures" %}</button>
+        <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot">{% trans "Spot" %}</button>
     </div>
     <form method="get" class="screener-filters">
         <input type="hidden" name="market_type" value="{{ market_type }}">
@@ -184,5 +173,22 @@
         "open_interest",
         "ts",
     ];
+    
+    // Market type toggle handler - prevents duplicate market_type params
+    document.addEventListener('DOMContentLoaded', function() {
+        const marketTypeButtons = document.querySelectorAll('.market-type-toggle button[data-market-type]');
+        marketTypeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const newMarketType = this.dataset.marketType;
+                const url = new URL(window.location);
+                // Remove all market_type params to prevent duplicates
+                url.searchParams.delete('market_type');
+                // Add new market_type
+                url.searchParams.set('market_type', newMarketType);
+                // Navigate to new URL
+                window.location.href = url.toString();
+            });
+        });
+    });
 </script>
 {% endblock %}
