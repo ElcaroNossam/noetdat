@@ -80,16 +80,17 @@ def ingest_snapshot() -> int:
             ticks_1h = int(volume_1h / 1000.0)
 
             # Vdelta: volume-weighted price change for each timeframe
-            # Formula: vdelta_tf = change_tf * volume_24h
+            # Formula: vdelta_tf = (change_tf / 100.0) * volume_24h
+            # change_tf is in percentage (e.g., -2.0 means -2%), so we divide by 100 to convert to decimal
             # Uses timeframe-specific change with 24h volume for correct scaling between timeframes
             # This ensures: 1) correct ratio between TFs (1d/5m = 288), 2) larger values on smaller TFs
             # For cheap coins (price < 1), limit vdelta to max 2x volume_tf to prevent unrealistic values
             # volume_24h is in USDT (normalized), so price doesn't affect the calculation directly
-            vdelta_5m_calc = change_5m * volume_24h
-            vdelta_15m_calc = change_15m * volume_24h
-            vdelta_1h_calc = change_1h * volume_24h
-            vdelta_8h_calc = change_8h * volume_24h
-            vdelta_1d_calc = change_1d * volume_24h
+            vdelta_5m_calc = (change_5m / 100.0) * volume_24h
+            vdelta_15m_calc = (change_15m / 100.0) * volume_24h
+            vdelta_1h_calc = (change_1h / 100.0) * volume_24h
+            vdelta_8h_calc = (change_8h / 100.0) * volume_24h
+            vdelta_1d_calc = (change_1d / 100.0) * volume_24h
             
             # Limit vdelta to max 2x volume_tf for cheap coins with large % changes
             vdelta_5m = max(-abs(volume_5m) * 2.0, min(abs(volume_5m) * 2.0, vdelta_5m_calc))
