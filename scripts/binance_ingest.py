@@ -117,13 +117,14 @@ def ingest_snapshot() -> int:
             ticks_1h = int(volume_1h / 1000.0)
 
             # Vdelta approximation: positive if price going up, negative if down
-            # Use change as proxy
-            # For futures: multiply by 100 to make Vdelta more readable
-            vdelta_5m = change_5m * volume_5m * 100.0
-            vdelta_15m = change_15m * volume_15m * 100.0
-            vdelta_1h = change_1h * volume_1h * 100.0
-            vdelta_8h = change_8h * volume_8h * 100.0
-            vdelta_1d = change_1d * volume_1d * 100.0
+            # Use timeframe-specific change with 24h volume for correct scaling
+            # Formula: vdelta_tf = change_tf * volume_24h / 100.0
+            # This ensures correct ratio between timeframes (1d/5m = 288, not 288²)
+            vdelta_5m = change_5m * volume_24h / 100.0
+            vdelta_15m = change_15m * volume_24h / 100.0
+            vdelta_1h = change_1h * volume_24h / 100.0
+            vdelta_8h = change_8h * volume_24h / 100.0
+            vdelta_1d = change_1d * volume_24h / 100.0
 
             oi = fetch_open_interest(symbol_code)
 

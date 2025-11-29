@@ -101,7 +101,7 @@ def format_vdelta(value, market_type: str | None = None) -> str:
         return f"{v:.2f}"
 
 
-def get_value_color(current_value, previous_value=None, is_positive_only=False, repetition_info=None):
+def get_value_color(current_value, previous_value=None, is_positive_only=False):
     """
     Determine color class for a value based on comparison with previous value.
     Returns: "value-up" (green), "value-down" (red), or "" (white/no color)
@@ -109,10 +109,9 @@ def get_value_color(current_value, previous_value=None, is_positive_only=False, 
     For ALL values (volume, vdelta, ticks, volatility, OI):
     - Green if current > previous
     - Red if current < previous
-    - White only if value repeats 3+ times in a row
-    - Otherwise shows color based on last change or value direction
+    - White if no previous value or equal
     
-    repetition_info: dict with 'count' and 'last_color' keys (modified in place)
+    Changed: Vdelta now works like Volume - only shows color when comparing with previous value.
     """
     if current_value is None:
         return ""
@@ -122,55 +121,21 @@ def get_value_color(current_value, previous_value=None, is_positive_only=False, 
     except (ValueError, TypeError):
         return ""
     
-    epsilon = 0.0001
-    
     # If we have previous value, compare
     if previous_value is not None:
         try:
             previous = float(previous_value)
             diff = current - previous
-            
-            # If values are equal or very close
-            if abs(diff) <= epsilon:
-                # Increment repetition count
-                if repetition_info is not None:
-                    repetition_info['count'] = repetition_info.get('count', 0) + 1
-                
-                # If repeated 3+ times, return white (no color)
-                if repetition_info and repetition_info.get('count', 0) >= 3:
-                    return ""
-                
-                # If repeated less than 3 times, return last color
-                if repetition_info and repetition_info.get('last_color'):
-                    return repetition_info['last_color']
-                
-                # If no last color, show based on value direction
-                if current > epsilon:
-                    return "value-up"
-                if current < -epsilon:
-                    return "value-down"
-                return ""
-            else:
-                # Value changed - reset repetition count and determine new color
-                if repetition_info is not None:
-                    repetition_info['count'] = 0
-                
-                if diff > epsilon:
-                    if repetition_info is not None:
-                        repetition_info['last_color'] = "value-up"
-                    return "value-up"
-                elif diff < -epsilon:
-                    if repetition_info is not None:
-                        repetition_info['last_color'] = "value-down"
-                    return "value-down"
+            if diff > 0.0001:
+                return "value-up"
+            elif diff < -0.0001:
+                return "value-down"
+            # If values are equal or very close, no color
+            return ""
         except (ValueError, TypeError):
             pass
     
-    # No previous value - show color based on value itself
-    if current > epsilon:
-        return "value-up"
-    if current < -epsilon:
-        return "value-down"
-    
+    # No previous value - no color (white) for all values
+    # This makes vdelta work like volume - only color when comparing
     return ""
 
