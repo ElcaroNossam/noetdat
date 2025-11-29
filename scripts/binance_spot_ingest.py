@@ -98,9 +98,13 @@ def ingest_snapshot() -> int:
             vdelta_8h = max(-abs(volume_8h) * 2.0, min(abs(volume_8h) * 2.0, vdelta_8h_calc))
             vdelta_1d = max(-abs(volume_1d) * 2.0, min(abs(volume_1d) * 2.0, vdelta_1d_calc))
 
-            # Spot doesn't have open interest or funding rate
-            # Open Interest exists only for Futures, so for Spot it should be 0
-            # Funding rate also doesn't exist for Spot
+            # Spot doesn't have open interest or funding rate, but we'll get it from futures
+            # Get OI from futures for the same symbol (for reference, even though Spot doesn't have OI)
+            futures_symbol = Symbol.objects.filter(
+                symbol=symbol_code, market_type="futures"
+            ).first()
+            
+            # Initialize OI and funding rate
             oi = 0.0
             funding_rate = 0.0
             oi_change_5m = 0.0
@@ -108,6 +112,24 @@ def ingest_snapshot() -> int:
             oi_change_1h = 0.0
             oi_change_8h = 0.0
             oi_change_1d = 0.0
+            
+            futures_snapshot = None
+            if futures_symbol:
+                # Get latest futures snapshot to get OI, funding rate, and OI changes
+                futures_snapshot = (
+                    ScreenerSnapshot.objects.filter(symbol=futures_symbol)
+                    .order_by("-ts")
+                    .first()
+                )
+                if futures_snapshot:
+                    oi = float(futures_snapshot.open_interest) if futures_snapshot.open_interest else 0.0
+                    funding_rate = float(futures_snapshot.funding_rate) if futures_snapshot.funding_rate else 0.0
+                    # Get OI changes directly from futures snapshot
+                    oi_change_5m = float(futures_snapshot.oi_change_5m) if futures_snapshot.oi_change_5m else 0.0
+                    oi_change_15m = float(futures_snapshot.oi_change_15m) if futures_snapshot.oi_change_15m else 0.0
+                    oi_change_1h = float(futures_snapshot.oi_change_1h) if futures_snapshot.oi_change_1h else 0.0
+                    oi_change_8h = float(futures_snapshot.oi_change_8h) if futures_snapshot.oi_change_8h else 0.0
+                    oi_change_1d = float(futures_snapshot.oi_change_1d) if futures_snapshot.oi_change_1d else 0.0
 
             # Get or create symbol with market_type="spot"
             # Use filter().first() + create() to avoid race conditions

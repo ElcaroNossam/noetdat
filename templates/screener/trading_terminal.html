@@ -79,15 +79,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Preserve language prefix
-        // Build API path - check if current URL has language prefix
+        const langPrefix = window.getLanguagePrefix ? window.getLanguagePrefix() : (window.location.pathname.match(/^\/(ru|en|es|he)\//)?.[1] || 'ru');
+        // Build API path based on current URL structure (same logic as screener.js)
         const currentPath = window.location.pathname;
         const pathParts = currentPath.split('/').filter(p => p);
         const hasLangPrefix = pathParts.length > 0 && ['ru', 'en', 'es', 'he'].includes(pathParts[0]);
         
-        // If URL has language prefix, use it; otherwise use /api/ directly
         const apiPath = hasLangPrefix 
             ? `/${pathParts[0]}/api/symbols/`
             : `/api/symbols/`;
+        
         fetch(`${apiPath}?market_type=${marketType}&search=${encodeURIComponent(search)}`)
             .then(res => res.json())
             .then(data => {
@@ -571,17 +572,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция обновления статистики (использует currentSymbol)
     function updateStats() {
-        // Build API path - check if current URL has language prefix
+        // Build API path based on current URL structure (same logic as screener.js)
         const currentPath = window.location.pathname;
         const pathParts = currentPath.split('/').filter(p => p);
         const hasLangPrefix = pathParts.length > 0 && ['ru', 'en', 'es', 'he'].includes(pathParts[0]);
         
-        // If URL has language prefix, use it; otherwise use /api/ directly
-        // For default language (ru), prefix_default_language=False means no prefix in URL
+        // Build API path: if current URL has language prefix, use it; otherwise use /api/ directly
         const apiPath = hasLangPrefix 
             ? `/${pathParts[0]}/api/symbol/`
             : `/api/symbol/`;
-        fetch(`${apiPath}${currentSymbol}/?market_type=${marketType}`)
+        
+        fetch(`${apiPath}${encodeURIComponent(currentSymbol)}/?market_type=${marketType}`)
             .then(res => res.json())
             .then(data => {
                 if (data.latest) {
