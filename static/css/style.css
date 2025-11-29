@@ -291,7 +291,6 @@ body {
     border-radius: 4px;
     transition: all 0.2s;
     font-size: 0.9rem;
-    cursor: pointer;
 }
 
 .market-type-btn:hover {
