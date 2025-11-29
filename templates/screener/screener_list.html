@@ -175,20 +175,54 @@
     ];
     
     // Market type toggle handler - prevents duplicate market_type params
-    document.addEventListener('DOMContentLoaded', function() {
-        const marketTypeButtons = document.querySelectorAll('.market-type-toggle button[data-market-type]');
-        marketTypeButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const newMarketType = this.dataset.marketType;
-                const url = new URL(window.location);
-                // Remove all market_type params to prevent duplicates
-                url.searchParams.delete('market_type');
-                // Add new market_type
-                url.searchParams.set('market_type', newMarketType);
-                // Navigate to new URL
-                window.location.href = url.toString();
+    (function() {
+        function initMarketTypeToggle() {
+            const marketTypeButtons = document.querySelectorAll('.market-type-toggle button[data-market-type]');
+            console.log('Market type buttons found:', marketTypeButtons.length);
+            
+            if (marketTypeButtons.length === 0) {
+                // Buttons not ready yet, try again
+                setTimeout(initMarketTypeToggle, 100);
+                return;
+            }
+            
+            marketTypeButtons.forEach(btn => {
+                // Remove any existing listeners by cloning
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const newMarketType = this.dataset.marketType;
+                    console.log('Market type button clicked:', newMarketType);
+                    
+                    const url = new URL(window.location);
+                    
+                    // Remove all market_type params to prevent duplicates
+                    url.searchParams.delete('market_type');
+                    
+                    // Add new market_type
+                    url.searchParams.set('market_type', newMarketType);
+                    
+                    console.log('Navigating to:', url.toString());
+                    
+                    // Navigate to new URL
+                    window.location.href = url.toString();
+                });
             });
-        });
-    });
+            
+            console.log('Market type toggle initialized');
+        }
+        
+        // Try to initialize immediately
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMarketTypeToggle);
+        } else {
+            // DOM already loaded, initialize immediately
+            initMarketTypeToggle();
+        }
+    })();
 </script>
 {% endblock %}
