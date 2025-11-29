@@ -89,8 +89,8 @@ body {
 
 .language-select {
     padding: 0.4rem 0.75rem;
-    background: #000000;
-    border: 1px solid #45a29e44;
+    background: #0a0a0a;
+    border: 1px solid #45a29e33;
     border-radius: 4px;
     color: #c5c6c7;
     font-size: 0.9rem;
@@ -270,23 +270,19 @@ body {
     border-color: #66fcf1;
 }
 
-.market-type-toggle-wrapper {
-    display: flex;
+.market-type-toggle {
+    display: inline-flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
-    align-items: center;
-}
-
-.market-type-btn-wrapper {
-    position: relative;
-    z-index: 100;
-    isolation: isolate; /* Create new stacking context */
+    padding: 0.5rem;
+    background: #0a0a0a;
+    border-radius: 6px;
+    border: 1px solid #45a29e33;
 }
 
 .market-type-btn {
     padding: 0.5rem 1rem;
     text-align: center;
-    text-decoration: none;
     color: #c5c6c7;
     cursor: pointer;
     user-select: none;
@@ -295,12 +291,6 @@ body {
     border-radius: 4px;
     transition: all 0.2s;
     font-size: 0.9rem;
-    position: relative;
-    z-index: 101;
-    pointer-events: auto !important;
-    touch-action: manipulation; /* Improve touch responsiveness */
-    display: block;
-    width: 100%;
     min-width: 100px;
 }
 

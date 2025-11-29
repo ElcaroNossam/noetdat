@@ -7,13 +7,9 @@
 {% block content %}
 <div class="screener-container">
     <h1>{% trans "Crypto Screener" %}</h1>
-    <div class="market-type-toggle-wrapper">
-        <div class="market-type-btn-wrapper">
-            <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures" id="btn-futures">{% trans "Futures" %}</button>
-        </div>
-        <div class="market-type-btn-wrapper">
-            <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot" id="btn-spot">{% trans "Spot" %}</button>
-        </div>
+    <div class="market-type-toggle">
+        <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures" id="btn-futures">{% trans "Futures" %}</button>
+        <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot" id="btn-spot">{% trans "Spot" %}</button>
     </div>
     <form method="get" class="screener-filters">
         <input type="hidden" id="market_type_hidden" name="market_type" value="{{ market_type }}">
@@ -178,93 +174,32 @@
         "ts",
     ];
     
-    // Market type toggle handler - simple and reliable
-    (function() {
-        let initialized = false;
+    // Market type toggle handler - simple and direct
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnFutures = document.getElementById('btn-futures');
+        const btnSpot = document.getElementById('btn-spot');
         
-        function initMarketTypeButtons() {
-            const btnFutures = document.getElementById('btn-futures');
-            const btnSpot = document.getElementById('btn-spot');
-            
-            if (!btnFutures || !btnSpot) {
-                return; // Buttons not found yet, will retry
-            }
-            
-            if (initialized) {
-                // Already initialized, just verify buttons are still clickable
-                return;
-            }
-            
-            // Check if buttons are visible and not covered
-            const rectFutures = btnFutures.getBoundingClientRect();
-            const rectSpot = btnSpot.getBoundingClientRect();
-            const elementAtFutures = document.elementFromPoint(rectFutures.left + rectFutures.width / 2, rectFutures.top + rectFutures.height / 2);
-            const elementAtSpot = document.elementFromPoint(rectSpot.left + rectSpot.width / 2, rectSpot.top + rectSpot.height / 2);
-            
-            // If something else is on top, log it for debugging
-            if (elementAtFutures !== btnFutures && elementAtFutures !== btnFutures.parentElement) {
-                console.warn('Button Futures may be covered by:', elementAtFutures);
-            }
-            if (elementAtSpot !== btnSpot && elementAtSpot !== btnSpot.parentElement) {
-                console.warn('Button Spot may be covered by:', elementAtSpot);
-            }
-            
-            // Use direct onclick assignment for maximum compatibility
-            btnFutures.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                const url = new URL(window.location);
-                url.searchParams.delete('market_type');
-                url.searchParams.set('market_type', 'futures');
-                window.location.href = url.toString();
-                return false;
-            };
-            
-            btnSpot.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                const url = new URL(window.location);
-                url.searchParams.delete('market_type');
-                url.searchParams.set('market_type', 'spot');
-                window.location.href = url.toString();
-                return false;
-            };
-            
-            // Also add event listeners as backup (using mousedown for better reliability)
-            btnFutures.addEventListener('mousedown', function(e) {
+        if (btnFutures) {
+            btnFutures.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const url = new URL(window.location);
                 url.searchParams.delete('market_type');
                 url.searchParams.set('market_type', 'futures');
                 window.location.href = url.toString();
-            }, { capture: true });
-            
-            btnSpot.addEventListener('mousedown', function(e) {
+            });
+        }
+        
+        if (btnSpot) {
+            btnSpot.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 const url = new URL(window.location);
                 url.searchParams.delete('market_type');
                 url.searchParams.set('market_type', 'spot');
                 window.location.href = url.toString();
-            }, { capture: true });
-            
-            initialized = true;
+            });
         }
-        
-        // Initialize immediately if DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initMarketTypeButtons);
-        } else {
-            initMarketTypeButtons();
-        }
-        
-        // Also try after delays as fallback
-        setTimeout(initMarketTypeButtons, 0);
-        setTimeout(initMarketTypeButtons, 100);
-        setTimeout(initMarketTypeButtons, 500);
-    })();
+    });
 </script>
 {% endblock %}

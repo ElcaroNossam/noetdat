@@ -13,7 +13,7 @@
                 <select id="language-select" name="language" onchange="this.form.submit()" class="language-select">
                     {% for language in languages %}
                         <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
-                            {% if language.code == 'ru' %}🇷🇺{% elif language.code == 'en' %}🇬🇧{% elif language.code == 'es' %}🇪🇸{% elif language.code == 'he' %}🇮🇱{% endif %} {{ language.name_local }}
+                            {% if language.code == 'ru' %}🇷🇺{% elif language.code == 'en' %}🇬🇧{% elif language.code == 'es' %}🇪🇸{% elif language.code == 'he' %}🇮🇱{% endif %} {{ language.code|upper }}
                         </option>
                     {% endfor %}
                 </select>
