@@ -743,10 +743,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 funding_rate: storeValue(row.funding_rate),
                 // Open Interest
                 open_interest: storeValue(row.open_interest),
-            };
-            
-            previousValues.set(symbol, storedValues);
-            console.log('Stored values for', symbol, ':', Object.keys(storedValues).length, 'fields');
+            });
         }
         console.log('renderScreenerTable: Completed, total previousValues:', previousValues.size);
         // Apply visibility immediately after rendering all rows
