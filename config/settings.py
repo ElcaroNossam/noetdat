@@ -116,6 +116,12 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
+# Language settings
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60  # 1 year
+LANGUAGE_COOKIE_HTTPONLY = False  # Allow JavaScript to read it
+LANGUAGE_COOKIE_SAMESITE = 'Lax'
+
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [

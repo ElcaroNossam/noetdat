@@ -2,6 +2,7 @@
 {% load static %}
 {% load formatting %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
 {% block title %}{% trans "Trading Terminal" %} — {{ symbol.symbol }}{% endblock %}
 
@@ -183,14 +184,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function initTradingView() {
+        // Проверяем, что контейнер существует и видим
+        const container = document.getElementById('tradingview-widget-container');
+        const widgetDiv = document.getElementById('tradingview-widget');
+        
+        if (!container || !widgetDiv) {
+            console.error('TradingView container not found!');
+            return;
+        }
+        
+        // Убеждаемся, что контейнер видим
+        container.style.display = 'block';
+        container.style.visibility = 'visible';
+        container.style.opacity = '1';
+        widgetDiv.style.display = 'block';
+        widgetDiv.style.visibility = 'visible';
+        widgetDiv.style.opacity = '1';
+        
         // Увеличиваем задержку для правильного расчета высоты после применения flexbox
         setTimeout(function() {
             const chartHeight = calculateChartHeight();
             console.log('Chart height calculated:', chartHeight);
             
-            const container = document.getElementById('tradingview-widget-container');
             if (container) {
                 container.style.height = chartHeight + 'px';
+                container.style.minHeight = chartHeight + 'px';
+            }
+            
+            // Проверяем, что TradingView загружен
+            if (typeof TradingView === 'undefined') {
+                console.error('TradingView library not loaded!');
+                return;
             }
             
             const widgetConfig = {
@@ -200,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 "timezone": "Etc/UTC",
                 "theme": "dark",
                 "style": "1",
-                "locale": "ru",
+                "locale": "{{ LANGUAGE_CODE }}",
                 "toolbar_bg": "#000000",
                 "enable_publishing": false,
                 "hide_top_toolbar": false,
@@ -211,7 +235,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 "width": "100%"
             };
             
-            new TradingView.widget(widgetConfig);
+            try {
+                new TradingView.widget(widgetConfig);
+                console.log('TradingView widget initialized');
+            } catch (error) {
+                console.error('Error initializing TradingView widget:', error);
+            }
         }, 500);
     }
     

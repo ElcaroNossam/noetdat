@@ -15,13 +15,56 @@
         (function() {
             const languageStorageKey = "preferred_language";
             
+            // Get language from HTML lang attribute (set by Django)
+            function getLanguageFromHTML() {
+                const htmlLang = document.documentElement.getAttribute('lang');
+                if (htmlLang && ['ru', 'en', 'es', 'he'].includes(htmlLang)) {
+                    return htmlLang;
+                }
+                return null;
+            }
+            
+            // Helper function to get cookie value
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+            
             window.getCurrentLanguage = function() {
-                // First, try to get from URL path
+                // Priority 1: Get from HTML lang attribute (most reliable, set by Django)
+                // This is set by Django template and reflects the actual current language
+                const htmlLang = getLanguageFromHTML();
+                if (htmlLang) {
+                    try {
+                        localStorage.setItem(languageStorageKey, htmlLang);
+                    } catch (e) {
+                        // ignore
+                    }
+                    return htmlLang;
+                }
+                
+                // Priority 2: Check Django language cookie (set by set_language view)
+                try {
+                    const cookieLang = getCookie('django_language');
+                    if (cookieLang && ['ru', 'en', 'es', 'he'].includes(cookieLang)) {
+                        try {
+                            localStorage.setItem(languageStorageKey, cookieLang);
+                        } catch (e) {
+                            // ignore
+                        }
+                        return cookieLang;
+                    }
+                } catch (e) {
+                    // ignore
+                }
+                
+                // Priority 3: Try to get from URL path
                 const currentPath = window.location.pathname;
                 const langMatch = currentPath.match(/^\/(ru|en|es|he)\//);
                 if (langMatch && langMatch[1]) {
                     const lang = langMatch[1];
-                    // Save to localStorage for future use
                     try {
                         localStorage.setItem(languageStorageKey, lang);
                     } catch (e) {
@@ -29,7 +72,25 @@
                     }
                     return lang;
                 }
-                // If not in URL, try localStorage
+                
+                // Priority 3: If no prefix in URL, check if it's root path (default = ru)
+                // With prefix_default_language=False, root path means Russian
+                if (currentPath === '/' || currentPath.match(/^\/[^\/]+$/)) {
+                    // Check if there's a saved language preference
+                    try {
+                        const savedLang = localStorage.getItem(languageStorageKey);
+                        if (savedLang && ['ru', 'en', 'es', 'he'].includes(savedLang)) {
+                            // If saved language is not ru, we should use it
+                            return savedLang;
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                    // Default to Russian for root path
+                    return 'ru';
+                }
+                
+                // Priority 4: Try localStorage
                 try {
                     const savedLang = localStorage.getItem(languageStorageKey);
                     if (savedLang && ['ru', 'en', 'es', 'he'].includes(savedLang)) {
@@ -38,6 +99,7 @@
                 } catch (e) {
                     // ignore
                 }
+                
                 // Default to Russian (matches LANGUAGE_CODE in settings)
                 return 'ru';
             };
@@ -57,17 +119,40 @@
                 // Monitor language selector changes
                 const langForm = document.querySelector('.language-form');
                 if (langForm) {
-                    langForm.addEventListener('submit', function() {
+                    langForm.addEventListener('submit', function(e) {
                         const select = this.querySelector('select[name="language"]');
                         if (select && select.value) {
+                            const selectedLang = select.value;
                             try {
-                                localStorage.setItem(languageStorageKey, select.value);
+                                // Save immediately before form submits
+                                localStorage.setItem(languageStorageKey, selectedLang);
+                                // Also set cookie immediately (will be overwritten by Django, but helps)
+                                document.cookie = `django_language=${selectedLang}; path=/; max-age=${365 * 24 * 60 * 60}`;
                             } catch (e) {
                                 // ignore
                             }
+                            // The form will submit and Django will handle the redirect
+                            // After redirect, the new language will be in URL and HTML lang attribute
                         }
                     });
                 }
+                
+                // Also monitor for language changes after page load (e.g., after redirect)
+                const observer = new MutationObserver(function(mutations) {
+                    const htmlLang = getLanguageFromHTML();
+                    if (htmlLang) {
+                        try {
+                            localStorage.setItem(languageStorageKey, htmlLang);
+                        } catch (e) {
+                            // ignore
+                        }
+                    }
+                });
+                
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['lang']
+                });
             });
         })();
     </script>

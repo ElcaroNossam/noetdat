@@ -1579,20 +1579,23 @@ body {
 }
 
 .trading-chart-container {
-    position: relative;
+    position: relative !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: #0a0a0a;
+    background: #0a0a0a !important;
     border-radius: 0;
     border: none;
     overflow: visible !important;
     flex: 1 1 auto !important;
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
     min-height: calc(100vh - 150px) !important;
     height: calc(100vh - 150px) !important;
+    max-height: none !important;
     z-index: 1 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .tradingview-widget-container {
