@@ -76,15 +76,10 @@ def format_vdelta(value, market_type: str | None = None) -> str:
     if abs_v < 0.0001:
         return "0.00"
 
-    # Different thresholds for spot vs futures.
-    # Spot обычно имеет меньшие значения, поэтому суффиксы начинаем раньше.
-    if market_type == "spot":
-        k_threshold = 500.0      # K начиная примерно с 500
-        m_threshold = 500_000.0  # M начиная примерно с 500K
-    else:
-        # Futures / default thresholds
-        k_threshold = 1_000.0
-        m_threshold = 1_000_000.0
+    # Для Vdelta делаем одинаковые пороги для spot и futures,
+    # чтобы суффиксы вели себя одинаково на всех рынках.
+    k_threshold = 1_000.0
+    m_threshold = 1_000_000.0
 
     if abs_v >= m_threshold:
         return f"{v / 1_000_000:.2f}M"
