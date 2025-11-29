@@ -312,6 +312,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!url.searchParams.has("market_type")) {
             url.searchParams.set("market_type", "spot");
         }
+        // Preserve language from URL path (e.g., /ru/, /en/, etc.)
+        const pathParts = url.pathname.split('/').filter(p => p);
+        if (pathParts.length > 0 && ['ru', 'en', 'es', 'he'].includes(pathParts[0])) {
+            // Language is in path, it will be preserved automatically
+        }
+        // Also preserve language from query params if present
+        const langFromPath = pathParts[0];
+        if (langFromPath && ['ru', 'en', 'es', 'he'].includes(langFromPath)) {
+            // Language is in path, no need to add to query
+        }
         return url.search || "?";
     }
 
@@ -388,7 +398,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!screenerTableBody) return;
         try {
             const query = buildQueryFromCurrentLocation();
-            const url = "/api/screener/" + query.replace(/^\?/, "?");
+            // Preserve language prefix from current URL (e.g., /ru/, /en/, etc.)
+            const currentPath = window.location.pathname;
+            const langPrefix = currentPath.match(/^\/(ru|en|es|he)\//)?.[1];
+            const apiPath = langPrefix ? `/${langPrefix}/api/screener/` : "/api/screener/";
+            const url = apiPath + query.replace(/^\?/, "?");
             const resp = await fetch(url);
             if (!resp.ok) return;
 
@@ -837,12 +851,7 @@ document.addEventListener("DOMContentLoaded", () => {
         initializePreviousValues();
         
         // Apply column visibility IMMEDIATELY on page load (for server-rendered HTML)
-        // Use multiple attempts to ensure it applies
         applyColumnVisibility();
-        setTimeout(() => applyColumnVisibility(), 0);
-        requestAnimationFrame(() => {
-            applyColumnVisibility();
-        });
         
         // Build settings panel
         buildSettingsPanel();
@@ -850,14 +859,17 @@ document.addEventListener("DOMContentLoaded", () => {
         setupTableSorting();
         // Sync scrollbars
         syncScrollbars();
-        // Start auto-refresh - delay first refresh to ensure previousValues is fully initialized
-        // Use longer delay to ensure DOM is ready and values are parsed
-        setTimeout(() => {
+        
+        // Start auto-refresh immediately - previousValues is already initialized
+        // Use requestAnimationFrame for optimal timing (runs before next paint)
+        requestAnimationFrame(() => {
             // Re-initialize to be sure (in case DOM wasn't ready)
             initializePreviousValues();
+            // Start refresh immediately
             refreshScreener();
+            // Then continue with interval
             setInterval(refreshScreener, autoRefreshIntervalMs);
-        }, 200);
+        });
         
         // Update scrollbar spacer after table updates
         const observer = new MutationObserver(() => {
@@ -881,7 +893,11 @@ document.addEventListener("DOMContentLoaded", () => {
         async function fetchSymbolData() {
             if (!symbol) return;
             try {
-                const resp = await fetch(`/api/symbol/${encodeURIComponent(symbol)}/`);
+                // Preserve language prefix from current URL (e.g., /ru/, /en/, etc.)
+                const currentPath = window.location.pathname;
+                const langPrefix = currentPath.match(/^\/(ru|en|es|he)\//)?.[1];
+                const apiPath = langPrefix ? `/${langPrefix}/api/symbol/` : "/api/symbol/";
+                const resp = await fetch(`${apiPath}${encodeURIComponent(symbol)}/`);
                 if (!resp.ok) return;
                 const data = await resp.json();
                 renderSymbolDetail(data);
