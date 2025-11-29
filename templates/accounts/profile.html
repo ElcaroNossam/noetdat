@@ -1,47 +1,48 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}{% endblock %}
 
 {% block content %}
 <div class="profile-container">
-    <h1>Профиль</h1>
+    <h1>{% trans "Profile" %}</h1>
     <div class="profile-card">
-        <p><strong>Логин:</strong> {{ request.user.username }}</p>
-        <p><strong>Email:</strong> {{ request.user.email|default:"—" }}</p>
+        <p><strong>{% trans "Username:" %}</strong> {{ request.user.username }}</p>
+        <p><strong>{% trans "Email:" %}</strong> {{ request.user.email|default:"—" }}</p>
         {% if request.user.profile %}
             <div class="profile-status">
-                <p><strong>Email подтвержден:</strong> 
+                <p><strong>{% trans "Email verified:" %}</strong> 
                     {% if request.user.profile.email_verified %}
-                        <span class="status-badge status-success">✓ Да</span>
+                        <span class="status-badge status-success">✓ {% trans "Yes" %}</span>
                     {% else %}
-                        <span class="status-badge status-warning">✗ Нет</span>
+                        <span class="status-badge status-warning">✗ {% trans "No" %}</span>
                         <form method="post" action="{% url 'accounts:resend_verification' %}" style="display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-small btn-secondary">Отправить повторно</button>
+                            <button type="submit" class="btn-small btn-secondary">{% trans "Resend" %}</button>
                         </form>
                     {% endif %}
                 </p>
-                <p><strong>Одобрен администратором:</strong> 
+                <p><strong>{% trans "Admin approved:" %}</strong> 
                     {% if request.user.profile.admin_approved %}
-                        <span class="status-badge status-success">✓ Да</span>
+                        <span class="status-badge status-success">✓ {% trans "Yes" %}</span>
                     {% else %}
-                        <span class="status-badge status-pending">⏳ Ожидает</span>
+                        <span class="status-badge status-pending">⏳ {% trans "Pending" %}</span>
                     {% endif %}
                 </p>
-                <p><strong>Статус аккаунта:</strong> {{ request.user.profile.is_pro|yesno:"Pro,Базовый" }}</p>
+                <p><strong>{% trans "Account status:" %}</strong> {{ request.user.profile.is_pro|yesno:"Pro,Basic" }}</p>
             </div>
             
             {% if not request.user.profile.email_verified %}
                 <div class="profile-alert alert-warning">
-                    <p>⚠️ Пожалуйста, подтвердите ваш email адрес для доступа к скринеру.</p>
+                    <p>⚠️ {% trans "Please verify your email address to access the screener." %}</p>
                 </div>
             {% elif not request.user.profile.admin_approved %}
                 <div class="profile-alert alert-info">
-                    <p>ℹ️ Ваш аккаунт ожидает одобрения администратором. Вы получите уведомление после одобрения.</p>
+                    <p>ℹ️ {% trans "Your account is awaiting administrator approval. You will be notified once approved." %}</p>
                 </div>
             {% else %}
                 <div class="profile-alert alert-success">
-                    <p>✓ Ваш аккаунт активен. Вы можете использовать все функции скринера.</p>
+                    <p>✓ {% trans "Your account is active. You can use all screener features." %}</p>
                 </div>
             {% endif %}
         {% endif %}

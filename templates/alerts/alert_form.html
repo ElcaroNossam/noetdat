@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Создать алерт — {{ symbol.symbol }}{% endblock %}
+{% block title %}{% trans "Create Alert" %} — {{ symbol.symbol }}{% endblock %}
 
 {% block content %}
 <div class="auth-container">
     <div class="alert-form-container">
-        <h1>Создать алерт для {{ symbol.symbol }}</h1>
+        <h1>{% trans "Create alert for" %} {{ symbol.symbol }}</h1>
         <form method="post" class="auth-form alert-form">
             {% csrf_token %}
             {% if market_type %}
@@ -28,13 +29,12 @@
             {% endfor %}
             <div class="alert-info-box">
                 <p class="chart-note">
-                    <strong>Telegram chat id</strong> можно получить, написав боту и посмотрев id в ответе
-                    или через сторонние боты вроде @userinfobot.
+                    <strong>{% trans "Telegram chat id" %}</strong> {% trans "can be obtained by writing to the bot and checking the id in the response or through third-party bots like @userinfobot." %}
                 </p>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn-primary">Сохранить алерт</button>
-                <a href="{% url 'screener:symbol_detail' symbol.symbol %}?market_type={{ market_type|default:'spot' }}" class="btn-secondary">Отмена</a>
+                <button type="submit" class="btn-primary">{% trans "Save alert" %}</button>
+                <a href="{% url 'screener:symbol_detail' symbol.symbol %}?market_type={{ market_type|default:'spot' }}" class="btn-secondary">{% trans "Cancel" %}</a>
             </div>
         </form>
     </div>

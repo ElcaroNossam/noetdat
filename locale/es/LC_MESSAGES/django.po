@@ -239,3 +239,174 @@ msgstr "Valor actual:"
 msgid "Threshold:"
 msgstr "Umbral:"
 
+msgid "Create account"
+msgstr "Crear cuenta"
+
+msgid "Username:"
+msgstr "Nombre de usuario:"
+
+msgid "Email:"
+msgstr "Correo electrónico:"
+
+msgid "Yes"
+msgstr "Sí"
+
+msgid "Resend"
+msgstr "Reenviar"
+
+msgid "Admin approved:"
+msgstr "Aprobado por administrador:"
+
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "Account status:"
+msgstr "Estado de la cuenta:"
+
+msgid "Basic"
+msgstr "Básico"
+
+msgid "Please verify your email address to access the screener."
+msgstr "Por favor, verifique su dirección de correo electrónico para acceder al filtro."
+
+msgid "Your account is awaiting administrator approval. You will be notified once approved."
+msgstr "Su cuenta está esperando la aprobación del administrador. Se le notificará una vez aprobada."
+
+msgid "Your account is active. You can use all screener features."
+msgstr "Su cuenta está activa. Puede usar todas las funciones del filtro."
+
+msgid "Create alert for"
+msgstr "Crear alerta para"
+
+msgid "Telegram chat id"
+msgstr "ID de chat de Telegram"
+
+msgid "can be obtained by writing to the bot and checking the id in the response or through third-party bots like @userinfobot."
+msgstr "se puede obtener escribiendo al bot y revisando el id en la respuesta o a través de bots de terceros como @userinfobot."
+
+msgid "Save alert"
+msgstr "Guardar alerta"
+
+msgid "Edit Alert"
+msgstr "Editar alerta"
+
+msgid "Edit alert for"
+msgstr "Editar alerta para"
+
+msgid "Save changes"
+msgstr "Guardar cambios"
+
+msgid "Alert Management"
+msgstr "Gestión de alertas"
+
+msgid "All markets"
+msgstr "Todos los mercados"
+
+msgid "All"
+msgstr "Todos"
+
+msgid "Active"
+msgstr "Activas"
+
+msgid "Inactive"
+msgstr "Inactivas"
+
+msgid "Reset"
+msgstr "Restablecer"
+
+msgid "Metric"
+msgstr "Métrica"
+
+msgid "Condition"
+msgstr "Condición"
+
+msgid "Threshold"
+msgstr "Umbral"
+
+msgid "Telegram ID"
+msgstr "ID de Telegram"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Created"
+msgstr "Creado"
+
+msgid "Last Triggered"
+msgstr "Último activado"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Deactivate"
+msgstr "Desactivar"
+
+msgid "Activate"
+msgstr "Activar"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Delete this alert?"
+msgstr "¿Eliminar esta alerta?"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "You don't have any alerts yet."
+msgstr "Aún no tiene alertas."
+
+msgid "Create an alert on the symbol page to receive notifications."
+msgstr "Cree una alerta en la página del símbolo para recibir notificaciones."
+
+msgid "Volatility 15m"
+msgstr "Volatilidad 15m"
+
+msgid "Volume 5m"
+msgstr "Volumen 5m"
+
+msgid "Light stub chart: data can be loaded via"
+msgstr "Gráfico stub ligero: los datos se pueden cargar a través de"
+
+msgid "No data for this symbol."
+msgstr "No hay datos para este símbolo."
+
+msgid "Latest snapshots"
+msgstr "Últimas instantáneas"
+
+msgid "TS"
+msgstr "TS"
+
+msgid "Change 15m %"
+msgstr "Cambio 15m %"
+
+msgid "Volume 15m"
+msgstr "Volumen 15m"
+
+msgid "OI Δ 15m %"
+msgstr "OI Δ 15m %"
+
+msgid "No data."
+msgstr "No hay datos."
+
+msgid "Operator"
+msgstr "Operador"
+
+msgid "Threshold value"
+msgstr "Valor umbral"
+
+msgid "Log in"
+msgstr "Iniciar sesión"
+
+msgid ", to create alerts for this symbol."
+msgstr ", para crear alertas para este símbolo."
+
+msgid "OI change 15m %"
+msgstr "Cambio OI 15m %"
+
+msgid "Funding rate"
+msgstr "Tasa de financiación"
+
+msgid "Vdelta 15m"
+msgstr "Vdelta 15m"
+

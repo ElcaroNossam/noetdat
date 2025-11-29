@@ -1,4 +1,6 @@
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_language_info_list for LANGUAGES as languages %}
 <header class="navbar">
     <div class="navbar-left">
         <a href="{% url 'screener:list' %}" class="navbar-logo">Noet-Dat</a>
@@ -9,10 +11,11 @@
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 <select name="language" onchange="this.form.submit()" class="language-select">
-                    <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>🇷🇺 Русский</option>
-                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 English</option>
-                    <option value="es" {% if LANGUAGE_CODE == 'es' %}selected{% endif %}>🇪🇸 Español</option>
-                    <option value="he" {% if LANGUAGE_CODE == 'he' %}selected{% endif %}>🇮🇱 עברית</option>
+                    {% for language in languages %}
+                        <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+                            {% if language.code == 'ru' %}🇷🇺{% elif language.code == 'en' %}🇬🇧{% elif language.code == 'es' %}🇪🇸{% elif language.code == 'he' %}🇮🇱{% endif %} {{ language.name_local }}
+                        </option>
+                    {% endfor %}
                 </select>
             </form>
         </div>

@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}{% endblock %}
 
 {% block content %}
 <div class="auth-container">
-    <h1>Логин</h1>
+    <h1>{% trans "Login" %}</h1>
     <form method="post" class="auth-form">
         {% csrf_token %}
         {{ form.non_field_errors }}
@@ -19,7 +20,7 @@
                 {% endif %}
             </div>
         {% endfor %}
-        <button type="submit" class="btn-primary">Войти</button>
+        <button type="submit" class="btn-primary">{% trans "Login" %}</button>
     </form>
 </div>
 {% endblock %}

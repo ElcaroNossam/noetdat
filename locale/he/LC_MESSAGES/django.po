@@ -240,3 +240,174 @@ msgstr "ערך נוכחי:"
 msgid "Threshold:"
 msgstr "סף:"
 
+msgid "Create account"
+msgstr "צור חשבון"
+
+msgid "Username:"
+msgstr "שם משתמש:"
+
+msgid "Email:"
+msgstr "אימייל:"
+
+msgid "Yes"
+msgstr "כן"
+
+msgid "Resend"
+msgstr "שלח שוב"
+
+msgid "Admin approved:"
+msgstr "אושר על ידי מנהל:"
+
+msgid "Pending"
+msgstr "ממתין"
+
+msgid "Account status:"
+msgstr "סטטוס חשבון:"
+
+msgid "Basic"
+msgstr "בסיסי"
+
+msgid "Please verify your email address to access the screener."
+msgstr "אנא אמת את כתובת האימייל שלך כדי לגשת למסנן."
+
+msgid "Your account is awaiting administrator approval. You will be notified once approved."
+msgstr "החשבון שלך ממתין לאישור מנהל. תתעדכן לאחר האישור."
+
+msgid "Your account is active. You can use all screener features."
+msgstr "החשבון שלך פעיל. אתה יכול להשתמש בכל תכונות המסנן."
+
+msgid "Create alert for"
+msgstr "צור התראה עבור"
+
+msgid "Telegram chat id"
+msgstr "מזהה צ'אט טלגרם"
+
+msgid "can be obtained by writing to the bot and checking the id in the response or through third-party bots like @userinfobot."
+msgstr "ניתן לקבל על ידי כתיבה לבוט ובדיקת המזהה בתגובה או דרך בוטים של צד שלישי כמו @userinfobot."
+
+msgid "Save alert"
+msgstr "שמור התראה"
+
+msgid "Edit Alert"
+msgstr "ערוך התראה"
+
+msgid "Edit alert for"
+msgstr "ערוך התראה עבור"
+
+msgid "Save changes"
+msgstr "שמור שינויים"
+
+msgid "Alert Management"
+msgstr "ניהול התראות"
+
+msgid "All markets"
+msgstr "כל השווקים"
+
+msgid "All"
+msgstr "הכל"
+
+msgid "Active"
+msgstr "פעיל"
+
+msgid "Inactive"
+msgstr "לא פעיל"
+
+msgid "Reset"
+msgstr "איפוס"
+
+msgid "Metric"
+msgstr "מדד"
+
+msgid "Condition"
+msgstr "תנאי"
+
+msgid "Threshold"
+msgstr "סף"
+
+msgid "Telegram ID"
+msgstr "מזהה טלגרם"
+
+msgid "Status"
+msgstr "סטטוס"
+
+msgid "Created"
+msgstr "נוצר"
+
+msgid "Last Triggered"
+msgstr "הופעל לאחרונה"
+
+msgid "Actions"
+msgstr "פעולות"
+
+msgid "Deactivate"
+msgstr "השבת"
+
+msgid "Activate"
+msgstr "הפעל"
+
+msgid "Edit"
+msgstr "ערוך"
+
+msgid "Delete this alert?"
+msgstr "למחוק את ההתראה הזו?"
+
+msgid "Delete"
+msgstr "מחק"
+
+msgid "You don't have any alerts yet."
+msgstr "אין לך התראות עדיין."
+
+msgid "Create an alert on the symbol page to receive notifications."
+msgstr "צור התראה בדף הסמל כדי לקבל התראות."
+
+msgid "Volatility 15m"
+msgstr "תנודתיות 15דק"
+
+msgid "Volume 5m"
+msgstr "נפח 5דק"
+
+msgid "Light stub chart: data can be loaded via"
+msgstr "גרף stub קל: ניתן לטעון נתונים דרך"
+
+msgid "No data for this symbol."
+msgstr "אין נתונים עבור סמל זה."
+
+msgid "Latest snapshots"
+msgstr "צילומי מסך אחרונים"
+
+msgid "TS"
+msgstr "TS"
+
+msgid "Change 15m %"
+msgstr "שינוי 15דק %"
+
+msgid "Volume 15m"
+msgstr "נפח 15דק"
+
+msgid "OI Δ 15m %"
+msgstr "OI Δ 15דק %"
+
+msgid "No data."
+msgstr "אין נתונים."
+
+msgid "Operator"
+msgstr "אופרטור"
+
+msgid "Threshold value"
+msgstr "ערך סף"
+
+msgid "Log in"
+msgstr "התחבר"
+
+msgid ", to create alerts for this symbol."
+msgstr ", כדי ליצור התראות עבור סמל זה."
+
+msgid "OI change 15m %"
+msgstr "שינוי OI 15דק %"
+
+msgid "Funding rate"
+msgstr "שיעור מימון"
+
+msgid "Vdelta 15m"
+msgstr "Vdelta 15דק"
+

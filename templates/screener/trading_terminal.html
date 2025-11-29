@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Кнопка добавления нового показателя
         const addBtn = document.createElement('button');
         addBtn.className = 'btn-secondary btn-small';
-        addBtn.textContent = '+ Добавить показатель';
+        addBtn.textContent = '+ {% trans "Add indicator" %}';
         addBtn.onclick = () => addStatConfigRow(body, null, configIndex++);
         body.appendChild(addBtn);
         

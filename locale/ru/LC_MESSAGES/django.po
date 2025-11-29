@@ -249,3 +249,174 @@ msgstr "Тики"
 msgid "Vdelta"
 msgstr "Vdelta"
 
+msgid "Create account"
+msgstr "Создать аккаунт"
+
+msgid "Username:"
+msgstr "Логин:"
+
+msgid "Email:"
+msgstr "Email:"
+
+msgid "Yes"
+msgstr "Да"
+
+msgid "Resend"
+msgstr "Отправить повторно"
+
+msgid "Admin approved:"
+msgstr "Одобрен администратором:"
+
+msgid "Pending"
+msgstr "Ожидает"
+
+msgid "Account status:"
+msgstr "Статус аккаунта:"
+
+msgid "Basic"
+msgstr "Базовый"
+
+msgid "Please verify your email address to access the screener."
+msgstr "Пожалуйста, подтвердите ваш email адрес для доступа к скринеру."
+
+msgid "Your account is awaiting administrator approval. You will be notified once approved."
+msgstr "Ваш аккаунт ожидает одобрения администратором. Вы получите уведомление после одобрения."
+
+msgid "Your account is active. You can use all screener features."
+msgstr "Ваш аккаунт активен. Вы можете использовать все функции скринера."
+
+msgid "Create alert for"
+msgstr "Создать алерт для"
+
+msgid "Telegram chat id"
+msgstr "Telegram chat id"
+
+msgid "can be obtained by writing to the bot and checking the id in the response or through third-party bots like @userinfobot."
+msgstr "можно получить, написав боту и посмотрев id в ответе или через сторонние боты вроде @userinfobot."
+
+msgid "Save alert"
+msgstr "Сохранить алерт"
+
+msgid "Edit Alert"
+msgstr "Редактировать алерт"
+
+msgid "Edit alert for"
+msgstr "Редактировать алерт для"
+
+msgid "Save changes"
+msgstr "Сохранить изменения"
+
+msgid "Alert Management"
+msgstr "Управление алертами"
+
+msgid "All markets"
+msgstr "Все рынки"
+
+msgid "All"
+msgstr "Все"
+
+msgid "Active"
+msgstr "Активные"
+
+msgid "Inactive"
+msgstr "Неактивные"
+
+msgid "Reset"
+msgstr "Сбросить"
+
+msgid "Metric"
+msgstr "Метрика"
+
+msgid "Condition"
+msgstr "Условие"
+
+msgid "Threshold"
+msgstr "Порог"
+
+msgid "Telegram ID"
+msgstr "Telegram ID"
+
+msgid "Status"
+msgstr "Статус"
+
+msgid "Created"
+msgstr "Создан"
+
+msgid "Last Triggered"
+msgstr "Последний триггер"
+
+msgid "Actions"
+msgstr "Действия"
+
+msgid "Deactivate"
+msgstr "Отключить"
+
+msgid "Activate"
+msgstr "Включить"
+
+msgid "Edit"
+msgstr "Редактировать"
+
+msgid "Delete this alert?"
+msgstr "Удалить этот алерт?"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "You don't have any alerts yet."
+msgstr "У вас пока нет алертов."
+
+msgid "Create an alert on the symbol page to receive notifications."
+msgstr "Создайте алерт на странице символа, чтобы получать уведомления."
+
+msgid "Volatility 15m"
+msgstr "Волатильность 15м"
+
+msgid "Volume 5m"
+msgstr "Объем 5м"
+
+msgid "Light stub chart: data can be loaded via"
+msgstr "Лёгкий stub-график: данные можно будет грузить через"
+
+msgid "No data for this symbol."
+msgstr "Нет данных по этому символу."
+
+msgid "Latest snapshots"
+msgstr "Последние snapshot'ы"
+
+msgid "TS"
+msgstr "TS"
+
+msgid "Change 15m %"
+msgstr "Change 15m %"
+
+msgid "Volume 15m"
+msgstr "Volume 15m"
+
+msgid "OI Δ 15m %"
+msgstr "OI Δ 15m %"
+
+msgid "No data."
+msgstr "Нет данных."
+
+msgid "Operator"
+msgstr "Оператор"
+
+msgid "Threshold value"
+msgstr "Пороговое значение"
+
+msgid "Log in"
+msgstr "Войдите"
+
+msgid ", to create alerts for this symbol."
+msgstr ", чтобы создавать алерты по этому символу."
+
+msgid "OI change 15m %"
+msgstr "OI change 15m %"
+
+msgid "Funding rate"
+msgstr "Funding rate"
+
+msgid "Vdelta 15m"
+msgstr "Vdelta 15m"
+

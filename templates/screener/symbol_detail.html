@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load formatting %}
+{% load i18n %}
 
 {% block title %}{% endblock %}
 
@@ -8,67 +9,67 @@
     <div class="symbol-detail-header">
         <h1>{{ symbol.symbol }}</h1>
         <a href="{% url 'screener:trading_terminal' symbol.symbol %}?market_type={{ market_type }}" class="btn-primary trading-terminal-btn">
-            📈 Торговый терминал
+            📈 {% trans "Trading Terminal" %}
         </a>
     </div>
     {% if latest_snapshot %}
         <div class="symbol-summary">
             <div class="metric">
-                <span class="label">Price</span>
+                <span class="label">{% trans "Price" %}</span>
                 <span class="value" id="symbol-price">{{ latest_snapshot.price|format_price }}</span>
             </div>
             <div class="metric">
-                <span class="label">Volatility 15m</span>
+                <span class="label">{% trans "Volatility 15m" %}</span>
                 <span class="value" id="symbol-volatility-15m">{{ latest_snapshot.volatility_15m|floatformat:2 }}</span>
             </div>
             <div class="metric">
-                <span class="label">Volume 5m</span>
+                <span class="label">{% trans "Volume 5m" %}</span>
                 <span class="value" id="symbol-volume-5m">{{ latest_snapshot.volume_5m|floatformat:2 }}</span>
             </div>
             <div class="metric">
-                <span class="label">OI Δ 15m</span>
+                <span class="label">{% trans "OI Δ 15m" %}</span>
                 <span class="value {% if latest_snapshot.oi_change_15m > 0 %}value-up{% elif latest_snapshot.oi_change_15m < 0 %}value-down{% endif %}"
                       id="symbol-oi-change-15m">
                     {{ latest_snapshot.oi_change_15m|floatformat:3 }}
                 </span>
             </div>
             <div class="metric">
-                <span class="label">Funding</span>
+                <span class="label">{% trans "Funding" %}</span>
                 <span class="value {% if latest_snapshot.funding_rate > 0 %}value-up{% elif latest_snapshot.funding_rate < 0 %}value-down{% endif %}"
                       id="symbol-funding-rate">
                     {{ latest_snapshot.funding_rate|format_percentage:4 }}
                 </span>
             </div>
             <div class="metric">
-                <span class="label">OI</span>
+                <span class="label">{% trans "OI" %}</span>
                 <span class="value" id="symbol-open-interest">{{ latest_snapshot.open_interest|floatformat:0 }}</span>
             </div>
             <div class="metric">
-                <span class="label">Updated</span>
+                <span class="label">{% trans "Updated" %}</span>
                 <span class="value" id="symbol-updated-at">{{ latest_snapshot.ts }}</span>
             </div>
         </div>
 
         <div class="symbol-chart">
             <canvas id="priceChart" width="800" height="200"></canvas>
-            <p class="chart-note">Лёгкий stub-график: данные можно будет грузить через `/api/symbol/{{ symbol.symbol }}/`.</p>
+            <p class="chart-note">{% trans "Light stub chart: data can be loaded via" %} `/api/symbol/{{ symbol.symbol }}/`.</p>
         </div>
     {% else %}
-        <p>Нет данных по этому символу.</p>
+        <p>{% trans "No data for this symbol." %}</p>
     {% endif %}
 
-    <h2>Последние snapshot'ы</h2>
+    <h2>{% trans "Latest snapshots" %}</h2>
     <div class="screener-table-wrapper">
         <table class="screener-table">
             <thead>
             <tr>
-                <th>TS</th>
-                <th>Price</th>
-                <th>Change 15m %</th>
-                <th>Volume 15m</th>
-                <th>OI</th>
-                <th>OI Δ 15m %</th>
-                <th>Funding</th>
+                <th>{% trans "TS" %}</th>
+                <th>{% trans "Price" %}</th>
+                <th>{% trans "Change 15m %" %}</th>
+                <th>{% trans "Volume 15m" %}</th>
+                <th>{% trans "OI" %}</th>
+                <th>{% trans "OI Δ 15m %" %}</th>
+                <th>{% trans "Funding" %}</th>
             </tr>
             </thead>
             <tbody id="symbol-history-body">
@@ -90,7 +91,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="8" class="empty-row">Нет данных.</td>
+                    <td colspan="8" class="empty-row">{% trans "No data." %}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -98,23 +99,23 @@
     </div>
 
     {% if request.user.is_authenticated %}
-        <h2>Создать алерт</h2>
+        <h2>{% trans "Create Alert" %}</h2>
         <div class="auth-form">
             <form method="post" action="{% url 'alerts:create' symbol.symbol %}?market_type={{ market_type }}">
                 {% csrf_token %}
                 <input type="hidden" name="market_type" value="{{ market_type }}">
                 <div class="form-field">
-                    <label for="metric">Метрика</label>
+                    <label for="metric">{% trans "Metric" %}</label>
                     <select name="metric" id="metric">
-                        <option value="change_15m">Change 15m %</option>
-                        <option value="oi_change_15m">OI change 15m %</option>
-                        <option value="volume_15m">Volume 15m</option>
-                        <option value="funding_rate">Funding rate</option>
-                        <option value="vdelta_15m">Vdelta 15m</option>
+                        <option value="change_15m">{% trans "Change 15m %" %}</option>
+                        <option value="oi_change_15m">{% trans "OI change 15m %" %}</option>
+                        <option value="volume_15m">{% trans "Volume 15m" %}</option>
+                        <option value="funding_rate">{% trans "Funding rate" %}</option>
+                        <option value="vdelta_15m">{% trans "Vdelta 15m" %}</option>
                     </select>
                 </div>
                 <div class="form-field">
-                    <label for="operator">Оператор</label>
+                    <label for="operator">{% trans "Operator" %}</label>
                     <select name="operator" id="operator">
                         <option value=">">&gt;</option>
                         <option value="<">&lt;</option>
@@ -123,23 +124,22 @@
                     </select>
                 </div>
                 <div class="form-field">
-                    <label for="threshold">Пороговое значение</label>
+                    <label for="threshold">{% trans "Threshold value" %}</label>
                     <input type="number" step="0.0001" name="threshold" id="threshold">
                 </div>
                 <div class="form-field">
-                    <label for="telegram_chat_id">Telegram chat id</label>
+                    <label for="telegram_chat_id">{% trans "Telegram chat id" %}</label>
                     <input type="number" name="telegram_chat_id" id="telegram_chat_id">
                 </div>
                 <p class="chart-note">
-                    Telegram chat id можно узнать, написав вашему боту и посмотрев id в ответе
-                    либо через сервисные боты вроде @userinfobot.
+                    {% trans "Telegram chat id can be obtained by writing to your bot and checking the id in the response or through service bots like @userinfobot." %}
                 </p>
-                <button type="submit" class="btn-primary">Создать алерт</button>
+                <button type="submit" class="btn-primary">{% trans "Create Alert" %}</button>
             </form>
         </div>
     {% else %}
         <p class="chart-note">
-            <a href="{% url 'accounts:login' %}">Войдите</a>, чтобы создавать алерты по этому символу.
+            <a href="{% url 'accounts:login' %}">{% trans "Log in" %}</a>{% trans ", to create alerts for this symbol." %}
         </p>
     {% endif %}
 </div>

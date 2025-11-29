@@ -239,3 +239,174 @@ msgstr "Current value:"
 msgid "Threshold:"
 msgstr "Threshold:"
 
+msgid "Create account"
+msgstr "Create account"
+
+msgid "Username:"
+msgstr "Username:"
+
+msgid "Email:"
+msgstr "Email:"
+
+msgid "Yes"
+msgstr "Yes"
+
+msgid "Resend"
+msgstr "Resend"
+
+msgid "Admin approved:"
+msgstr "Admin approved:"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "Account status:"
+msgstr "Account status:"
+
+msgid "Basic"
+msgstr "Basic"
+
+msgid "Please verify your email address to access the screener."
+msgstr "Please verify your email address to access the screener."
+
+msgid "Your account is awaiting administrator approval. You will be notified once approved."
+msgstr "Your account is awaiting administrator approval. You will be notified once approved."
+
+msgid "Your account is active. You can use all screener features."
+msgstr "Your account is active. You can use all screener features."
+
+msgid "Create alert for"
+msgstr "Create alert for"
+
+msgid "Telegram chat id"
+msgstr "Telegram chat id"
+
+msgid "can be obtained by writing to the bot and checking the id in the response or through third-party bots like @userinfobot."
+msgstr "can be obtained by writing to the bot and checking the id in the response or through third-party bots like @userinfobot."
+
+msgid "Save alert"
+msgstr "Save alert"
+
+msgid "Edit Alert"
+msgstr "Edit Alert"
+
+msgid "Edit alert for"
+msgstr "Edit alert for"
+
+msgid "Save changes"
+msgstr "Save changes"
+
+msgid "Alert Management"
+msgstr "Alert Management"
+
+msgid "All markets"
+msgstr "All markets"
+
+msgid "All"
+msgstr "All"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Inactive"
+msgstr "Inactive"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Metric"
+msgstr "Metric"
+
+msgid "Condition"
+msgstr "Condition"
+
+msgid "Threshold"
+msgstr "Threshold"
+
+msgid "Telegram ID"
+msgstr "Telegram ID"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Created"
+msgstr "Created"
+
+msgid "Last Triggered"
+msgstr "Last Triggered"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Deactivate"
+msgstr "Deactivate"
+
+msgid "Activate"
+msgstr "Activate"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Delete this alert?"
+msgstr "Delete this alert?"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "You don't have any alerts yet."
+msgstr "You don't have any alerts yet."
+
+msgid "Create an alert on the symbol page to receive notifications."
+msgstr "Create an alert on the symbol page to receive notifications."
+
+msgid "Volatility 15m"
+msgstr "Volatility 15m"
+
+msgid "Volume 5m"
+msgstr "Volume 5m"
+
+msgid "Light stub chart: data can be loaded via"
+msgstr "Light stub chart: data can be loaded via"
+
+msgid "No data for this symbol."
+msgstr "No data for this symbol."
+
+msgid "Latest snapshots"
+msgstr "Latest snapshots"
+
+msgid "TS"
+msgstr "TS"
+
+msgid "Change 15m %"
+msgstr "Change 15m %"
+
+msgid "Volume 15m"
+msgstr "Volume 15m"
+
+msgid "OI Δ 15m %"
+msgstr "OI Δ 15m %"
+
+msgid "No data."
+msgstr "No data."
+
+msgid "Operator"
+msgstr "Operator"
+
+msgid "Threshold value"
+msgstr "Threshold value"
+
+msgid "Log in"
+msgstr "Log in"
+
+msgid ", to create alerts for this symbol."
+msgstr ", to create alerts for this symbol."
+
+msgid "OI change 15m %"
+msgstr "OI change 15m %"
+
+msgid "Funding rate"
+msgstr "Funding rate"
+
+msgid "Vdelta 15m"
+msgstr "Vdelta 15m"
+

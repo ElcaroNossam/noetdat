@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Редактировать алерт — {{ alert.symbol.symbol }}{% endblock %}
+{% block title %}{% trans "Edit Alert" %} — {{ alert.symbol.symbol }}{% endblock %}
 
 {% block content %}
 <div class="auth-container">
     <div class="alert-form-container">
-        <h1>Редактировать алерт для {{ alert.symbol.symbol }}</h1>
+        <h1>{% trans "Edit alert for" %} {{ alert.symbol.symbol }}</h1>
         <form method="post" class="auth-form alert-form">
             {% csrf_token %}
             {{ form.non_field_errors }}
@@ -25,13 +26,12 @@
             {% endfor %}
             <div class="alert-info-box">
                 <p class="chart-note">
-                    <strong>Telegram chat id</strong> можно получить, написав боту и посмотрев id в ответе
-                    или через сторонние боты вроде @userinfobot.
+                    <strong>{% trans "Telegram chat id" %}</strong> {% trans "can be obtained by writing to the bot and checking the id in the response or through third-party bots like @userinfobot." %}
                 </p>
             </div>
             <div class="form-actions">
-                <button type="submit" class="btn-primary">Сохранить изменения</button>
-                <a href="{% url 'alerts:list' %}" class="btn-secondary">Отмена</a>
+                <button type="submit" class="btn-primary">{% trans "Save changes" %}</button>
+                <a href="{% url 'alerts:list' %}" class="btn-secondary">{% trans "Cancel" %}</a>
             </div>
         </form>
     </div>

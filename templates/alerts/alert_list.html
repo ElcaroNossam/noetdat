@@ -1,26 +1,27 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Алерты{% endblock %}
+{% block title %}{% trans "Alerts" %}{% endblock %}
 
 {% block content %}
 <div class="alerts-container">
     <div class="alerts-header">
-        <h1>Управление алертами</h1>
+        <h1>{% trans "Alert Management" %}</h1>
         <div class="alerts-filters">
             <form method="get" class="alerts-filter-form">
-                <input type="text" name="search" placeholder="Поиск по символу" value="{{ search }}">
+                <input type="text" name="search" placeholder="{% trans 'Search by symbol' %}" value="{{ search }}">
                 <select name="market_type">
-                    <option value="">Все рынки</option>
-                    <option value="futures" {% if market_type == 'futures' %}selected{% endif %}>Фьючерсы</option>
-                    <option value="spot" {% if market_type == 'spot' %}selected{% endif %}>Спот</option>
+                    <option value="">{% trans "All markets" %}</option>
+                    <option value="futures" {% if market_type == 'futures' %}selected{% endif %}>{% trans "Futures" %}</option>
+                    <option value="spot" {% if market_type == 'spot' %}selected{% endif %}>{% trans "Spot" %}</option>
                 </select>
                 <select name="active">
-                    <option value="">Все</option>
-                    <option value="true" {% if active_filter == 'true' %}selected{% endif %}>Активные</option>
-                    <option value="false" {% if active_filter == 'false' %}selected{% endif %}>Неактивные</option>
+                    <option value="">{% trans "All" %}</option>
+                    <option value="true" {% if active_filter == 'true' %}selected{% endif %}>{% trans "Active" %}</option>
+                    <option value="false" {% if active_filter == 'false' %}selected{% endif %}>{% trans "Inactive" %}</option>
                 </select>
-                <button type="submit" class="btn-secondary">Фильтровать</button>
-                <a href="{% url 'alerts:list' %}" class="btn-secondary">Сбросить</a>
+                <button type="submit" class="btn-secondary">{% trans "Filter" %}</button>
+                <a href="{% url 'alerts:list' %}" class="btn-secondary">{% trans "Reset" %}</a>
             </form>
         </div>
     </div>
@@ -30,15 +31,15 @@
             <table class="alerts-table">
                 <thead>
                     <tr>
-                        <th>Символ</th>
-                        <th>Метрика</th>
-                        <th>Условие</th>
-                        <th>Порог</th>
-                        <th>Telegram ID</th>
-                        <th>Статус</th>
-                        <th>Создан</th>
-                        <th>Последний триггер</th>
-                        <th>Действия</th>
+                        <th>{% trans "Symbol" %}</th>
+                        <th>{% trans "Metric" %}</th>
+                        <th>{% trans "Condition" %}</th>
+                        <th>{% trans "Threshold" %}</th>
+                        <th>{% trans "Telegram ID" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Created" %}</th>
+                        <th>{% trans "Last Triggered" %}</th>
+                        <th>{% trans "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,7 +56,7 @@
                             <td>{{ alert.telegram_chat_id|default:"—" }}</td>
                             <td>
                                 <span class="alert-status {% if alert.active %}alert-active{% else %}alert-inactive-status{% endif %}">
-                                    {% if alert.active %}Активен{% else %}Неактивен{% endif %}
+                                    {% if alert.active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
                                 </span>
                             </td>
                             <td>{{ alert.created_at|date:"d.m.Y H:i" }}</td>
@@ -64,13 +65,13 @@
                                 <form method="post" action="{% url 'alerts:toggle' alert.id %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn-small {% if alert.active %}btn-warning{% else %}btn-success{% endif %}">
-                                        {% if alert.active %}Отключить{% else %}Включить{% endif %}
+                                        {% if alert.active %}{% trans "Deactivate" %}{% else %}{% trans "Activate" %}{% endif %}
                                     </button>
                                 </form>
-                                <a href="{% url 'alerts:edit' alert.id %}" class="btn-small btn-secondary">Редактировать</a>
-                                <form method="post" action="{% url 'alerts:delete' alert.id %}" style="display: inline;" onsubmit="return confirm('Удалить этот алерт?');">
+                                <a href="{% url 'alerts:edit' alert.id %}" class="btn-small btn-secondary">{% trans "Edit" %}</a>
+                                <form method="post" action="{% url 'alerts:delete' alert.id %}" style="display: inline;" onsubmit="return confirm('{% trans 'Delete this alert?' %}');">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn-small btn-danger">Удалить</button>
+                                    <button type="submit" class="btn-small btn-danger">{% trans "Delete" %}</button>
                                 </form>
                             </td>
                         </tr>
@@ -80,8 +81,8 @@
         </div>
     {% else %}
         <div class="empty-state">
-            <p>У вас пока нет алертов.</p>
-            <p>Создайте алерт на странице символа, чтобы получать уведомления.</p>
+            <p>{% trans "You don't have any alerts yet." %}</p>
+            <p>{% trans "Create an alert on the symbol page to receive notifications." %}</p>
         </div>
     {% endif %}
 </div>
