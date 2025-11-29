@@ -133,12 +133,13 @@ def screener_list_api(request):
         symbol = s.symbol.symbol
         prev_vals = symbol_previous_values.get(symbol, {})
         
-        # Format vdelta values
-        vdelta_5m_formatted = format_vdelta(s.vdelta_5m)
-        vdelta_15m_formatted = format_vdelta(s.vdelta_15m)
-        vdelta_1h_formatted = format_vdelta(s.vdelta_1h)
-        vdelta_8h_formatted = format_vdelta(s.vdelta_8h)
-        vdelta_1d_formatted = format_vdelta(s.vdelta_1d)
+        # Format vdelta values (use different thresholds for spot / futures)
+        market_type = s.symbol.market_type
+        vdelta_5m_formatted = format_vdelta(s.vdelta_5m, market_type)
+        vdelta_15m_formatted = format_vdelta(s.vdelta_15m, market_type)
+        vdelta_1h_formatted = format_vdelta(s.vdelta_1h, market_type)
+        vdelta_8h_formatted = format_vdelta(s.vdelta_8h, market_type)
+        vdelta_1d_formatted = format_vdelta(s.vdelta_1d, market_type)
         
         # Get colors for vdelta (compare with previous value for same symbol)
         vdelta_5m_color = get_value_color(s.vdelta_5m, prev_vals.get("vdelta_5m"), False)
@@ -147,12 +148,12 @@ def screener_list_api(request):
         vdelta_8h_color = get_value_color(s.vdelta_8h, prev_vals.get("vdelta_8h"), False)
         vdelta_1d_color = get_value_color(s.vdelta_1d, prev_vals.get("vdelta_1d"), False)
         
-        # Format volume values
-        volume_5m_formatted = format_volume(s.volume_5m)
-        volume_15m_formatted = format_volume(s.volume_15m)
-        volume_1h_formatted = format_volume(s.volume_1h)
-        volume_8h_formatted = format_volume(s.volume_8h)
-        volume_1d_formatted = format_volume(s.volume_1d)
+        # Format volume values (use different thresholds for spot / futures)
+        volume_5m_formatted = format_volume(s.volume_5m, market_type)
+        volume_15m_formatted = format_volume(s.volume_15m, market_type)
+        volume_1h_formatted = format_volume(s.volume_1h, market_type)
+        volume_8h_formatted = format_volume(s.volume_8h, market_type)
+        volume_1d_formatted = format_volume(s.volume_1d, market_type)
         
         # Get colors for volume (compare with previous value for same symbol)
         volume_5m_color = get_value_color(s.volume_5m, prev_vals.get("volume_5m"), True)
@@ -161,8 +162,8 @@ def screener_list_api(request):
         volume_8h_color = get_value_color(s.volume_8h, prev_vals.get("volume_8h"), True)
         volume_1d_color = get_value_color(s.volume_1d, prev_vals.get("volume_1d"), True)
         
-        # Format OI and get color
-        oi_formatted = format_volume(s.open_interest)
+        # Format OI and get color (same thresholds as volume)
+        oi_formatted = format_volume(s.open_interest, market_type)
         oi_color = get_value_color(s.open_interest, prev_vals.get("open_interest"), True)
         
         # Format price

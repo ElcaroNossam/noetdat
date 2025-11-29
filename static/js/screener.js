@@ -386,26 +386,36 @@ document.addEventListener("DOMContentLoaded", () => {
         return value.toFixed(8);
     }
 
-    function formatVolume(v) {
+    function formatVolume(v, marketType) {
         if (v === null || v === undefined || v === "") return "0.00";
         const value = Number(v);
         if (isNaN(value) || value === 0) return "0.00";
         const absV = Math.abs(value);
-        if (absV >= 1_000_000_000) return (value / 1_000_000_000).toFixed(2) + "B";
-        if (absV >= 1_000_000) return (value / 1_000_000).toFixed(2) + "M";
-        if (absV >= 1_000) return (value / 1_000).toFixed(2) + "K";
+        // Different thresholds for spot vs futures to mirror backend logic.
+        const isSpot = marketType === "spot";
+        const kThreshold = isSpot ? 100 : 1_000;
+        const mThreshold = isSpot ? 500_000 : 1_000_000;
+        const bThreshold = 1_000_000_000;
+        if (absV >= bThreshold) return (value / 1_000_000_000).toFixed(2) + "B";
+        if (absV >= mThreshold) return (value / 1_000_000).toFixed(2) + "M";
+        if (absV >= kThreshold) return (value / 1_000).toFixed(2) + "K";
         return value.toFixed(2);
     }
 
-    function formatVdelta(v) {
+    function formatVdelta(v, marketType) {
         if (v === null || v === undefined || v === "") return "0.00";
         const value = Number(v);
         if (isNaN(value)) return "0.00";
         const absV = Math.abs(value);
         // Handle zero case
         if (absV < 0.0001) return "0.00";
-        if (absV >= 1_000_000) return (value / 1_000_000).toFixed(2) + "M";
-        if (absV >= 1_000) return (value / 1_000).toFixed(2) + "K";
+        // Different thresholds for spot vs futures:
+        // Spot обычно имеет меньшие значения, поэтому суффиксы начинаем раньше.
+        const isSpot = marketType === "spot";
+        const kThreshold = isSpot ? 500 : 1_000;
+        const mThreshold = isSpot ? 500_000 : 1_000_000;
+        if (absV >= mThreshold) return (value / 1_000_000).toFixed(2) + "M";
+        if (absV >= kThreshold) return (value / 1_000).toFixed(2) + "K";
         if (absV >= 1) {
             // Check if value is whole number (same logic as Django: abs_v == int(abs_v))
             // For whole numbers, return as integer (preserve sign like int(v) in Python)
@@ -635,7 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Use formatted value from backend if available, otherwise format on client
                 const formatted = (row[col + "_formatted"] !== undefined && row[col + "_formatted"] !== null && row[col + "_formatted"] !== "") 
                     ? row[col + "_formatted"] 
-                    : formatVdelta(row[col] ?? 0);
+                    : formatVdelta(row[col] ?? 0, marketType);
                 // Use color from backend if available, otherwise calculate based on previousValues
                 let cls = (row[col + "_color"] !== undefined && row[col + "_color"] !== null && row[col + "_color"] !== "") 
                     ? row[col + "_color"] 
@@ -654,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Use formatted value from backend if available, otherwise format on client
                 const formatted = (row[col + "_formatted"] !== undefined && row[col + "_formatted"] !== null && row[col + "_formatted"] !== "") 
                     ? row[col + "_formatted"] 
-                    : formatVolume(row[col] ?? 0);
+                    : formatVolume(row[col] ?? 0, marketType);
                 // Use color from backend if available, otherwise calculate based on previousValues
                 let cls = (row[col + "_color"] !== undefined && row[col + "_color"] !== null && row[col + "_color"] !== "") 
                     ? row[col + "_color"] 
@@ -679,7 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Open Interest - use formatted value and color from backend (reference implementation)
             const oiFormatted = (row.open_interest_formatted !== undefined && row.open_interest_formatted !== null && row.open_interest_formatted !== "") 
                 ? row.open_interest_formatted 
-                : formatVolume(row.open_interest ?? 0);
+                : formatVolume(row.open_interest ?? 0, marketType);
             let oiCls = (row.open_interest_color !== undefined && row.open_interest_color !== null && row.open_interest_color !== "") 
                 ? row.open_interest_color 
                 : "";
@@ -1034,7 +1044,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     const v = latest.volatility_15m ?? 0;
                     vol15El.textContent = formatVolatility(v);
                 }
-                if (vol5mEl) vol5mEl.textContent = formatVolume(latest.volume_5m);
+                if (vol5mEl) {
+                    const mt = new URLSearchParams(window.location.search).get("market_type") || "spot";
+                    vol5mEl.textContent = formatVolume(latest.volume_5m, mt);
+                }
                 if (fundingEl) {
                     const f = latest.funding_rate ?? 0;
                     const fNumValue = Number(f);
@@ -1043,7 +1056,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (!isNaN(fNumValue) && fNumValue > 0.0000001) fundingEl.classList.add("value-up");
                     else if (!isNaN(fNumValue) && fNumValue < -0.0000001) fundingEl.classList.add("value-down");
                 }
-                if (oiEl) oiEl.textContent = formatVolume(latest.open_interest);
+                if (oiEl) {
+                    const mt = new URLSearchParams(window.location.search).get("market_type") || "spot";
+                    oiEl.textContent = formatVolume(latest.open_interest, mt);
+                }
                 if (updatedEl) updatedEl.textContent = latest.ts || "";
                 if (oi15El) {
                     const v = latest.oi_change_15m ?? 0;
@@ -1087,7 +1103,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 else if (!isNaN(c15NumValue) && c15NumValue < -0.0000001) change15Td.classList.add("value-down");
 
                 const vol15Td = document.createElement("td");
-                vol15Td.textContent = formatVolume(s.volume_15m);
+                {
+                    const mt = new URLSearchParams(window.location.search).get("market_type") || "spot";
+                    vol15Td.textContent = formatVolume(s.volume_15m, mt);
+                }
                 // Volume comparison - compare with previous snapshot in the list
                 if (snapshots.indexOf(s) > 0) {
                     const prevSnapshot = snapshots[snapshots.indexOf(s) - 1];
@@ -1096,7 +1115,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 const oiTd = document.createElement("td");
-                oiTd.textContent = formatVolume(s.open_interest);
+                {
+                    const mt = new URLSearchParams(window.location.search).get("market_type") || "spot";
+                    oiTd.textContent = formatVolume(s.open_interest, mt);
+                }
                 // OI comparison - compare with previous snapshot in the list
                 if (snapshots.indexOf(s) > 0) {
                     const prevSnapshot = snapshots[snapshots.indexOf(s) - 1];

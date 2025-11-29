@@ -4,7 +4,7 @@ Utility functions for formatting values (same logic as template filters).
 from decimal import Decimal
 
 
-def format_volume(value):
+def format_volume(value, market_type: str | None = None) -> str:
     """
     Format volume with K/M/B suffixes:
     - >= 1B: show as X.XXB
@@ -28,23 +28,37 @@ def format_volume(value):
     
     abs_v = abs(v)
 
-    if abs_v >= 1_000_000_000:
+    # Different thresholds for spot vs futures to make spot volumes more readable.
+    if market_type == "spot":
+        k_threshold = 100.0   # start K earlier on spot (e.g. 100+)
+        m_threshold = 500_000.0
+        b_threshold = 1_000_000_000.0
+    else:
+        # Futures / default thresholds
+        k_threshold = 1_000.0
+        m_threshold = 1_000_000.0
+        b_threshold = 1_000_000_000.0
+
+    if abs_v >= b_threshold:
         return f"{v / 1_000_000_000:.2f}B"
-    elif abs_v >= 1_000_000:
+    elif abs_v >= m_threshold:
         return f"{v / 1_000_000:.2f}M"
-    elif abs_v >= 1_000:
+    elif abs_v >= k_threshold:
         return f"{v / 1_000:.2f}K"
     else:
         return f"{v:.2f}"
 
 
-def format_vdelta(value):
+def format_vdelta(value, market_type: str | None = None) -> str:
     """
-    Format volume delta with K/M/B suffixes and smart rounding:
-    - >= 1M: show as X.XXM
-    - >= 1K: show as X.XXK
-    - >= 1: show as integer or 1 decimal
-    - < 1: show with 2 decimals
+    Format volume delta with K/M/B suffixes and smart rounding.
+    Thresholds can be slightly different for spot / futures to make values
+    more readable on spot, where absolute numbers are usually smaller.
+    Common logic:
+    - abs(v) very small -> 0.00
+    - large values -> K / M suffix
+    - medium values -> integer or 1 decimal
+    - small values -> 2 decimals
     """
     if value is None:
         return "0.00"
@@ -61,9 +75,20 @@ def format_vdelta(value):
 
     if abs_v < 0.0001:
         return "0.00"
-    if abs_v >= 1_000_000:
+
+    # Different thresholds for spot vs futures.
+    # Spot обычно имеет меньшие значения, поэтому суффиксы начинаем раньше.
+    if market_type == "spot":
+        k_threshold = 500.0      # K начиная примерно с 500
+        m_threshold = 500_000.0  # M начиная примерно с 500K
+    else:
+        # Futures / default thresholds
+        k_threshold = 1_000.0
+        m_threshold = 1_000_000.0
+
+    if abs_v >= m_threshold:
         return f"{v / 1_000_000:.2f}M"
-    elif abs_v >= 1_000:
+    elif abs_v >= k_threshold:
         return f"{v / 1_000:.2f}K"
     elif abs_v >= 1:
         # For values >= 1, show as integer if whole number, otherwise 1 decimal
