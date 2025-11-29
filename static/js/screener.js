@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const screenerTableBody = document.getElementById("screener-table-body");
-    const autoRefreshIntervalMs = 5000; // 5s for main screener (reduced frequency to avoid blocking user interactions)
+    const autoRefreshIntervalMs = 3000; // 3s for main screener
 
     const availableColumns = window.SCREENER_AVAILABLE_COLUMNS || [];
     const storageKey = "screener_visible_columns";
@@ -446,7 +446,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function refreshScreener() {
-        if (!screenerTableBody) return;
+        if (!screenerTableBody) {
+            console.warn('refreshScreener: screenerTableBody not found');
+            return;
+        }
         // Skip refresh if user is interacting
         if (isUserInteracting) {
             return;
@@ -467,16 +470,22 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const resp = await fetch(url);
             if (!resp.ok) {
-                // Silently fail - will retry on next interval
+                console.warn('refreshScreener: API request failed', resp.status, resp.statusText);
                 return;
             }
 
             const data = await resp.json();
+            if (!data || !Array.isArray(data)) {
+                console.warn('refreshScreener: Invalid data received', data);
+                return;
+            }
+            
+            console.log('refreshScreener: Updating table with', data.length, 'rows');
             renderScreenerTable(data);
             // Always reapply column visibility immediately after rendering
             applyColumnVisibility();
         } catch (e) {
-            // Silently fail - will retry on next interval
+            console.error('refreshScreener: Error', e);
         }
     }
 
@@ -502,7 +511,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderScreenerTable(rows) {
-        if (!screenerTableBody) return;
+        if (!screenerTableBody) {
+            console.warn('renderScreenerTable: screenerTableBody not found');
+            return;
+        }
+        
+        console.log('renderScreenerTable: Rendering', rows.length, 'rows, previousValues size:', previousValues.size);
         
         // Don't clear previousValues - keep them for comparison
         // Only clear the HTML
@@ -729,8 +743,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 funding_rate: storeValue(row.funding_rate),
                 // Open Interest
                 open_interest: storeValue(row.open_interest),
-            });
+            };
+            
+            previousValues.set(symbol, storedValues);
+            console.log('Stored values for', symbol, ':', Object.keys(storedValues).length, 'fields');
         }
+        console.log('renderScreenerTable: Completed, total previousValues:', previousValues.size);
         // Apply visibility immediately after rendering all rows
         applyColumnVisibility();
     }
@@ -949,14 +967,22 @@ document.addEventListener("DOMContentLoaded", () => {
         syncScrollbars();
         
         // Start auto-refresh immediately - previousValues is already initialized
+        // Store interval ID to prevent duplicates
+        let refreshIntervalId = null;
+        
         // Use requestAnimationFrame for optimal timing (runs before next paint)
         requestAnimationFrame(() => {
             // Re-initialize to be sure (in case DOM wasn't ready)
             initializePreviousValues();
             // Start refresh immediately
             refreshScreener();
-            // Then continue with interval
-            setInterval(refreshScreener, autoRefreshIntervalMs);
+            // Clear any existing interval to prevent duplicates
+            if (refreshIntervalId) {
+                clearInterval(refreshIntervalId);
+            }
+            // Then continue with interval (3 seconds)
+            refreshIntervalId = setInterval(refreshScreener, autoRefreshIntervalMs);
+            console.log('Auto-refresh started with interval:', autoRefreshIntervalMs, 'ms');
         });
         
         // Update scrollbar spacer after table updates
