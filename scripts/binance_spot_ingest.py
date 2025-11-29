@@ -54,6 +54,11 @@ def ingest_snapshot() -> int:
             symbol_code = t["symbol"]
 
             last_price = Decimal(t.get("lastPrice", "0"))
+            
+            # Skip coins with zero or invalid price
+            if last_price <= 0:
+                continue
+            
             price_change_percent_24h = float(t.get("priceChangePercent", 0.0))
             # Use quoteVolume (volume in USDT) for spot
             volume_24h = float(t.get("quoteVolume", t.get("volume", 0.0)))
