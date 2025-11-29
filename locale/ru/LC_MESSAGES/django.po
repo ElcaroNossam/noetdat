@@ -1,0 +1,251 @@
+# Russian translations for Noet-Dat
+# Copyright (C) 2025
+# This file is distributed under the same license as the Noet-Dat project.
+msgid ""
+msgstr ""
+"Project-Id-Version: Noet-Dat 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-28 12:00+0000\n"
+"PO-Revision-Date: 2025-01-28 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Screener"
+msgstr "Скринер"
+
+msgid "Alerts"
+msgstr "Алерты"
+
+msgid "Profile"
+msgstr "Профиль"
+
+msgid "Logout"
+msgstr "Выход"
+
+msgid "Login"
+msgstr "Логин"
+
+msgid "Register"
+msgstr "Регистрация"
+
+msgid "Crypto Screener"
+msgstr "Крипто-скринер"
+
+msgid "Futures"
+msgstr "Фьючерсы"
+
+msgid "Spot"
+msgstr "Спот"
+
+msgid "Search by symbol"
+msgstr "Поиск по символу"
+
+msgid "Filter"
+msgstr "Фильтровать"
+
+msgid "Screener Settings"
+msgstr "Настройки скринера"
+
+msgid "Symbol"
+msgstr "Символ"
+
+msgid "Price"
+msgstr "Цена"
+
+msgid "Change 5m"
+msgstr "Изменение 5м"
+
+msgid "Change 15m"
+msgstr "Изменение 15м"
+
+msgid "Change 1h"
+msgstr "Изменение 1ч"
+
+msgid "Change 8h"
+msgstr "Изменение 8ч"
+
+msgid "Change 1d"
+msgstr "Изменение 1д"
+
+msgid "OI Δ 5m"
+msgstr "OI Δ 5м"
+
+msgid "OI Δ 15m"
+msgstr "OI Δ 15м"
+
+msgid "OI Δ 1h"
+msgstr "OI Δ 1ч"
+
+msgid "OI Δ 8h"
+msgstr "OI Δ 8ч"
+
+msgid "OI Δ 1d"
+msgstr "OI Δ 1д"
+
+msgid "Vol 5m"
+msgstr "Волатильность 5м"
+
+msgid "Vol 15m"
+msgstr "Волатильность 15м"
+
+msgid "Vol 1h"
+msgstr "Волатильность 1ч"
+
+msgid "Ticks 5m"
+msgstr "Тики 5м"
+
+msgid "Ticks 15m"
+msgstr "Тики 15м"
+
+msgid "Ticks 1h"
+msgstr "Тики 1ч"
+
+msgid "Vdelta 5m"
+msgstr "Vdelta 5м"
+
+msgid "Vdelta 15m"
+msgstr "Vdelta 15м"
+
+msgid "Vdelta 1h"
+msgstr "Vdelta 1ч"
+
+msgid "Vdelta 8h"
+msgstr "Vdelta 8ч"
+
+msgid "Vdelta 1d"
+msgstr "Vdelta 1д"
+
+msgid "Volume 5m"
+msgstr "Объем 5м"
+
+msgid "Volume 15m"
+msgstr "Объем 15м"
+
+msgid "Volume 1h"
+msgstr "Объем 1ч"
+
+msgid "Volume 8h"
+msgstr "Объем 8ч"
+
+msgid "Volume 1d"
+msgstr "Объем 1д"
+
+msgid "Funding"
+msgstr "Фандинг"
+
+msgid "OI"
+msgstr "OI"
+
+msgid "Updated"
+msgstr "Обновлено"
+
+msgid "No data to display."
+msgstr "Нет данных для отображения."
+
+msgid "Page"
+msgstr "Страница"
+
+msgid "of"
+msgstr "из"
+
+msgid "Previous"
+msgstr "Назад"
+
+msgid "Next"
+msgstr "Вперёд"
+
+msgid "Create Alert"
+msgstr "Создать алерт"
+
+msgid "Trading Terminal"
+msgstr "Торговый терминал"
+
+msgid "Configure indicators"
+msgstr "Настроить показатели"
+
+msgid "Min volume 15m"
+msgstr "Мин объем 15м"
+
+msgid "Max volume 15m"
+msgstr "Макс объем 15м"
+
+msgid "Min change 15m %"
+msgstr "Мин изменение 15м %"
+
+msgid "Max change 15m %"
+msgstr "Макс изменение 15м %"
+
+msgid "Min OI Δ 15m %"
+msgstr "Мин OI Δ 15м %"
+
+msgid "Min OI"
+msgstr "Мин OI"
+
+msgid "Max OI"
+msgstr "Макс OI"
+
+msgid "Min funding"
+msgstr "Мин фандинг"
+
+msgid "Max funding"
+msgstr "Макс фандинг"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Add indicator"
+msgstr "Добавить показатель"
+
+msgid "Select indicator"
+msgstr "Выберите показатель"
+
+msgid "No"
+msgstr "Нет"
+
+msgid "Alert triggered!"
+msgstr "Алерт сработал!"
+
+msgid "Symbol:"
+msgstr "Символ:"
+
+msgid "Market type:"
+msgstr "Тип рынка:"
+
+msgid "Indicator:"
+msgstr "Показатель:"
+
+msgid "Condition:"
+msgstr "Условие:"
+
+msgid "Current value:"
+msgstr "Текущее значение:"
+
+msgid "Threshold:"
+msgstr "Порог:"
+
+msgid "Search symbol..."
+msgstr "Поиск символа..."
+
+msgid "Toggle market type"
+msgstr "Переключить тип рынка"
+
+msgid "Vol"
+msgstr "Вол"
+
+msgid "Change"
+msgstr "Изменение"
+
+msgid "Ticks"
+msgstr "Тики"
+
+msgid "Vdelta"
+msgstr "Vdelta"
+

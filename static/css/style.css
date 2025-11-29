@@ -78,6 +78,41 @@ body {
     gap: 0.5rem;
 }
 
+.language-selector {
+    position: relative;
+}
+
+.language-form {
+    margin: 0;
+    padding: 0;
+}
+
+.language-select {
+    padding: 0.4rem 0.75rem;
+    background: #0a0a0a;
+    border: 1px solid #45a29e33;
+    border-radius: 4px;
+    color: #c5c6c7;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c5c6c7' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 12px;
+    padding-right: 2rem;
+}
+
+.language-select:hover {
+    border-color: #66fcf1;
+}
+
+.language-select:focus {
+    outline: none;
+    border-color: #66fcf1;
+}
+
 .navbar-right a {
     color: #c5c6c7;
     margin-left: 0;
@@ -1223,11 +1258,13 @@ body {
     font-weight: 600;
 }
 
-.stat-item-inline .stat-value.positive {
+.stat-item-inline .stat-value.positive,
+.stat-item-inline .stat-value.value-up {
     color: #2ecc71;
 }
 
-.stat-item-inline .stat-value.negative {
+.stat-item-inline .stat-value.negative,
+.stat-item-inline .stat-value.value-down {
     color: #e74c3c;
 }
 

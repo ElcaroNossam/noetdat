@@ -1,16 +1,29 @@
+{% load i18n %}
 <header class="navbar">
     <div class="navbar-left">
         <a href="{% url 'screener:list' %}" class="navbar-logo">Noet-Dat</a>
     </div>
     <nav class="navbar-right">
-        <a href="{% url 'screener:list' %}">Скринер</a>
+        <div class="language-selector">
+            <form action="{% url 'set_language' %}" method="post" class="language-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <select name="language" onchange="this.form.submit()" class="language-select">
+                    <option value="ru" {% if LANGUAGE_CODE == 'ru' %}selected{% endif %}>🇷🇺 Русский</option>
+                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 English</option>
+                    <option value="es" {% if LANGUAGE_CODE == 'es' %}selected{% endif %}>🇪🇸 Español</option>
+                    <option value="he" {% if LANGUAGE_CODE == 'he' %}selected{% endif %}>🇮🇱 עברית</option>
+                </select>
+            </form>
+        </div>
+        <a href="{% url 'screener:list' %}">{% trans "Screener" %}</a>
         {% if user.is_authenticated %}
-            <a href="{% url 'alerts:list' %}">Алерты</a>
-            <a href="{% url 'accounts:profile' %}">Профиль</a>
-            <a href="{% url 'accounts:logout' %}">Выход</a>
+            <a href="{% url 'alerts:list' %}">{% trans "Alerts" %}</a>
+            <a href="{% url 'accounts:profile' %}">{% trans "Profile" %}</a>
+            <a href="{% url 'accounts:logout' %}">{% trans "Logout" %}</a>
         {% else %}
-            <a href="{% url 'accounts:login' %}">Логин</a>
-            <a href="{% url 'accounts:register' %}">Регистрация</a>
+            <a href="{% url 'accounts:login' %}">{% trans "Login" %}</a>
+            <a href="{% url 'accounts:register' %}">{% trans "Register" %}</a>
         {% endif %}
     </nav>
 </header>

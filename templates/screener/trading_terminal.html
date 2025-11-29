@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% load formatting %}
+{% load i18n %}
 
-{% block title %}Торговый терминал — {{ symbol.symbol }}{% endblock %}
+{% block title %}{% trans "Trading Terminal" %} — {{ symbol.symbol }}{% endblock %}
 
 
 {% block content %}
@@ -13,7 +14,7 @@
                 <input type="text" 
                        id="symbol-search-input" 
                        class="symbol-search-input" 
-                       placeholder="Поиск символа..." 
+                       placeholder="{% trans 'Search symbol...' %}" 
                        value="{{ symbol.symbol }}"
                        autocomplete="off">
                 <div id="symbol-dropdown" class="symbol-dropdown"></div>
@@ -21,7 +22,7 @@
             <span class="market-type-badge {% if market_type == 'futures' %}futures{% else %}spot{% endif %}" id="market-type-badge">
                 {{ market_type|upper }}
             </span>
-            <button class="btn-secondary btn-small" id="toggle-market-type" title="Переключить тип рынка">
+            <button class="btn-secondary btn-small" id="toggle-market-type" title="{% trans 'Toggle market type' %}">
                 🔄
             </button>
             {% if latest_snapshot %}
@@ -35,14 +36,14 @@
         </div>
         <div class="trading-header-actions">
             <a href="{% url 'alerts:create' symbol.symbol %}?market_type={{ market_type }}" class="btn-primary">
-                🔔 Создать алерт
+                🔔 {% trans "Create Alert" %}
             </a>
         </div>
         {% if latest_snapshot %}
             <div class="trading-stats-inline" id="trading-stats-container">
                 <!-- Статистика будет динамически добавлена через JavaScript -->
             </div>
-            <button class="btn-secondary btn-small" id="configure-stats-btn" title="Настроить показатели">
+            <button class="btn-secondary btn-small" id="configure-stats-btn" title="{% trans 'Configure indicators' %}">
                 ⚙️
             </button>
         {% endif %}
@@ -240,15 +241,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const STATS_CONFIG_KEY = 'trading_terminal_stats_config';
     
     // Доступные показатели с их таймфреймами
+    // Лейблы будут переведены через gettext в Python, здесь оставляем английские для ключей
     const AVAILABLE_METRICS = {
-        'volume': { label: 'Vol', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'volume' },
-        'oi_change': { label: 'OI Δ', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'percentage' },
-        'change': { label: 'Change', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'percentage' },
-        'vdelta': { label: 'Vdelta', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'vdelta' },
-        'volatility': { label: 'Vol', timeframes: ['5m', '15m', '1h'], format: 'volatility' },
-        'ticks': { label: 'Ticks', timeframes: ['5m', '15m', '1h'], format: 'integer' },
-        'funding_rate': { label: 'Funding', timeframes: [], format: 'funding' },
-        'open_interest': { label: 'OI', timeframes: [], format: 'volume' },
+        'volume': { label: '{% trans "Vol" %}', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'volume' },
+        'oi_change': { label: '{% trans "OI Δ" %}', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'percentage' },
+        'change': { label: '{% trans "Change" %}', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'percentage' },
+        'vdelta': { label: '{% trans "Vdelta" %}', timeframes: ['5m', '15m', '1h', '8h', '1d'], format: 'vdelta' },
+        'volatility': { label: '{% trans "Vol" %}', timeframes: ['5m', '15m', '1h'], format: 'volatility' },
+        'ticks': { label: '{% trans "Ticks" %}', timeframes: ['5m', '15m', '1h'], format: 'integer' },
+        'funding_rate': { label: '{% trans "Funding" %}', timeframes: [], format: 'funding' },
+        'open_interest': { label: '{% trans "OI" %}', timeframes: [], format: 'volume' },
     };
     
     // Загрузка конфигурации из localStorage или использование значений по умолчанию
@@ -399,15 +401,15 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.innerHTML = `
             <div class="stats-config-content">
                 <div class="stats-config-header">
-                    <h2>Настройка показателей</h2>
+                    <h2>{% trans "Configure indicators" %}</h2>
                     <button class="close-modal-btn" onclick="this.closest('.stats-config-modal').remove()">×</button>
                 </div>
                 <div class="stats-config-body" id="stats-config-body">
                     <!-- Конфигурация будет добавлена динамически -->
                 </div>
                 <div class="stats-config-footer">
-                    <button class="btn-secondary" onclick="this.closest('.stats-config-modal').remove()">Отмена</button>
-                    <button class="btn-primary" id="save-stats-config">Сохранить</button>
+                    <button class="btn-secondary" onclick="this.closest('.stats-config-modal').remove()">{% trans "Cancel" %}</button>
+                    <button class="btn-primary" id="save-stats-config">{% trans "Save" %}</button>
                 </div>
             </div>
         `;
@@ -461,7 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const metricSelect = document.createElement('select');
         metricSelect.className = 'metric-select';
-        metricSelect.innerHTML = '<option value="">Выберите показатель</option>';
+        metricSelect.innerHTML = '<option value="">{% trans "Select indicator" %}</option>';
         Object.keys(AVAILABLE_METRICS).forEach(key => {
             const option = document.createElement('option');
             option.value = key;
@@ -472,12 +474,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const timeframeSelect = document.createElement('select');
         timeframeSelect.className = 'timeframe-select';
-        timeframeSelect.innerHTML = '<option value="">Нет</option>';
+        timeframeSelect.innerHTML = '<option value="">{% trans "No" %}</option>';
         
         function updateTimeframes() {
             const selectedMetric = metricSelect.value;
             const metricInfo = AVAILABLE_METRICS[selectedMetric];
-            timeframeSelect.innerHTML = '<option value="">Нет</option>';
+            timeframeSelect.innerHTML = '<option value="">{% trans "No" %}</option>';
             
             if (metricInfo && metricInfo.timeframes.length > 0) {
                 metricInfo.timeframes.forEach(tf => {
@@ -571,6 +573,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }{% else %}null{% endif %};
     
     window.currentSnapshot = initialSnapshot;
+    
+    // Инициализация previousStatsValues при первой загрузке
+    if (initialSnapshot) {
+        const config = loadStatsConfig();
+        config.forEach(item => {
+            const statKey = item.timeframe ? `${item.metric}_${item.timeframe}` : item.metric;
+            const value = getStatValue(initialSnapshot, item.metric, item.timeframe);
+            if (value !== null && !isNaN(Number(value))) {
+                previousStatsValues[statKey] = Number(value);
+            }
+        });
+    }
+    
     renderStats(initialSnapshot);
     
     // Периодическое обновление
