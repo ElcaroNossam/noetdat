@@ -32,64 +32,19 @@ class CSPMiddleware(MiddlewareMixin):
 
 class ForceLanguageMiddleware(MiddlewareMixin):
     """
-    Middleware to ensure language is determined from URL and cookie only,
-    not from Accept-Language header. This prevents language from being
-    overridden by browser settings.
-    
-    This middleware runs AFTER LocaleMiddleware to override Accept-Language.
+    Middleware to ensure language cookie is set correctly.
+    This runs AFTER LocaleMiddleware to ensure cookie matches the active language.
     """
     
-    def process_request(self, request):
-        # Skip for API requests to avoid breaking them
-        # API requests can be /api/ or /{lang}/api/
-        if '/api/' in request.path_info:
-            return None
-        
-        # LocaleMiddleware already set the language, but we need to override
-        # if it was set from Accept-Language header
-        
-        # Priority 1: Get language from URL path (highest priority)
-        language_from_path = translation.get_language_from_path(request.path_info)
-        if language_from_path:
-            translation.activate(language_from_path)
-            request.LANGUAGE_CODE = language_from_path
-            return None
-        
-        # Priority 2: Get language from cookie
-        language_from_cookie = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
-        if language_from_cookie and language_from_cookie in [lang[0] for lang in settings.LANGUAGES]:
-            translation.activate(language_from_cookie)
-            request.LANGUAGE_CODE = language_from_cookie
-            return None
-        
-        # Priority 3: Use default language from settings (do NOT use Accept-Language)
-        # Only activate if not already activated by LocaleMiddleware
-        current_lang = translation.get_language()
-        if current_lang != settings.LANGUAGE_CODE:
-            translation.activate(settings.LANGUAGE_CODE)
-            request.LANGUAGE_CODE = settings.LANGUAGE_CODE
-        
-        return None
-    
     def process_response(self, request, response):
-        # Skip for API requests
-        # API requests can be /api/ or /{lang}/api/
-        if '/api/' in request.path_info:
+        # Skip for API requests and admin
+        if '/api/' in request.path_info or request.path_info.startswith('/admin/'):
             return response
         
-        # Ensure language cookie is set if language is determined from URL
+        # Get current language (set by LocaleMiddleware)
         language = translation.get_language()
-        language_from_path = translation.get_language_from_path(request.path_info)
         
-        # If language is set from URL, ensure it's activated and cookie is set
-        if language_from_path and language_from_path != language:
-            translation.activate(language_from_path)
-            language = language_from_path
-        
-        # Set or update language cookie
-        if hasattr(request, 'LANGUAGE_CODE'):
-            language = request.LANGUAGE_CODE
-        
+        # Ensure cookie is set to match current language
         if language and translation.check_for_language(language):
             current_cookie = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME)
             if current_cookie != language:
@@ -104,6 +59,5 @@ class ForceLanguageMiddleware(MiddlewareMixin):
                     samesite=getattr(settings, 'LANGUAGE_COOKIE_SAMESITE', 'Lax'),
                 )
         
-        # Don't deactivate - let LocaleMiddleware handle it
         return response
 

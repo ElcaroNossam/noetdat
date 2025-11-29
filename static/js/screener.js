@@ -433,8 +433,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const langPrefix = getLanguagePrefix();
             const apiPath = `/${langPrefix}/api/screener/`;
             const url = apiPath + query.replace(/^\?/, "?");
+            
+            // Debug logging
+            console.log("Refreshing screener:", url);
+            
             const resp = await fetch(url);
-            if (!resp.ok) return;
+            if (!resp.ok) {
+                console.error("Screener API error:", resp.status, resp.statusText);
+                return;
+            }
 
             const data = await resp.json();
             renderScreenerTable(data);
