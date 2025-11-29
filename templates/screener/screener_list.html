@@ -140,57 +140,6 @@
 
 {% block extra_scripts %}
 <script>
-    // Market type toggle handler - must be before screener.js loads
-    (function() {
-        function initMarketTypeToggle() {
-            const marketTypeButtons = document.querySelectorAll('.market-type-toggle button[data-market-type]');
-            console.log('Initializing market type toggle, found buttons:', marketTypeButtons.length);
-            
-            if (marketTypeButtons.length === 0) {
-                console.log('Market type buttons not found, retrying...');
-                setTimeout(initMarketTypeToggle, 100);
-                return;
-            }
-            
-            marketTypeButtons.forEach(btn => {
-                // Remove old event listeners by cloning
-                const newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-                
-                newBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const newMarketType = this.dataset.marketType;
-                    console.log('Market type button clicked:', newMarketType);
-                    
-                    const url = new URL(window.location);
-                    
-                    // Remove all market_type params to prevent duplicates
-                    url.searchParams.delete('market_type');
-                    
-                    // Add new market_type
-                    url.searchParams.set('market_type', newMarketType);
-                    
-                    console.log('Navigating to:', url.toString());
-                    
-                    // Navigate to new URL
-                    window.location.href = url.toString();
-                });
-            });
-            
-            console.log('Market type toggle initialized successfully');
-        }
-        
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initMarketTypeToggle);
-        } else {
-            // DOM already loaded
-            initMarketTypeToggle();
-        }
-    })();
-    
     window.SCREENER_AVAILABLE_COLUMNS = [
         "symbol",
         "price",
@@ -224,5 +173,56 @@
         "open_interest",
         "ts",
     ];
+    
+    // Market type toggle handler - direct binding to avoid conflicts
+    (function() {
+        function initMarketTypeButtons() {
+            const buttons = document.querySelectorAll('.market-type-toggle .market-type-btn[data-market-type]');
+            console.log('Found market type buttons:', buttons.length);
+            
+            buttons.forEach(function(btn) {
+                // Remove any existing listeners
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    const newMarketType = this.getAttribute('data-market-type');
+                    console.log('Market type button clicked:', newMarketType, this);
+                    
+                    if (!newMarketType) {
+                        console.error('No market type found on button');
+                        return;
+                    }
+                    
+                    const url = new URL(window.location);
+                    
+                    // Remove all market_type params to prevent duplicates
+                    url.searchParams.delete('market_type');
+                    
+                    // Add new market_type
+                    url.searchParams.set('market_type', newMarketType);
+                    
+                    console.log('Navigating to:', url.toString());
+                    
+                    // Navigate to new URL
+                    window.location.href = url.toString();
+                }, true); // Use capture phase
+            });
+            
+            console.log('Market type buttons initialized');
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMarketTypeButtons);
+        } else {
+            // DOM already loaded
+            setTimeout(initMarketTypeButtons, 100); // Small delay to ensure buttons are rendered
+        }
+    })();
 </script>
 {% endblock %}
