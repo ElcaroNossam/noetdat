@@ -16,15 +16,16 @@ class CSPMiddleware(MiddlewareMixin):
         # Set CSP header to allow unsafe-eval for TradingView
         csp_policy = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://s3.tradingview.com https://*.tradingview.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://s3.tradingview.com https://*.tradingview.com https://*.binance.com; "
             "style-src 'self' 'unsafe-inline' https://*.tradingview.com; "
             "img-src 'self' data: https: blob:; "
             "font-src 'self' data: https:; "
-            "connect-src 'self' https://*.tradingview.com https://*.binance.com; "
+            "connect-src 'self' https://*.tradingview.com https://*.binance.com wss://*.binance.com; "
             "frame-src 'self' https://*.tradingview.com; "
             "object-src 'none'; "
             "base-uri 'self'; "
-            "form-action 'self';"
+            "form-action 'self'; "
+            "worker-src 'self' blob:;"
         )
         response['Content-Security-Policy'] = csp_policy
         return response

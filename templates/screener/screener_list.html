@@ -12,25 +12,25 @@
         <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot">{% trans "Spot" %}</button>
     </div>
     <form method="get" class="screener-filters">
-        <input type="hidden" name="market_type" value="{{ market_type }}">
-        <input type="text" name="search" placeholder="{% trans 'Search by symbol' %}" value="{{ search }}">
-        <input type="number" step="0.0001" name="min_volume_15m" placeholder="{% trans 'Min volume 15m' %}"
+        <input type="hidden" id="market_type_hidden" name="market_type" value="{{ market_type }}">
+        <input type="text" id="search" name="search" placeholder="{% trans 'Search by symbol' %}" value="{{ search }}">
+        <input type="number" id="min_volume_15m" step="0.0001" name="min_volume_15m" placeholder="{% trans 'Min volume 15m' %}"
                value="{{ min_volume_15m }}">
-        <input type="number" step="0.0001" name="max_volume_15m" placeholder="{% trans 'Max volume 15m' %}"
+        <input type="number" id="max_volume_15m" step="0.0001" name="max_volume_15m" placeholder="{% trans 'Max volume 15m' %}"
                value="{{ max_volume_15m }}">
-        <input type="number" step="0.01" name="min_change_15m" placeholder="{% trans 'Min change 15m %' %}"
+        <input type="number" id="min_change_15m" step="0.01" name="min_change_15m" placeholder="{% trans 'Min change 15m %' %}"
                value="{{ min_change_15m }}">
-        <input type="number" step="0.01" name="max_change_15m" placeholder="{% trans 'Max change 15m %' %}"
+        <input type="number" id="max_change_15m" step="0.01" name="max_change_15m" placeholder="{% trans 'Max change 15m %' %}"
                value="{{ max_change_15m }}">
-        <input type="number" step="0.01" name="min_oi_change_15m" placeholder="{% trans 'Min OI Δ 15m %' %}"
+        <input type="number" id="min_oi_change_15m" step="0.01" name="min_oi_change_15m" placeholder="{% trans 'Min OI Δ 15m %' %}"
                value="{{ min_oi_change_15m }}">
-        <input type="number" step="1" name="min_open_interest" placeholder="{% trans 'Min OI' %}"
+        <input type="number" id="min_open_interest" step="1" name="min_open_interest" placeholder="{% trans 'Min OI' %}"
                value="{{ min_open_interest }}">
-        <input type="number" step="1" name="max_open_interest" placeholder="{% trans 'Max OI' %}"
+        <input type="number" id="max_open_interest" step="1" name="max_open_interest" placeholder="{% trans 'Max OI' %}"
                value="{{ max_open_interest }}">
-        <input type="number" step="0.0001" name="min_funding_rate" placeholder="{% trans 'Min funding' %}"
+        <input type="number" id="min_funding_rate" step="0.0001" name="min_funding_rate" placeholder="{% trans 'Min funding' %}"
                value="{{ min_funding_rate }}">
-        <input type="number" step="0.0001" name="max_funding_rate" placeholder="{% trans 'Max funding' %}"
+        <input type="number" id="max_funding_rate" step="0.0001" name="max_funding_rate" placeholder="{% trans 'Max funding' %}"
                value="{{ max_funding_rate }}">
         <button type="submit" class="btn-secondary">{% trans "Filter" %}</button>
         <button type="button" id="toggle-settings" class="btn-secondary">{% trans "Screener Settings" %}</button>
@@ -175,40 +175,20 @@
     ];
     
     // Market type toggle handler - use event delegation to avoid conflicts
-    // Initialize immediately when script loads
-    (function() {
-        function handleMarketTypeClick(e) {
-            const btn = e.target.closest('.market-type-toggle .market-type-btn[data-market-type]');
-            if (!btn) return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            
-            const newMarketType = btn.getAttribute('data-market-type');
-            console.log('Market type button clicked:', newMarketType);
-            
-            if (!newMarketType) {
-                console.error('No market type found on button');
-                return;
-            }
-            
-            const url = new URL(window.location);
-            
-            // Remove all market_type params to prevent duplicates
-            url.searchParams.delete('market_type');
-            
-            // Add new market_type
-            url.searchParams.set('market_type', newMarketType);
-            
-            console.log('Navigating to:', url.toString());
-            
-            // Navigate to new URL
-            window.location.href = url.toString();
-        }
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.market-type-toggle .market-type-btn[data-market-type]');
+        if (!btn) return;
         
-        // Use capture phase to ensure we catch the event early
-        document.addEventListener('click', handleMarketTypeClick, true);
-    })();
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const newMarketType = btn.getAttribute('data-market-type');
+        if (!newMarketType) return;
+        
+        const url = new URL(window.location);
+        url.searchParams.delete('market_type');
+        url.searchParams.set('market_type', newMarketType);
+        window.location.href = url.toString();
+    }, true);
 </script>
 {% endblock %}

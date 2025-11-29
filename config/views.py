@@ -4,10 +4,8 @@ Custom views for language switching and other utilities.
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils import translation
-from django.utils.translation import get_language
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
-from django.urls import translate_url
 
 
 @csrf_protect

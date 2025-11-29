@@ -9,8 +9,8 @@
         <div class="language-selector">
             <form action="{% url 'set_language' %}" method="post" class="language-form">
                 {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <select name="language" onchange="this.form.submit()" class="language-select">
+                <input type="hidden" id="language-next" name="next" value="{{ request.get_full_path }}">
+                <select id="language-select" name="language" onchange="this.form.submit()" class="language-select">
                     {% for language in languages %}
                         <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
                             {% if language.code == 'ru' %}🇷🇺{% elif language.code == 'en' %}🇬🇧{% elif language.code == 'es' %}🇪🇸{% elif language.code == 'he' %}🇮🇱{% endif %} {{ language.name_local }}

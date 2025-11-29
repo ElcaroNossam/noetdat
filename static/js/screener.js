@@ -1,10 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
     const screenerTableBody = document.getElementById("screener-table-body");
-    const autoRefreshIntervalMs = 1000; // 1s for main screener
+    const autoRefreshIntervalMs = 5000; // 5s for main screener (reduced frequency to avoid blocking user interactions)
 
     const availableColumns = window.SCREENER_AVAILABLE_COLUMNS || [];
     const storageKey = "screener_visible_columns";
     const languageStorageKey = "preferred_language";
+    
+    // Track if user is interacting with the page to pause auto-refresh
+    let isUserInteracting = false;
+    let interactionTimeout = null;
+    
+    // Track user interactions to pause auto-refresh
+    document.addEventListener('mousedown', () => {
+        isUserInteracting = true;
+        clearTimeout(interactionTimeout);
+        interactionTimeout = setTimeout(() => {
+            isUserInteracting = false;
+        }, 2000); // Reset after 2s of no interaction
+    });
+    
+    document.addEventListener('keydown', () => {
+        isUserInteracting = true;
+        clearTimeout(interactionTimeout);
+        interactionTimeout = setTimeout(() => {
+            isUserInteracting = false;
+        }, 2000);
+    });
     
     // Store previous values for comparison (for volume, ticks, volatility, OI)
     let previousValues = new Map(); // key: symbol, value: object with previous values
@@ -218,7 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const col = label.dataset.column;
             if (!col) {
-                console.warn("No column attribute found on label");
                 return;
             }
             
@@ -427,33 +447,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function refreshScreener() {
         if (!screenerTableBody) return;
+        // Skip refresh if user is interacting
+        if (isUserInteracting) {
+            return;
+        }
         try {
             const query = buildQueryFromCurrentLocation();
-            // Get language prefix - for default language (ru) with prefix_default_language=False, 
-            // we should NOT add prefix to URL
-            const langPrefix = getLanguagePrefix();
+            // Build API path based on current URL structure
             const currentPath = window.location.pathname;
             const pathParts = currentPath.split('/').filter(p => p);
             const hasLangPrefix = pathParts.length > 0 && ['ru', 'en', 'es', 'he'].includes(pathParts[0]);
             
             // Build API path: if current URL has language prefix, use it; otherwise use /api/ directly
-            let apiPath;
-            if (hasLangPrefix) {
-                // Current page has language prefix, use it for API
-                apiPath = `/${pathParts[0]}/api/screener/`;
-            } else {
-                // Current page has no prefix (default language), API also has no prefix
-                apiPath = `/api/screener/`;
-            }
+            const apiPath = hasLangPrefix 
+                ? `/${pathParts[0]}/api/screener/`
+                : `/api/screener/`;
             
             const url = apiPath + query.replace(/^\?/, "?");
             
-            // Debug logging
-            console.log("Refreshing screener:", url);
-            
             const resp = await fetch(url);
             if (!resp.ok) {
-                console.error("Screener API error:", resp.status, resp.statusText, url);
+                // Silently fail - will retry on next interval
                 return;
             }
 
@@ -462,7 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Always reapply column visibility immediately after rendering
             applyColumnVisibility();
         } catch (e) {
-            console.error("Failed to refresh screener", e);
+            // Silently fail - will retry on next interval
         }
     }
 
@@ -976,7 +990,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await resp.json();
                 renderSymbolDetail(data);
             } catch (e) {
-                console.error("Failed to refresh symbol detail", e);
+                // Silently fail - will retry on next interval
             }
         }
 

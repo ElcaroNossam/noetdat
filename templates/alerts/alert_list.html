@@ -9,8 +9,8 @@
         <h1>{% trans "Alert Management" %}</h1>
         <div class="alerts-filters">
             <form method="get" class="alerts-filter-form">
-                <input type="text" name="search" placeholder="{% trans 'Search by symbol' %}" value="{{ search }}">
-                <select name="market_type">
+                <input type="text" id="alert-search" name="search" placeholder="{% trans 'Search by symbol' %}" value="{{ search }}">
+                <select id="alert-market-type" name="market_type">
                     <option value="">{% trans "All markets" %}</option>
                     <option value="futures" {% if market_type == 'futures' %}selected{% endif %}>{% trans "Futures" %}</option>
                     <option value="spot" {% if market_type == 'spot' %}selected{% endif %}>{% trans "Spot" %}</option>
