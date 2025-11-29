@@ -125,7 +125,7 @@ def screener_list_api(request):
     snapshots = list(qs)
     
     # Store previous values per symbol for comparison
-    # This will be populated as we iterate
+    # Note: repetition tracking is done on client side for persistence across API calls
     symbol_previous_values = {}
     
     data = []
@@ -142,6 +142,7 @@ def screener_list_api(request):
         vdelta_1d_formatted = format_volume(s.vdelta_1d, market_type)
         
         # Get colors for vdelta (compare with previous value for same symbol)
+        # Client will handle repetition tracking (3+ repeats = white)
         vdelta_5m_color = get_value_color(s.vdelta_5m, prev_vals.get("vdelta_5m"), False)
         vdelta_15m_color = get_value_color(s.vdelta_15m, prev_vals.get("vdelta_15m"), False)
         vdelta_1h_color = get_value_color(s.vdelta_1h, prev_vals.get("vdelta_1h"), False)
@@ -156,6 +157,7 @@ def screener_list_api(request):
         volume_1d_formatted = format_volume(s.volume_1d, market_type)
         
         # Get colors for volume (compare with previous value for same symbol)
+        # Client will handle repetition tracking (3+ repeats = white)
         volume_5m_color = get_value_color(s.volume_5m, prev_vals.get("volume_5m"), True)
         volume_15m_color = get_value_color(s.volume_15m, prev_vals.get("volume_15m"), True)
         volume_1h_color = get_value_color(s.volume_1h, prev_vals.get("volume_1h"), True)

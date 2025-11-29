@@ -27,8 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 2000);
     });
     
-    // Store previous values for comparison (for volume, ticks, volatility, OI)
-    let previousValues = new Map(); // key: symbol, value: object with previous values
+            // Store previous values for comparison (for volume, ticks, volatility, OI)
+            // Also track repetition count and last color for each column
+            let previousValues = new Map(); // key: symbol, value: object with previous values and repetition info
     
     // Use global language functions from base.html
     function getLanguagePrefix() {
@@ -476,24 +477,61 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function getComparisonClass(currentValue, previousValue, isPositiveOnly = false) {
+    function getComparisonClass(currentValue, previousValue, isPositiveOnly = false, repetitionInfo = null) {
         const current = Number(currentValue);
         const previous = previousValue !== null && previousValue !== undefined && previousValue !== "" ? Number(previousValue) : null;
         
         // Check for NaN
         if (isNaN(current)) return "";
         
-        // If we have previous value, always compare (for both positive-only and negative values)
+        // If we have previous value, compare
         if (previous !== null && !isNaN(previous)) {
             const diff = current - previous;
-            if (diff > 0.0001) return "value-up";
-            if (diff < -0.0001) return "value-down";
-            // If values are equal or very close, no color (white)
-            return "";
+            const epsilon = 0.0001;
+            
+            // If values are equal or very close
+            if (Math.abs(diff) <= epsilon) {
+                // Increment repetition count
+                if (repetitionInfo) {
+                    repetitionInfo.count = (repetitionInfo.count || 0) + 1;
+                }
+                // If repeated 3+ times, return white (no color)
+                if (repetitionInfo && repetitionInfo.count >= 3) {
+                    return "";
+                }
+                // If repeated less than 3 times, return last color (or default to showing change direction)
+                // Use last color if available, otherwise show based on value direction
+                if (repetitionInfo && repetitionInfo.lastColor) {
+                    return repetitionInfo.lastColor;
+                }
+                // If no last color, show based on value (positive = green, negative = red, zero = white)
+                if (current > epsilon) return "value-up";
+                if (current < -epsilon) return "value-down";
+                return "";
+            } else {
+                // Value changed - reset repetition count and determine new color
+                if (repetitionInfo) {
+                    repetitionInfo.count = 0;
+                }
+                if (diff > epsilon) {
+                    if (repetitionInfo) {
+                        repetitionInfo.lastColor = "value-up";
+                    }
+                    return "value-up";
+                }
+                if (diff < -epsilon) {
+                    if (repetitionInfo) {
+                        repetitionInfo.lastColor = "value-down";
+                    }
+                    return "value-down";
+                }
+            }
+        } else {
+            // No previous value - show color based on value itself (positive = green, negative = red)
+            if (current > 0.0001) return "value-up";
+            if (current < -0.0001) return "value-down";
         }
         
-        // No previous value - no color (white) for all values
-        // Changed: Vdelta now works like Volume - only shows color when comparing with previous value
         return "";
     }
 
@@ -556,8 +594,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? row.price_color 
                 : "";
             if (!priceCls) {
-                const prevPrice = prev.price !== undefined && prev.price !== null && prev.price !== "" ? Number(prev.price) : undefined;
-                priceCls = getComparisonClass(priceValue, prevPrice, true);
+                    const prevPrice = prev.price !== undefined && prev.price !== null && prev.price !== "" ? Number(prev.price) : undefined;
+                    const priceRepInfo = repetitionInfo.price || { count: 0, lastColor: "" };
+                    priceCls = getComparisonClass(priceValue, prevPrice, true, priceRepInfo);
+                    repetitionInfo.price = priceRepInfo;
             }
             tr.appendChild(makeTd("price", priceFormatted, priceCls));
 
@@ -567,7 +607,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const numValue = Number(v);
                 const formatted = !isNaN(numValue) ? numValue.toFixed(2) : String(v);
                 const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
-                const cls = getComparisonClass(numValue, prevValue, false);
+                const repInfo = repetitionInfo[col] || { count: 0, lastColor: "" };
+                const cls = getComparisonClass(numValue, prevValue, false, repInfo);
+                repetitionInfo[col] = repInfo;
                 tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
@@ -577,7 +619,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const numValue = Number(v);
                 const formatted = formatOIChange(v);
                 const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
-                const cls = getComparisonClass(numValue, prevValue, false);
+                const repInfo = repetitionInfo[col] || { count: 0, lastColor: "" };
+                const cls = getComparisonClass(numValue, prevValue, false, repInfo);
+                repetitionInfo[col] = repInfo;
                 tr.appendChild(makeTd(col, formatted + "%", cls));
             });
 
@@ -587,7 +631,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const numValue = Number(v);
                 const formatted = formatVolatility(v);
                 const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
-                const cls = getComparisonClass(numValue, prevValue, true);
+                const repInfo = repetitionInfo[col] || { count: 0, lastColor: "" };
+                const cls = getComparisonClass(numValue, prevValue, true, repInfo);
+                repetitionInfo[col] = repInfo;
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
@@ -610,10 +656,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 let cls = (row[col + "_color"] !== undefined && row[col + "_color"] !== null && row[col + "_color"] !== "") 
                     ? row[col + "_color"] 
                     : "";
-                if (!cls) {
-                    const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
-                    cls = getComparisonClass(numValue, prevValue, true);
-                }
+                        if (!cls) {
+                            const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
+                            const repInfo = repetitionInfo[col] || { count: 0, lastColor: "" };
+                            cls = getComparisonClass(numValue, prevValue, true, repInfo);
+                            repetitionInfo[col] = repInfo;
+                        }
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
@@ -631,7 +679,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     // If no color from backend, calculate based on previous value from previousValues
                     const numValue = Number(row[col] ?? 0);
                     const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
-                    cls = getComparisonClass(numValue, prevValue, false);
+                    const repInfo = repetitionInfo[col] || { count: 0, lastColor: "" };
+                    cls = getComparisonClass(numValue, prevValue, false, repInfo);
+                    repetitionInfo[col] = repInfo;
                 }
                 tr.appendChild(makeTd(col, formatted, cls));
             });
@@ -650,7 +700,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     // If no color from backend, calculate based on previous value from previousValues
                     const numValue = Number(row[col] ?? 0);
                     const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
-                    cls = getComparisonClass(numValue, prevValue, true);
+                    const repInfo = repetitionInfo[col] || { count: 0, lastColor: "" };
+                    cls = getComparisonClass(numValue, prevValue, true, repInfo);
+                    repetitionInfo[col] = repInfo;
                 }
                 tr.appendChild(makeTd(col, formatted, cls));
             });
@@ -660,7 +712,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const fundNumValue = Number(funding);
             const fundingFormatted = !isNaN(fundNumValue) ? fundNumValue.toFixed(4) : String(funding);
             const prevFunding = prev.funding_rate !== undefined && prev.funding_rate !== null && prev.funding_rate !== "" ? Number(prev.funding_rate) : undefined;
-            const fundClass = getComparisonClass(fundNumValue, prevFunding, false);
+            const fundRepInfo = repetitionInfo.funding_rate || { count: 0, lastColor: "" };
+            const fundClass = getComparisonClass(fundNumValue, prevFunding, false, fundRepInfo);
+            repetitionInfo.funding_rate = fundRepInfo;
             tr.appendChild(makeTd("funding_rate", fundingFormatted, fundClass));
 
             // Open Interest - use formatted value and color from backend (reference implementation)
@@ -674,7 +728,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 // If no color from backend, calculate based on previous value from previousValues
                 const oiValue = row.open_interest != null ? Number(row.open_interest) : 0;
                 const prevOI = prev.open_interest !== undefined && prev.open_interest !== null && prev.open_interest !== "" ? Number(prev.open_interest) : undefined;
-                oiCls = getComparisonClass(oiValue, prevOI, true);
+                const oiRepInfo = repetitionInfo.open_interest || { count: 0, lastColor: "" };
+                oiCls = getComparisonClass(oiValue, prevOI, true, oiRepInfo);
+                repetitionInfo.open_interest = oiRepInfo;
             }
             tr.appendChild(makeTd("open_interest", oiFormatted, oiCls));
 
@@ -691,6 +747,10 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             
             // Store ALL values for proper comparison
+            // Also initialize repetition info if not exists
+            const prevData = previousValues.get(symbol) || {};
+            const repetitionInfo = prevData._repetition || {};
+            
             previousValues.set(symbol, {
                 // Price
                 price: storeValue(row.price),
@@ -730,6 +790,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 funding_rate: storeValue(row.funding_rate),
                 // Open Interest
                 open_interest: storeValue(row.open_interest),
+                // Store repetition info for next comparison
+                _repetition: repetitionInfo,
             });
         }
         console.log('renderScreenerTable: Completed, total previousValues:', previousValues.size);

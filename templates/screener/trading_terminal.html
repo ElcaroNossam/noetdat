@@ -371,19 +371,61 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Хранение предыдущих значений для сравнения
     let previousStatsValues = {};
+    let statsRepetitionInfo = {}; // Track repetition counts for stats
     
     // Функция сравнения значений (та же логика, что и в скринере)
-    function getComparisonClass(currentValue, previousValue, isPositiveOnly = false) {
+    // Returns white only if value repeats 3+ times, otherwise shows color
+    function getComparisonClass(currentValue, previousValue, isPositiveOnly = false, repetitionInfo = null) {
         const current = Number(currentValue);
         const previous = previousValue !== null && previousValue !== undefined && previousValue !== "" ? Number(previousValue) : null;
         
         if (isNaN(current)) return "";
         
+        const epsilon = 0.0001;
+        
         if (previous !== null && !isNaN(previous)) {
             const diff = current - previous;
-            if (diff > 0.0001) return "value-up";
-            if (diff < -0.0001) return "value-down";
-            return "";
+            
+            // If values are equal or very close
+            if (Math.abs(diff) <= epsilon) {
+                // Increment repetition count
+                if (repetitionInfo) {
+                    repetitionInfo.count = (repetitionInfo.count || 0) + 1;
+                }
+                // If repeated 3+ times, return white (no color)
+                if (repetitionInfo && repetitionInfo.count >= 3) {
+                    return "";
+                }
+                // If repeated less than 3 times, return last color
+                if (repetitionInfo && repetitionInfo.lastColor) {
+                    return repetitionInfo.lastColor;
+                }
+                // If no last color, show based on value direction
+                if (current > epsilon) return "value-up";
+                if (current < -epsilon) return "value-down";
+                return "";
+            } else {
+                // Value changed - reset repetition count and determine new color
+                if (repetitionInfo) {
+                    repetitionInfo.count = 0;
+                }
+                if (diff > epsilon) {
+                    if (repetitionInfo) {
+                        repetitionInfo.lastColor = "value-up";
+                    }
+                    return "value-up";
+                }
+                if (diff < -epsilon) {
+                    if (repetitionInfo) {
+                        repetitionInfo.lastColor = "value-down";
+                    }
+                    return "value-down";
+                }
+            }
+        } else {
+            // No previous value - show color based on value itself
+            if (current > epsilon) return "value-up";
+            if (current < -epsilon) return "value-down";
         }
         
         return "";
@@ -423,7 +465,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const statKey = item.timeframe ? `${item.metric}_${item.timeframe}` : item.metric;
             const previousValue = previousStatsValues[statKey];
             const isPositiveOnly = isPositiveOnlyMetric(item.metric);
-            const colorClass = getComparisonClass(value, previousValue, isPositiveOnly);
+            const repInfo = statsRepetitionInfo[statKey] || { count: 0, lastColor: "" };
+            const colorClass = getComparisonClass(value, previousValue, isPositiveOnly, repInfo);
+            statsRepetitionInfo[statKey] = repInfo;
             
             if (colorClass) {
                 valueSpan.classList.add(colorClass);
