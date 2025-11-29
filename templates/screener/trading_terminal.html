@@ -117,8 +117,12 @@ document.addEventListener('DOMContentLoaded', function() {
         symbolSearchInput.value = symbol;
         symbolDropdown.style.display = 'none';
         
+        // Preserve language prefix
+        const langPrefix = window.getLanguagePrefix ? window.getLanguagePrefix() : (window.location.pathname.match(/^\/(ru|en|es|he)\//)?.[1] || 'ru');
+        const langPath = langPrefix && langPrefix !== 'ru' ? `/${langPrefix}` : '';
+        
         // Обновляем URL и перезагружаем страницу
-        const newUrl = `/trading/${symbol}/?market_type=${marketType}`;
+        const newUrl = `${langPath}/trading/${symbol}/?market_type=${marketType}`;
         window.location.href = newUrl;
     }
     
@@ -151,11 +155,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Переключение типа рынка
-    document.getElementById('toggle-market-type').addEventListener('click', function() {
-        marketType = marketType === 'spot' ? 'futures' : 'spot';
-        const newUrl = `/trading/${currentSymbol}/?market_type=${marketType}`;
-        window.location.href = newUrl;
-    });
+    const toggleMarketTypeBtn = document.getElementById('toggle-market-type');
+    if (toggleMarketTypeBtn) {
+        toggleMarketTypeBtn.addEventListener('click', function() {
+            marketType = marketType === 'spot' ? 'futures' : 'spot';
+            
+            // Preserve language prefix
+            const langPrefix = window.getLanguagePrefix ? window.getLanguagePrefix() : (window.location.pathname.match(/^\/(ru|en|es|he)\//)?.[1] || 'ru');
+            const langPath = langPrefix && langPrefix !== 'ru' ? `/${langPrefix}` : '';
+            
+            const newUrl = `${langPath}/trading/${currentSymbol}/?market_type=${marketType}`;
+            window.location.href = newUrl;
+        });
+    }
     
     function calculateChartHeight() {
         // Получаем реальную высоту контейнера графика через getBoundingClientRect
@@ -335,7 +347,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 return num.toFixed(2);
             case 'volatility':
-                if (absV >= 1) return num.toFixed(2);
+                const absVol = Math.abs(num);
+                if (absVol >= 1) return num.toFixed(2);
                 return num.toFixed(3);
             case 'integer':
                 return String(Math.round(num));

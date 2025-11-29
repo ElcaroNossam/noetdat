@@ -7,9 +7,9 @@
 {% block content %}
 <div class="screener-container">
     <h1>{% trans "Crypto Screener" %}</h1>
-    <div class="market-type-toggle">
-        <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures">{% trans "Futures" %}</button>
-        <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot">{% trans "Spot" %}</button>
+    <div class="market-type-toggle" id="market-type-toggle">
+        <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures" id="btn-futures">{% trans "Futures" %}</button>
+        <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot" id="btn-spot">{% trans "Spot" %}</button>
     </div>
     <form method="get" class="screener-filters">
         <input type="hidden" id="market_type_hidden" name="market_type" value="{{ market_type }}">
@@ -174,21 +174,58 @@
         "ts",
     ];
     
-    // Market type toggle handler - use event delegation to avoid conflicts
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('.market-type-toggle .market-type-btn[data-market-type]');
-        if (!btn) return;
+    // Market type toggle handler - multiple approaches for reliability
+    (function() {
+        function switchMarketType(newMarketType) {
+            if (!newMarketType || !['futures', 'spot'].includes(newMarketType)) return;
+            
+            const url = new URL(window.location);
+            url.searchParams.delete('market_type');
+            url.searchParams.set('market_type', newMarketType);
+            window.location.href = url.toString();
+        }
         
-        e.preventDefault();
-        e.stopPropagation();
+        function handleMarketTypeClick(e) {
+            const btn = e.target.closest('.market-type-toggle .market-type-btn[data-market-type]');
+            if (!btn) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const newMarketType = btn.getAttribute('data-market-type');
+            switchMarketType(newMarketType);
+        }
         
-        const newMarketType = btn.getAttribute('data-market-type');
-        if (!newMarketType) return;
+        // Method 1: Event delegation on document (capture phase)
+        document.addEventListener('click', handleMarketTypeClick, true);
         
-        const url = new URL(window.location);
-        url.searchParams.delete('market_type');
-        url.searchParams.set('market_type', newMarketType);
-        window.location.href = url.toString();
-    }, true);
+        // Method 2: Direct binding when DOM is ready (as fallback)
+        function attachDirectHandlers() {
+            const toggleContainer = document.getElementById('market-type-toggle');
+            if (!toggleContainer) return;
+            
+            const buttons = toggleContainer.querySelectorAll('.market-type-btn[data-market-type]');
+            buttons.forEach(function(btn) {
+                // Remove any existing listeners by cloning
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const marketType = this.getAttribute('data-market-type');
+                    switchMarketType(marketType);
+                }, true);
+            });
+        }
+        
+        // Attach direct handlers when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachDirectHandlers);
+        } else {
+            attachDirectHandlers();
+        }
+    })();
 </script>
 {% endblock %}

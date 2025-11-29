@@ -286,6 +286,8 @@ body {
     text-align: center;
     text-decoration: none;
     color: #c5c6c7;
+    cursor: pointer;
+    user-select: none;
     background: #000000;
     border: 1px solid #45a29e33;
     border-radius: 4px;
