@@ -410,3 +410,9 @@ msgstr "Tasa de financiación"
 msgid "Vdelta 15m"
 msgstr "Vdelta 15m"
 
+msgid "Customize the table display by selecting the columns you want to see."
+msgstr "Personaliza la visualización de la tabla seleccionando las columnas que deseas ver."
+
+msgid "Restore Default Column Order"
+msgstr "Restaurar orden de columnas por defecto"
+

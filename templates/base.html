@@ -157,6 +157,22 @@
             });
         })();
     </script>
+    <script>
+        // Pass translations to JavaScript
+        window.TRANSLATIONS = {
+            'Screener Settings': '{% trans "Screener Settings" %}',
+            'Customize the table display by selecting the columns you want to see.': '{% trans "Customize the table display by selecting the columns you want to see." %}',
+            'Restore Default Column Order': '{% trans "Restore Default Column Order" %}',
+            'Reset': '{% trans "Reset" %}',
+            'No data to display.': '{% trans "No data to display." %}',
+            'No data.': '{% trans "No data." %}',
+        };
+        
+        // Simple translation function for JS
+        window.__ = function(key) {
+            return window.TRANSLATIONS[key] || key;
+        };
+    </script>
     <script src="{% static 'js/screener.js' %}" defer></script>
 </head>
 <body>

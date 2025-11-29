@@ -174,55 +174,41 @@
         "ts",
     ];
     
-    // Market type toggle handler - direct binding to avoid conflicts
+    // Market type toggle handler - use event delegation to avoid conflicts
+    // Initialize immediately when script loads
     (function() {
-        function initMarketTypeButtons() {
-            const buttons = document.querySelectorAll('.market-type-toggle .market-type-btn[data-market-type]');
-            console.log('Found market type buttons:', buttons.length);
+        function handleMarketTypeClick(e) {
+            const btn = e.target.closest('.market-type-toggle .market-type-btn[data-market-type]');
+            if (!btn) return;
             
-            buttons.forEach(function(btn) {
-                // Remove any existing listeners
-                const newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-                
-                newBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    
-                    const newMarketType = this.getAttribute('data-market-type');
-                    console.log('Market type button clicked:', newMarketType, this);
-                    
-                    if (!newMarketType) {
-                        console.error('No market type found on button');
-                        return;
-                    }
-                    
-                    const url = new URL(window.location);
-                    
-                    // Remove all market_type params to prevent duplicates
-                    url.searchParams.delete('market_type');
-                    
-                    // Add new market_type
-                    url.searchParams.set('market_type', newMarketType);
-                    
-                    console.log('Navigating to:', url.toString());
-                    
-                    // Navigate to new URL
-                    window.location.href = url.toString();
-                }, true); // Use capture phase
-            });
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             
-            console.log('Market type buttons initialized');
+            const newMarketType = btn.getAttribute('data-market-type');
+            console.log('Market type button clicked:', newMarketType);
+            
+            if (!newMarketType) {
+                console.error('No market type found on button');
+                return;
+            }
+            
+            const url = new URL(window.location);
+            
+            // Remove all market_type params to prevent duplicates
+            url.searchParams.delete('market_type');
+            
+            // Add new market_type
+            url.searchParams.set('market_type', newMarketType);
+            
+            console.log('Navigating to:', url.toString());
+            
+            // Navigate to new URL
+            window.location.href = url.toString();
         }
         
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initMarketTypeButtons);
-        } else {
-            // DOM already loaded
-            setTimeout(initMarketTypeButtons, 100); // Small delay to ensure buttons are rendered
-        }
+        // Use capture phase to ensure we catch the event early
+        document.addEventListener('click', handleMarketTypeClick, true);
     })();
 </script>
 {% endblock %}

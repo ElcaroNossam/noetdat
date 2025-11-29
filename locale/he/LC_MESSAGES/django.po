@@ -411,3 +411,9 @@ msgstr "שיעור מימון"
 msgid "Vdelta 15m"
 msgstr "Vdelta 15דק"
 
+msgid "Customize the table display by selecting the columns you want to see."
+msgstr "התאם אישית את תצוגת הטבלה על ידי בחירת העמודות שברצונך לראות."
+
+msgid "Restore Default Column Order"
+msgstr "שחזר סדר עמודות ברירת מחדל"
+

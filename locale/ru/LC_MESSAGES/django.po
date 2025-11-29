@@ -420,3 +420,9 @@ msgstr "Funding rate"
 msgid "Vdelta 15m"
 msgstr "Vdelta 15m"
 
+msgid "Customize the table display by selecting the columns you want to see."
+msgstr "Настройте отображение таблицы, выбрав столбцы, которые вы хотите видеть."
+
+msgid "Restore Default Column Order"
+msgstr "Восстановить порядок столбцов по умолчанию"
+

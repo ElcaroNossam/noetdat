@@ -171,10 +171,10 @@ document.addEventListener("DOMContentLoaded", () => {
         let html = `
             <div class="screener-settings-inner">
                 <div class="settings-header">
-                    <h2>Screener Settings</h2>
+                    <h2>${window.__ ? window.__('Screener Settings') : 'Screener Settings'}</h2>
                     <button type="button" class="close-settings" id="close-settings">×</button>
                 </div>
-                <p class="chart-note">Customize the table display by selecting the columns you want to see.</p>
+                <p class="chart-note">${window.__ ? window.__('Customize the table display by selecting the columns you want to see.') : 'Customize the table display by selecting the columns you want to see.'}</p>
                 <div class="settings-columns">
         `;
 
@@ -196,8 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="settings-footer">
                     <div class="settings-reset">
-                        <span>Restore Default Column Order</span>
-                        <button type="button" class="btn-secondary" id="reset-settings">Reset</button>
+                        <span>${window.__ ? window.__('Restore Default Column Order') : 'Restore Default Column Order'}</span>
+                        <button type="button" class="btn-secondary" id="reset-settings">${window.__ ? window.__('Reset') : 'Reset'}</button>
                     </div>
                 </div>
             </div>
@@ -499,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const td = document.createElement("td");
             td.colSpan = 31;
             td.className = "empty-row";
-            td.textContent = "Нет данных для отображения.";
+            td.textContent = "No data to display.";
             tr.appendChild(td);
             screenerTableBody.appendChild(tr);
             return;
@@ -1027,7 +1027,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const td = document.createElement("td");
                 td.colSpan = 7;
                 td.className = "empty-row";
-                td.textContent = "Нет данных.";
+                td.textContent = "No data.";
                 tr.appendChild(td);
                 body.appendChild(tr);
                 return;
