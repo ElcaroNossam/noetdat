@@ -79,12 +79,12 @@ def ingest_snapshot() -> int:
             ticks_15m = int(volume_15m / 1000.0)
             ticks_1h = int(volume_1h / 1000.0)
 
-            # Formula: vdelta = change * volume (no division for better readability)
-            vdelta_5m = change_5m * volume_5m
-            vdelta_15m = change_15m * volume_15m
-            vdelta_1h = change_1h * volume_1h
-            vdelta_8h = change_8h * volume_8h
-            vdelta_1d = change_1d * volume_1d
+            # Formula: vdelta = change * volume / 10.0 (divide by 10 for better readability on spot)
+            vdelta_5m = change_5m * volume_5m / 10.0
+            vdelta_15m = change_15m * volume_15m / 10.0
+            vdelta_1h = change_1h * volume_1h / 10.0
+            vdelta_8h = change_8h * volume_8h / 10.0
+            vdelta_1d = change_1d * volume_1d / 10.0
 
             # Spot doesn't have open interest or funding rate, but we'll get it from futures
             # Get OI from futures for the same symbol
