@@ -7,9 +7,13 @@
 {% block content %}
 <div class="screener-container">
     <h1>{% trans "Crypto Screener" %}</h1>
-    <div class="market-type-toggle" id="market-type-toggle">
-        <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures" id="btn-futures">{% trans "Futures" %}</button>
-        <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot" id="btn-spot">{% trans "Spot" %}</button>
+    <div class="market-type-toggle-wrapper">
+        <div class="market-type-btn-wrapper">
+            <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures" id="btn-futures">{% trans "Futures" %}</button>
+        </div>
+        <div class="market-type-btn-wrapper">
+            <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot" id="btn-spot">{% trans "Spot" %}</button>
+        </div>
     </div>
     <form method="get" class="screener-filters">
         <input type="hidden" id="market_type_hidden" name="market_type" value="{{ market_type }}">
