@@ -4,9 +4,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const availableColumns = window.SCREENER_AVAILABLE_COLUMNS || [];
     const storageKey = "screener_visible_columns";
+    const languageStorageKey = "preferred_language";
     
     // Store previous values for comparison (for volume, ticks, volatility, OI)
     let previousValues = new Map(); // key: symbol, value: object with previous values
+    
+    // Use global language functions from base.html
+    function getLanguagePrefix() {
+        if (window.getLanguagePrefix) {
+            return window.getLanguagePrefix();
+        }
+        // Fallback if global function not available
+        const currentPath = window.location.pathname;
+        const langMatch = currentPath.match(/^\/(ru|en|es|he)\//);
+        if (langMatch && langMatch[1]) {
+            return langMatch[1];
+        }
+        // If no prefix in URL, it's default language (ru) - but we still need prefix for API
+        // Check localStorage
+        try {
+            const savedLang = localStorage.getItem('preferred_language');
+            if (savedLang && ['ru', 'en', 'es', 'he'].includes(savedLang)) {
+                return savedLang;
+            }
+        } catch (e) {
+            // ignore
+        }
+        // Default to Russian
+        return 'ru';
+    }
 
     // Default visible columns (matching initial display)
     const defaultVisible = new Set([
@@ -330,6 +356,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const value = Number(v);
         if (isNaN(value)) return String(v);
         const absV = Math.abs(value);
+        // For large prices (>= 1000), use K/M/B suffixes
+        if (absV >= 1_000_000_000) return (value / 1_000_000_000).toFixed(2) + "B";
+        if (absV >= 1_000_000) return (value / 1_000_000).toFixed(2) + "M";
+        if (absV >= 1_000) return (value / 1_000).toFixed(2) + "K";
+        // For smaller prices, use adaptive formatting
         if (absV >= 1) return value.toFixed(2);
         if (absV >= 0.01) return value.toFixed(4);
         return value.toFixed(8);
@@ -398,10 +429,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!screenerTableBody) return;
         try {
             const query = buildQueryFromCurrentLocation();
-            // Preserve language prefix from current URL (e.g., /ru/, /en/, etc.)
-            const currentPath = window.location.pathname;
-            const langPrefix = currentPath.match(/^\/(ru|en|es|he)\//)?.[1];
-            const apiPath = langPrefix ? `/${langPrefix}/api/screener/` : "/api/screener/";
+            // Always use saved language prefix
+            const langPrefix = getLanguagePrefix();
+            const apiPath = `/${langPrefix}/api/screener/`;
             const url = apiPath + query.replace(/^\?/, "?");
             const resp = await fetch(url);
             if (!resp.ok) return;
@@ -481,11 +511,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tr.appendChild(symbolTd);
             
-            // Price - compare with previous value
+            // Price - use formatted value from backend if available, otherwise format on client
             const priceValue = Number(row.price ?? 0);
-            const priceFormatted = formatPrice(row.price);
-            const prevPrice = prev.price !== undefined && prev.price !== null && prev.price !== "" ? Number(prev.price) : undefined;
-            const priceCls = getComparisonClass(priceValue, prevPrice, true);
+            const priceFormatted = (row.price_formatted !== undefined && row.price_formatted !== null && row.price_formatted !== "") 
+                ? row.price_formatted 
+                : formatPrice(row.price);
+            let priceCls = (row.price_color !== undefined && row.price_color !== null && row.price_color !== "") 
+                ? row.price_color 
+                : "";
+            if (!priceCls) {
+                const prevPrice = prev.price !== undefined && prev.price !== null && prev.price !== "" ? Number(prev.price) : undefined;
+                priceCls = getComparisonClass(priceValue, prevPrice, true);
+            }
             tr.appendChild(makeTd("price", priceFormatted, priceCls));
 
             // Change columns - compare with previous values (same logic as Volume)
@@ -518,13 +555,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 
-            // Ticks columns - compare with previous values, round to integer
+            // Ticks columns - use formatted values from backend if available, otherwise format on client
             ["ticks_5m", "ticks_15m", "ticks_1h"].forEach((col) => {
                 const v = row[col] ?? 0;
                 const numValue = Number(v);
-                const formatted = !isNaN(numValue) ? String(Math.round(numValue)) : String(v);
-                const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
-                const cls = getComparisonClass(numValue, prevValue, true);
+                // Use formatted value from backend if available, otherwise format on client
+                let formatted = (row[col + "_formatted"] !== undefined && row[col + "_formatted"] !== null && row[col + "_formatted"] !== "") 
+                    ? row[col + "_formatted"] 
+                    : (() => {
+                        if (isNaN(numValue)) return String(v);
+                        const absV = Math.abs(numValue);
+                        if (absV >= 1_000_000_000) return (numValue / 1_000_000_000).toFixed(2) + "B";
+                        if (absV >= 1_000_000) return (numValue / 1_000_000).toFixed(2) + "M";
+                        if (absV >= 1_000) return (numValue / 1_000).toFixed(2) + "K";
+                        return String(Math.round(numValue));
+                    })();
+                // Use color from backend if available, otherwise calculate based on previousValues
+                let cls = (row[col + "_color"] !== undefined && row[col + "_color"] !== null && row[col + "_color"] !== "") 
+                    ? row[col + "_color"] 
+                    : "";
+                if (!cls) {
+                    const prevValue = prev[col] !== undefined && prev[col] !== null && prev[col] !== "" ? Number(prev[col]) : undefined;
+                    cls = getComparisonClass(numValue, prevValue, true);
+                }
                 tr.appendChild(makeTd(col, formatted, cls));
             });
 

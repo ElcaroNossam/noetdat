@@ -73,7 +73,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        fetch(`/api/symbols/?market_type=${marketType}&search=${encodeURIComponent(search)}`)
+        // Preserve language prefix
+        const langPrefix = window.getLanguagePrefix ? window.getLanguagePrefix() : (window.location.pathname.match(/^\/(ru|en|es|he)\//)?.[1] || 'ru');
+        const apiPath = `/${langPrefix}/api/symbols/`;
+        fetch(`${apiPath}?market_type=${marketType}&search=${encodeURIComponent(search)}`)
             .then(res => res.json())
             .then(data => {
                 symbolsCache[cacheKey] = data.symbols;
@@ -515,7 +518,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция обновления статистики (использует currentSymbol)
     function updateStats() {
-        fetch(`/api/symbol/${currentSymbol}/?market_type=${marketType}`)
+        // Preserve language prefix
+        const langPrefix = window.getLanguagePrefix ? window.getLanguagePrefix() : (window.location.pathname.match(/^\/(ru|en|es|he)\//)?.[1] || 'ru');
+        const apiPath = `/${langPrefix}/api/symbol/`;
+        fetch(`${apiPath}${currentSymbol}/?market_type=${marketType}`)
             .then(res => res.json())
             .then(data => {
                 if (data.latest) {

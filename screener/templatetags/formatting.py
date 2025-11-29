@@ -10,8 +10,11 @@ register = template.Library()
 @register.filter
 def format_price(value):
     """
-    Adaptive price formatting:
-    - price >= 1: 2 decimal places (e.g., 51234.56)
+    Adaptive price formatting with K/M/B suffixes for large values:
+    - >= 1B: show as X.XXB
+    - >= 1M: show as X.XXM
+    - >= 1K: show as X.XXK
+    - >= 1: 2 decimal places (e.g., 51234.56)
     - 0.01 <= price < 1: 4 decimal places
     - price < 0.01: 8 decimal places
     """
@@ -28,7 +31,14 @@ def format_price(value):
 
     abs_v = abs(v)
 
-    if abs_v >= 1:
+    # For large prices, use K/M/B suffixes
+    if abs_v >= 1_000_000_000:
+        return f"{v / 1_000_000_000:.2f}B"
+    elif abs_v >= 1_000_000:
+        return f"{v / 1_000_000:.2f}M"
+    elif abs_v >= 1_000:
+        return f"{v / 1_000:.2f}K"
+    elif abs_v >= 1:
         return f"{v:.2f}"
     elif abs_v >= 0.01:
         return f"{v:.4f}"
@@ -180,4 +190,36 @@ def format_oi_change(value):
     else:
         # For very small values, show more decimals to distinguish from zero
         return f"{v:.6f}"
+
+
+@register.filter
+def format_ticks(value):
+    """
+    Format ticks with K/M/B suffixes:
+    - >= 1B: show as X.XXB
+    - >= 1M: show as X.XXM
+    - >= 1K: show as X.XXK
+    - < 1K: show as integer
+    """
+    if value is None:
+        return ""
+
+    try:
+        if isinstance(value, Decimal):
+            v = float(value)
+        else:
+            v = float(value)
+    except (ValueError, TypeError):
+        return str(value)
+
+    abs_v = abs(v)
+
+    if abs_v >= 1_000_000_000:
+        return f"{v / 1_000_000_000:.2f}B"
+    elif abs_v >= 1_000_000:
+        return f"{v / 1_000_000:.2f}M"
+    elif abs_v >= 1_000:
+        return f"{v / 1_000:.2f}K"
+    else:
+        return f"{int(v)}"
 

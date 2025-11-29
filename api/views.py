@@ -4,6 +4,7 @@ from accounts.decorators import access_required
 
 from screener.models import ScreenerSnapshot, Symbol
 from screener.utils import format_volume, format_vdelta, get_value_color
+from screener.templatetags.formatting import format_price, format_ticks
 
 
 @access_required
@@ -164,10 +165,24 @@ def screener_list_api(request):
         oi_formatted = format_volume(s.open_interest)
         oi_color = get_value_color(s.open_interest, prev_vals.get("open_interest"), True)
         
+        # Format price
+        price_formatted = format_price(s.price)
+        price_color = get_value_color(s.price, prev_vals.get("price"), True)
+        
+        # Format ticks
+        ticks_5m_formatted = format_ticks(s.ticks_5m)
+        ticks_15m_formatted = format_ticks(s.ticks_15m)
+        ticks_1h_formatted = format_ticks(s.ticks_1h)
+        ticks_5m_color = get_value_color(s.ticks_5m, prev_vals.get("ticks_5m"), True)
+        ticks_15m_color = get_value_color(s.ticks_15m, prev_vals.get("ticks_15m"), True)
+        ticks_1h_color = get_value_color(s.ticks_1h, prev_vals.get("ticks_1h"), True)
+        
         data.append({
             "symbol": s.symbol.symbol,
             "name": s.symbol.name,
             "price": float(s.price),
+            "price_formatted": price_formatted,
+            "price_color": price_color,
             "change_5m": s.change_5m,
             "change_15m": s.change_15m,
             "change_1h": s.change_1h,
@@ -182,8 +197,14 @@ def screener_list_api(request):
             "volatility_15m": s.volatility_15m,
             "volatility_1h": s.volatility_1h,
             "ticks_5m": s.ticks_5m,
+            "ticks_5m_formatted": ticks_5m_formatted,
+            "ticks_5m_color": ticks_5m_color,
             "ticks_15m": s.ticks_15m,
+            "ticks_15m_formatted": ticks_15m_formatted,
+            "ticks_15m_color": ticks_15m_color,
             "ticks_1h": s.ticks_1h,
+            "ticks_1h_formatted": ticks_1h_formatted,
+            "ticks_1h_color": ticks_1h_color,
             # Vdelta - raw values and formatted
             "vdelta_5m": s.vdelta_5m,
             "vdelta_5m_formatted": vdelta_5m_formatted,
@@ -225,6 +246,7 @@ def screener_list_api(request):
         
         # Store current values as previous for next update (for same symbol)
         symbol_previous_values[symbol] = {
+            "price": float(s.price) if s.price is not None else None,
             "vdelta_5m": float(s.vdelta_5m) if s.vdelta_5m is not None else None,
             "vdelta_15m": float(s.vdelta_15m) if s.vdelta_15m is not None else None,
             "vdelta_1h": float(s.vdelta_1h) if s.vdelta_1h is not None else None,
@@ -236,6 +258,9 @@ def screener_list_api(request):
             "volume_8h": float(s.volume_8h) if s.volume_8h is not None else None,
             "volume_1d": float(s.volume_1d) if s.volume_1d is not None else None,
             "open_interest": float(s.open_interest) if s.open_interest is not None else None,
+            "ticks_5m": float(s.ticks_5m) if s.ticks_5m is not None else None,
+            "ticks_15m": float(s.ticks_15m) if s.ticks_15m is not None else None,
+            "ticks_1h": float(s.ticks_1h) if s.ticks_1h is not None else None,
         }
     
     return JsonResponse(data, safe=False)

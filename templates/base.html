@@ -10,6 +10,67 @@
     <link rel="apple-touch-icon" href="{% static 'favicon.svg' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_css %}{% endblock %}
+    <script>
+        // Global language management - must be available before other scripts
+        (function() {
+            const languageStorageKey = "preferred_language";
+            
+            window.getCurrentLanguage = function() {
+                // First, try to get from URL path
+                const currentPath = window.location.pathname;
+                const langMatch = currentPath.match(/^\/(ru|en|es|he)\//);
+                if (langMatch && langMatch[1]) {
+                    const lang = langMatch[1];
+                    // Save to localStorage for future use
+                    try {
+                        localStorage.setItem(languageStorageKey, lang);
+                    } catch (e) {
+                        // ignore
+                    }
+                    return lang;
+                }
+                // If not in URL, try localStorage
+                try {
+                    const savedLang = localStorage.getItem(languageStorageKey);
+                    if (savedLang && ['ru', 'en', 'es', 'he'].includes(savedLang)) {
+                        return savedLang;
+                    }
+                } catch (e) {
+                    // ignore
+                }
+                // Default to Russian (matches LANGUAGE_CODE in settings)
+                return 'ru';
+            };
+            
+            window.getLanguagePrefix = function() {
+                const lang = window.getCurrentLanguage();
+                // Always return language code for API requests
+                // Even for default language (ru), we need prefix for API
+                return lang;
+            };
+            
+            // Initialize language on page load and save to localStorage
+            window.getCurrentLanguage();
+            
+            // Also save language when it changes via form
+            document.addEventListener('DOMContentLoaded', function() {
+                // Monitor language selector changes
+                const langForm = document.querySelector('.language-form');
+                if (langForm) {
+                    langForm.addEventListener('submit', function() {
+                        const select = this.querySelector('select[name="language"]');
+                        if (select && select.value) {
+                            try {
+                                localStorage.setItem(languageStorageKey, select.value);
+                            } catch (e) {
+                                // ignore
+                            }
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
     <script src="{% static 'js/screener.js' %}" defer></script>
 </head>
 <body>
