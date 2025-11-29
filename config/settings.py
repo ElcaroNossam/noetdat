@@ -32,7 +32,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",  # Локализация
+    "django.middleware.locale.LocaleMiddleware",  # Локализация (базовый)
+    "config.middleware.ForceLanguageMiddleware",  # Принудительное определение языка из URL/cookie
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -121,6 +122,8 @@ LANGUAGE_COOKIE_NAME = 'django_language'
 LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60  # 1 year
 LANGUAGE_COOKIE_HTTPONLY = False  # Allow JavaScript to read it
 LANGUAGE_COOKIE_SAMESITE = 'Lax'
+LANGUAGE_COOKIE_SECURE = False  # Set to True if using HTTPS only
+LANGUAGE_COOKIE_PATH = '/'  # Cookie available for entire site
 
 
 STATIC_URL = "/static/"
