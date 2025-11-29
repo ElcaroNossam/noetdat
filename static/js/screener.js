@@ -409,10 +409,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const absV = Math.abs(value);
         // Handle zero case
         if (absV < 0.0001) return "0.00";
-        // Для Vdelta делаем одинаковые пороги для spot и futures,
-        // чтобы суффиксы вели себя одинаково на всех рынках.
-        const kThreshold = 1_000;
-        const mThreshold = 1_000_000;
+        
+        // Different thresholds for spot vs futures
+        let kThreshold, mThreshold;
+        if (marketType === "spot") {
+            // Spot: lower thresholds because volumes are smaller
+            kThreshold = 100;      // K from 100 (e.g., 150 -> 0.15K)
+            mThreshold = 100_000;  // M from 100K (e.g., 150K -> 0.15M)
+        } else {
+            // Futures / default: higher thresholds
+            kThreshold = 1_000;
+            mThreshold = 1_000_000;
+        }
+        
         if (absV >= mThreshold) return (value / 1_000_000).toFixed(2) + "M";
         if (absV >= kThreshold) return (value / 1_000).toFixed(2) + "K";
         if (absV >= 1) {

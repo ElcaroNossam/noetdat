@@ -52,8 +52,9 @@ def format_volume(value, market_type: str | None = None) -> str:
 def format_vdelta(value, market_type: str | None = None) -> str:
     """
     Format volume delta with K/M/B suffixes and smart rounding.
-    Thresholds can be slightly different for spot / futures to make values
-    more readable on spot, where absolute numbers are usually smaller.
+    Different thresholds for spot vs futures to make values more readable:
+    - Spot: lower thresholds (K from 100, M from 100K) because volumes are smaller
+    - Futures: higher thresholds (K from 1000, M from 1M) because volumes are larger
     Common logic:
     - abs(v) very small -> 0.00
     - large values -> K / M suffix
@@ -76,10 +77,15 @@ def format_vdelta(value, market_type: str | None = None) -> str:
     if abs_v < 0.0001:
         return "0.00"
 
-    # Для Vdelta делаем одинаковые пороги для spot и futures,
-    # чтобы суффиксы вели себя одинаково на всех рынках.
-    k_threshold = 1_000.0
-    m_threshold = 1_000_000.0
+    # Different thresholds for spot vs futures
+    if market_type == "spot":
+        # Spot: lower thresholds because volumes are smaller
+        k_threshold = 100.0   # K from 100 (e.g., 150 -> 0.15K)
+        m_threshold = 100_000.0  # M from 100K (e.g., 150K -> 0.15M)
+    else:
+        # Futures / default: higher thresholds
+        k_threshold = 1_000.0
+        m_threshold = 1_000_000.0
 
     if abs_v >= m_threshold:
         return f"{v / 1_000_000:.2f}M"
