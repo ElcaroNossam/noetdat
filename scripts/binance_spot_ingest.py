@@ -80,23 +80,17 @@ def ingest_snapshot() -> int:
             ticks_1h = int(volume_1h / 1000.0)
 
             # Vdelta: volume-weighted price change for each timeframe
-            # Formula: vdelta_tf = change_tf * volume_tf
-            # This represents the weighted volume (volume adjusted by price change %)
-            # For each timeframe, uses its own change and volume, ensuring |vdelta| <= |volume| * |change|
-            # Since both change and volume scale by ratio, vdelta scales by ratio² (mathematically correct)
-            # For cheap coins (price < 1), limit vdelta to max 2x volume_tf to prevent unrealistic values
-            vdelta_5m_calc = change_5m * volume_5m
-            vdelta_15m_calc = change_15m * volume_15m
-            vdelta_1h_calc = change_1h * volume_1h
-            vdelta_8h_calc = change_8h * volume_8h
-            vdelta_1d_calc = change_1d * volume_1d
-            
-            # Limit vdelta to max 2x volume_tf for cheap coins with large % changes
-            vdelta_5m = max(-abs(volume_5m) * 2.0, min(abs(volume_5m) * 2.0, vdelta_5m_calc))
-            vdelta_15m = max(-abs(volume_15m) * 2.0, min(abs(volume_15m) * 2.0, vdelta_15m_calc))
-            vdelta_1h = max(-abs(volume_1h) * 2.0, min(abs(volume_1h) * 2.0, vdelta_1h_calc))
-            vdelta_8h = max(-abs(volume_8h) * 2.0, min(abs(volume_8h) * 2.0, vdelta_8h_calc))
-            vdelta_1d = max(-abs(volume_1d) * 2.0, min(abs(volume_1d) * 2.0, vdelta_1d_calc))
+            # Formula: vdelta_tf = change_tf * volume_24h
+            # Uses timeframe-specific change with 24h volume for correct scaling between timeframes
+            # This ensures: 1) correct ratio between TFs (1d/5m = 288), 2) larger values on smaller TFs
+            # volume_24h is in USDT (normalized), so price doesn't affect the calculation directly
+            # No limiting - vdelta is proportional to change, which is mathematically correct
+            # For change = -1%, vdelta = 100% of volume; for change = -2%, vdelta = 200% of volume, etc.
+            vdelta_5m = change_5m * volume_24h
+            vdelta_15m = change_15m * volume_24h
+            vdelta_1h = change_1h * volume_24h
+            vdelta_8h = change_8h * volume_24h
+            vdelta_1d = change_1d * volume_24h
 
             # Spot doesn't have open interest or funding rate, but we'll get it from futures
             # Get OI from futures for the same symbol (for reference, even though Spot doesn't have OI)
