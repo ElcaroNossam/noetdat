@@ -334,10 +334,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildQueryFromCurrentLocation() {
         const url = new URL(window.location);
-        // Ensure market_type is preserved
-        if (!url.searchParams.has("market_type")) {
-            url.searchParams.set("market_type", "spot");
-        }
+        // Remove duplicate market_type params first
+        const marketType = url.searchParams.get("market_type") || "spot";
+        url.searchParams.delete("market_type");
+        url.searchParams.set("market_type", marketType);
         // Preserve language from URL path (e.g., /ru/, /en/, etc.)
         const pathParts = url.pathname.split('/').filter(p => p);
         if (pathParts.length > 0 && ['ru', 'en', 'es', 'he'].includes(pathParts[0])) {
@@ -429,9 +429,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!screenerTableBody) return;
         try {
             const query = buildQueryFromCurrentLocation();
-            // Always use saved language prefix
+            // Get language prefix - for default language (ru) with prefix_default_language=False, 
+            // we should NOT add prefix to URL
             const langPrefix = getLanguagePrefix();
-            const apiPath = `/${langPrefix}/api/screener/`;
+            const currentPath = window.location.pathname;
+            const pathParts = currentPath.split('/').filter(p => p);
+            const hasLangPrefix = pathParts.length > 0 && ['ru', 'en', 'es', 'he'].includes(pathParts[0]);
+            
+            // Build API path: if current URL has language prefix, use it; otherwise use /api/ directly
+            let apiPath;
+            if (hasLangPrefix) {
+                // Current page has language prefix, use it for API
+                apiPath = `/${pathParts[0]}/api/screener/`;
+            } else {
+                // Current page has no prefix (default language), API also has no prefix
+                apiPath = `/api/screener/`;
+            }
+            
             const url = apiPath + query.replace(/^\?/, "?");
             
             // Debug logging
@@ -439,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const resp = await fetch(url);
             if (!resp.ok) {
-                console.error("Screener API error:", resp.status, resp.statusText);
+                console.error("Screener API error:", resp.status, resp.statusText, url);
                 return;
             }
 
