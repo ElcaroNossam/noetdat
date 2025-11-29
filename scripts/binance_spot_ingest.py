@@ -79,15 +79,16 @@ def ingest_snapshot() -> int:
             ticks_15m = int(volume_15m / 1000.0)
             ticks_1h = int(volume_1h / 1000.0)
 
-            # Vdelta approximation: use timeframe-specific change with 24h volume
-            # For spot: no division (multiply by 100 for better readability)
-            # Formula: vdelta_tf = change_tf * volume_24h
-            # This ensures correct ratio between timeframes (1d/5m = 288, not 288²)
-            vdelta_5m = change_5m * volume_24h
-            vdelta_15m = change_15m * volume_24h
-            vdelta_1h = change_1h * volume_24h
-            vdelta_8h = change_8h * volume_24h
-            vdelta_1d = change_1d * volume_24h
+            # Vdelta: volume-weighted price change for each timeframe
+            # Formula: vdelta_tf = change_tf * volume_tf
+            # This represents the weighted volume (volume adjusted by price change %)
+            # For each timeframe, uses its own change and volume, ensuring |vdelta| <= |volume| * |change|
+            # Since both change and volume scale by ratio, vdelta scales by ratio² (mathematically correct)
+            vdelta_5m = change_5m * volume_5m
+            vdelta_15m = change_15m * volume_15m
+            vdelta_1h = change_1h * volume_1h
+            vdelta_8h = change_8h * volume_8h
+            vdelta_1d = change_1d * volume_1d
 
             # Spot doesn't have open interest or funding rate, but we'll get it from futures
             # Get OI from futures for the same symbol
