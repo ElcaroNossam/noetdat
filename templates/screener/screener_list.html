@@ -174,58 +174,44 @@
         "ts",
     ];
     
-    // Market type toggle handler - multiple approaches for reliability
+    // Market type toggle handler - simple and reliable
     (function() {
-        function switchMarketType(newMarketType) {
-            if (!newMarketType || !['futures', 'spot'].includes(newMarketType)) return;
+        function initMarketTypeButtons() {
+            const btnFutures = document.getElementById('btn-futures');
+            const btnSpot = document.getElementById('btn-spot');
             
-            const url = new URL(window.location);
-            url.searchParams.delete('market_type');
-            url.searchParams.set('market_type', newMarketType);
-            window.location.href = url.toString();
-        }
-        
-        function handleMarketTypeClick(e) {
-            const btn = e.target.closest('.market-type-toggle .market-type-btn[data-market-type]');
-            if (!btn) return;
-            
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            
-            const newMarketType = btn.getAttribute('data-market-type');
-            switchMarketType(newMarketType);
-        }
-        
-        // Method 1: Event delegation on document (capture phase)
-        document.addEventListener('click', handleMarketTypeClick, true);
-        
-        // Method 2: Direct binding when DOM is ready (as fallback)
-        function attachDirectHandlers() {
-            const toggleContainer = document.getElementById('market-type-toggle');
-            if (!toggleContainer) return;
-            
-            const buttons = toggleContainer.querySelectorAll('.market-type-btn[data-market-type]');
-            buttons.forEach(function(btn) {
-                // Remove any existing listeners by cloning
-                const newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-                
-                newBtn.addEventListener('click', function(e) {
+            if (btnFutures) {
+                btnFutures.onclick = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    const marketType = this.getAttribute('data-market-type');
-                    switchMarketType(marketType);
-                }, true);
-            });
+                    const url = new URL(window.location);
+                    url.searchParams.delete('market_type');
+                    url.searchParams.set('market_type', 'futures');
+                    window.location.href = url.toString();
+                };
+            }
+            
+            if (btnSpot) {
+                btnSpot.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const url = new URL(window.location);
+                    url.searchParams.delete('market_type');
+                    url.searchParams.set('market_type', 'spot');
+                    window.location.href = url.toString();
+                };
+            }
         }
         
-        // Attach direct handlers when DOM is ready
+        // Initialize when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', attachDirectHandlers);
+            document.addEventListener('DOMContentLoaded', initMarketTypeButtons);
         } else {
-            attachDirectHandlers();
+            initMarketTypeButtons();
         }
+        
+        // Also try after a short delay as fallback
+        setTimeout(initMarketTypeButtons, 100);
     })();
 </script>
 {% endblock %}
