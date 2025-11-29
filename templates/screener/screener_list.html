@@ -8,8 +8,8 @@
 <div class="screener-container">
     <h1>{% trans "Crypto Screener" %}</h1>
     <div class="market-type-toggle" style="z-index: 10000 !important; position: relative !important;">
-        <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures" id="btn-futures" style="z-index: 10001 !important; pointer-events: auto !important; position: relative !important; cursor: pointer !important;" onclick="console.log('=== FUTURES CLICKED ==='); event.preventDefault(); event.stopPropagation(); const url = new URL(window.location); url.searchParams.delete('market_type'); url.searchParams.set('market_type', 'futures'); console.log('Navigating to:', url.toString()); window.location.href = url.toString(); return false;">{% trans "Futures" %}</button>
-        <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot" id="btn-spot" style="z-index: 10001 !important; pointer-events: auto !important; position: relative !important; cursor: pointer !important;" onclick="console.log('=== SPOT CLICKED ==='); event.preventDefault(); event.stopPropagation(); const url = new URL(window.location); url.searchParams.delete('market_type'); url.searchParams.set('market_type', 'spot'); console.log('Navigating to:', url.toString()); window.location.href = url.toString(); return false;">{% trans "Spot" %}</button>
+        <button type="button" class="market-type-btn {% if market_type == 'futures' %}active{% endif %}" data-market-type="futures" id="btn-futures" style="z-index: 10001 !important; pointer-events: auto !important; position: relative !important; cursor: pointer !important;" onclick="console.log('=== FUTURES CLICKED ==='); if(event) { event.preventDefault(); event.stopPropagation(); } var url = window.location.href.split('?')[0]; var params = new URLSearchParams(window.location.search); params.delete('market_type'); params.set('market_type', 'futures'); var newUrl = url + '?' + params.toString(); console.log('Navigating to:', newUrl); window.location.href = newUrl; return false;">{% trans "Futures" %}</button>
+        <button type="button" class="market-type-btn {% if market_type == 'spot' %}active{% endif %}" data-market-type="spot" id="btn-spot" style="z-index: 10001 !important; pointer-events: auto !important; position: relative !important; cursor: pointer !important;" onclick="console.log('=== SPOT CLICKED ==='); if(event) { event.preventDefault(); event.stopPropagation(); } var url = window.location.href.split('?')[0]; var params = new URLSearchParams(window.location.search); params.delete('market_type'); params.set('market_type', 'spot'); var newUrl = url + '?' + params.toString(); console.log('Navigating to:', newUrl); window.location.href = newUrl; return false;">{% trans "Spot" %}</button>
     </div>
     <form method="get" class="screener-filters">
         <input type="hidden" id="market_type_hidden" name="market_type" value="{{ market_type }}">
@@ -183,30 +183,36 @@
         
         if (btnFutures) {
             btnFutures.addEventListener('click', function(e) {
-                console.log('Futures button clicked', e);
+                console.log('Futures button clicked (addEventListener)', e);
                 e.preventDefault();
                 e.stopPropagation();
-                const url = new URL(window.location);
-                url.searchParams.delete('market_type');
-                url.searchParams.set('market_type', 'futures');
-                console.log('Navigating to:', url.toString());
-                window.location.href = url.toString();
-            });
+                e.stopImmediatePropagation();
+                var url = window.location.href.split('?')[0];
+                var params = new URLSearchParams(window.location.search);
+                params.delete('market_type');
+                params.set('market_type', 'futures');
+                var newUrl = url + '?' + params.toString();
+                console.log('Navigating to:', newUrl);
+                window.location.href = newUrl;
+            }, true);
         } else {
             console.warn('btn-futures not found!');
         }
         
         if (btnSpot) {
             btnSpot.addEventListener('click', function(e) {
-                console.log('Spot button clicked', e);
+                console.log('Spot button clicked (addEventListener)', e);
                 e.preventDefault();
                 e.stopPropagation();
-                const url = new URL(window.location);
-                url.searchParams.delete('market_type');
-                url.searchParams.set('market_type', 'spot');
-                console.log('Navigating to:', url.toString());
-                window.location.href = url.toString();
-            });
+                e.stopImmediatePropagation();
+                var url = window.location.href.split('?')[0];
+                var params = new URLSearchParams(window.location.search);
+                params.delete('market_type');
+                params.set('market_type', 'spot');
+                var newUrl = url + '?' + params.toString();
+                console.log('Navigating to:', newUrl);
+                window.location.href = newUrl;
+            }, true);
         } else {
             console.warn('btn-spot not found!');
         }
