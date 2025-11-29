@@ -118,12 +118,12 @@ def ingest_snapshot() -> int:
 
             # Vdelta approximation: positive if price going up, negative if down
             # Use change as proxy
-            # Formula: vdelta = change * volume (no division for better readability)
-            vdelta_5m = change_5m * volume_5m
-            vdelta_15m = change_15m * volume_15m
-            vdelta_1h = change_1h * volume_1h
-            vdelta_8h = change_8h * volume_8h
-            vdelta_1d = change_1d * volume_1d
+            # For futures: keep original formula with /100.0 (was correct)
+            vdelta_5m = change_5m * volume_5m / 100.0
+            vdelta_15m = change_15m * volume_15m / 100.0
+            vdelta_1h = change_1h * volume_1h / 100.0
+            vdelta_8h = change_8h * volume_8h / 100.0
+            vdelta_1d = change_1d * volume_1d / 100.0
 
             oi = fetch_open_interest(symbol_code)
 
