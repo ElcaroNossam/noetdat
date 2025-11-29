@@ -563,6 +563,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const symbol = row.symbol;
             // Get previous values for this symbol, or use empty object if not found
             const prev = previousValues.get(symbol) || {};
+            // Initialize repetition info for this symbol (get from previous data or create new)
+            const prevData = previousValues.get(symbol) || {};
+            const repetitionInfo = prevData._repetition || {};
 
             const makeTd = (col, text, className) => {
                 const td = document.createElement("td");
@@ -747,10 +750,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             
             // Store ALL values for proper comparison
-            // Also initialize repetition info if not exists
-            const prevData = previousValues.get(symbol) || {};
-            const repetitionInfo = prevData._repetition || {};
-            
+            // Repetition info is already initialized at the start of the loop
             previousValues.set(symbol, {
                 // Price
                 price: storeValue(row.price),
