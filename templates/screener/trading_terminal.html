@@ -57,6 +57,10 @@
     </div>
 </div>
 
+{% if snapshot_data %}
+{{ snapshot_data|json_script:"initial-snapshot-data" }}
+{% endif %}
+
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -588,11 +592,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => console.error('Failed to update stats:', err));
     }
     
-    // Первоначальная загрузка - use JSON script to avoid locale formatting issues
-    {% if snapshot_data %}
-    {{ snapshot_data|json_script:"initial-snapshot-data" }}
-    {% endif %}
-    
+    // Первоначальная загрузка - parse JSON data from script tag
     // Parse JSON data if it exists
     let initialSnapshot = null;
     {% if snapshot_data %}
