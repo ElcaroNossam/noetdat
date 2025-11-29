@@ -363,9 +363,6 @@ msgstr "צור התראה בדף הסמל כדי לקבל התראות."
 msgid "Volatility 15m"
 msgstr "תנודתיות 15דק"
 
-msgid "Volume 5m"
-msgstr "נפח 5דק"
-
 msgid "Light stub chart: data can be loaded via"
 msgstr "גרף stub קל: ניתן לטעון נתונים דרך"
 
@@ -380,9 +377,6 @@ msgstr "TS"
 
 msgid "Change 15m %"
 msgstr "שינוי 15דק %"
-
-msgid "Volume 15m"
-msgstr "נפח 15דק"
 
 msgid "OI Δ 15m %"
 msgstr "OI Δ 15דק %"
@@ -407,9 +401,6 @@ msgstr "שינוי OI 15דק %"
 
 msgid "Funding rate"
 msgstr "שיעור מימון"
-
-msgid "Vdelta 15m"
-msgstr "Vdelta 15דק"
 
 msgid "Customize the table display by selecting the columns you want to see."
 msgstr "התאם אישית את תצוגת הטבלה על ידי בחירת העמודות שברצונך לראות."
