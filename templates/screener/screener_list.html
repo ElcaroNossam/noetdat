@@ -176,42 +176,91 @@
     
     // Market type toggle handler - simple and reliable
     (function() {
+        let initialized = false;
+        
         function initMarketTypeButtons() {
             const btnFutures = document.getElementById('btn-futures');
             const btnSpot = document.getElementById('btn-spot');
             
-            if (btnFutures) {
-                btnFutures.onclick = function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const url = new URL(window.location);
-                    url.searchParams.delete('market_type');
-                    url.searchParams.set('market_type', 'futures');
-                    window.location.href = url.toString();
-                };
+            if (!btnFutures || !btnSpot) {
+                return; // Buttons not found yet, will retry
             }
             
-            if (btnSpot) {
-                btnSpot.onclick = function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const url = new URL(window.location);
-                    url.searchParams.delete('market_type');
-                    url.searchParams.set('market_type', 'spot');
-                    window.location.href = url.toString();
-                };
+            if (initialized) {
+                // Already initialized, just verify buttons are still clickable
+                return;
             }
+            
+            // Check if buttons are visible and not covered
+            const rectFutures = btnFutures.getBoundingClientRect();
+            const rectSpot = btnSpot.getBoundingClientRect();
+            const elementAtFutures = document.elementFromPoint(rectFutures.left + rectFutures.width / 2, rectFutures.top + rectFutures.height / 2);
+            const elementAtSpot = document.elementFromPoint(rectSpot.left + rectSpot.width / 2, rectSpot.top + rectSpot.height / 2);
+            
+            // If something else is on top, log it for debugging
+            if (elementAtFutures !== btnFutures && elementAtFutures !== btnFutures.parentElement) {
+                console.warn('Button Futures may be covered by:', elementAtFutures);
+            }
+            if (elementAtSpot !== btnSpot && elementAtSpot !== btnSpot.parentElement) {
+                console.warn('Button Spot may be covered by:', elementAtSpot);
+            }
+            
+            // Use direct onclick assignment for maximum compatibility
+            btnFutures.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                const url = new URL(window.location);
+                url.searchParams.delete('market_type');
+                url.searchParams.set('market_type', 'futures');
+                window.location.href = url.toString();
+                return false;
+            };
+            
+            btnSpot.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                const url = new URL(window.location);
+                url.searchParams.delete('market_type');
+                url.searchParams.set('market_type', 'spot');
+                window.location.href = url.toString();
+                return false;
+            };
+            
+            // Also add event listeners as backup (using mousedown for better reliability)
+            btnFutures.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = new URL(window.location);
+                url.searchParams.delete('market_type');
+                url.searchParams.set('market_type', 'futures');
+                window.location.href = url.toString();
+            }, { capture: true });
+            
+            btnSpot.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const url = new URL(window.location);
+                url.searchParams.delete('market_type');
+                url.searchParams.set('market_type', 'spot');
+                window.location.href = url.toString();
+            }, { capture: true });
+            
+            initialized = true;
         }
         
-        // Initialize when DOM is ready
+        // Initialize immediately if DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initMarketTypeButtons);
         } else {
             initMarketTypeButtons();
         }
         
-        // Also try after a short delay as fallback
+        // Also try after delays as fallback
+        setTimeout(initMarketTypeButtons, 0);
         setTimeout(initMarketTypeButtons, 100);
+        setTimeout(initMarketTypeButtons, 500);
     })();
 </script>
 {% endblock %}
