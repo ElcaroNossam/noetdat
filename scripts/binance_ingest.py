@@ -122,17 +122,17 @@ def ingest_snapshot() -> int:
             ticks_1h = int(volume_1h / 1000.0)
 
             # Vdelta: volume-weighted price change for each timeframe
-            # Formula: vdelta_tf = change_tf * volume_24h
-            # Uses timeframe-specific change with 24h volume for correct scaling between timeframes
-            # This ensures: 1) correct ratio between TFs (1d/5m = 288), 2) larger values on smaller TFs
-            # volume_24h is in USDT (normalized), so price doesn't affect the calculation directly
-            # No limiting - vdelta is proportional to change, which is mathematically correct
-            # For change = -1%, vdelta = 100% of volume; for change = -2%, vdelta = 200% of volume, etc.
-            vdelta_5m = change_5m * volume_24h
-            vdelta_15m = change_15m * volume_24h
-            vdelta_1h = change_1h * volume_24h
-            vdelta_8h = change_8h * volume_24h
-            vdelta_1d = change_1d * volume_24h
+            # Formula: vdelta_tf = (change_tf / 100.0) * volume_tf
+            # change_tf is in percentage (e.g., -1.0 means -1%), so divide by 100 to get decimal
+            # Uses timeframe-specific change with timeframe-specific volume
+            # This ensures vdelta is comparable to volume (both in USDT for the same timeframe)
+            # For change = -1%, vdelta = 1% of volume; for change = -2%, vdelta = 2% of volume, etc.
+            # Note: ratio between TFs will be 288² (mathematically correct for this formula)
+            vdelta_5m = (change_5m / 100.0) * volume_5m
+            vdelta_15m = (change_15m / 100.0) * volume_15m
+            vdelta_1h = (change_1h / 100.0) * volume_1h
+            vdelta_8h = (change_8h / 100.0) * volume_8h
+            vdelta_1d = (change_1d / 100.0) * volume_1d
 
             oi = fetch_open_interest(symbol_code)
 
